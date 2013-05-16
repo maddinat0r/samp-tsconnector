@@ -1,1 +1,6 @@
 boost/
+*.user
+Debug/
+Release/
+*.sdf
+*.suo

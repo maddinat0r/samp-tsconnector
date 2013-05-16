@@ -1,0 +1,104 @@
+#pragma once
+
+#include "main.h"
+#include "natives.h"
+
+#include "CTeamspeak.h"
+
+list<AMX *> p_Amx;
+void **ppPluginData;
+extern void *pAMXFunctions;
+logprintf_t logprintf;
+
+
+
+
+PLUGIN_EXPORT unsigned int PLUGIN_CALL Supports() {
+	return SUPPORTS_VERSION | SUPPORTS_AMX_NATIVES | SUPPORTS_PROCESS_TICK; 
+}
+
+PLUGIN_EXPORT bool PLUGIN_CALL Load(void **ppData) {
+	pAMXFunctions = ppData[PLUGIN_DATA_AMX_EXPORTS];
+	logprintf = (logprintf_t)ppData[PLUGIN_DATA_LOGPRINTF];
+	
+#ifdef _WIN32
+	WSAData wsa_unused;
+	WSAStartup(MAKEWORD(2,0), &wsa_unused);
+#endif
+
+	logprintf("TSConnector v0.0.1 loaded.");
+
+	return 1;
+}
+
+PLUGIN_EXPORT void PLUGIN_CALL Unload() {
+#ifdef _WIN32
+	WSACleanup();	
+#endif
+	p_Amx.clear();
+	logprintf("TSConnector unloaded.");
+}
+
+PLUGIN_EXPORT void PLUGIN_CALL ProcessTick() {
+	
+}
+
+#if defined __cplusplus
+extern "C"
+#endif
+const AMX_NATIVE_INFO NativesList[] = {
+	{"TSC_Connect",					native_TSC_Connect},
+	{"TSC_Disconnect",				native_TSC_Disconnect},
+	{"TSC_Login",					native_TSC_Login},
+
+	{"TSC_SetActiveVServer",		native_TSC_SetActiveVServer},
+
+	{"TSC_CreateChannel",			native_TSC_CreateChannel},
+	{"TSC_DeleteChannel",			native_TSC_DeleteChannel},
+	{"TSC_FindChannel",				native_TSC_FindChannel},
+	{"TSC_SetChannelName",			native_TSC_SetChannelName},
+	{"TSC_SetChannelDescription",	native_TSC_SetChannelDescription},
+	{"TSC_SetChannelType",			native_TSC_SetChannelType},
+	{"TSC_SetChannelPassword",		native_TSC_SetChannelPassword},
+	{"TSC_SetChannelTalkPower",		native_TSC_SetChannelTalkPower},
+	{"TSC_SetChannelUserLimit",		native_TSC_SetChannelUserLimit},
+	{NULL, NULL}
+};
+
+PLUGIN_EXPORT int PLUGIN_CALL AmxLoad(AMX *amx) {
+	p_Amx.push_back(amx);
+	return amx_Register(amx, NativesList, -1);
+}
+
+PLUGIN_EXPORT int PLUGIN_CALL AmxUnload(AMX *amx) { 
+	for (list<AMX *>::iterator i = p_Amx.begin(); i != p_Amx.end(); i++) {
+		if (* i == amx) {
+			p_Amx.erase(i);
+			break;
+		}
+	}
+	return AMX_ERR_NONE;
+}
+
+
+string AMX_GetString(AMX* amx, cell param) {
+	cell *String;
+	char *Dest;
+	int Len;
+	amx_GetAddr(amx, param, &String);
+	amx_StrLen(String, &Len);
+	Dest = new char[Len + 1];
+	amx_GetString(Dest, String, 0, UNLIMITED);
+	Dest[Len] = '\0';
+	string Return(Dest);
+	delete Dest;
+	return Return;
+}
+
+
+int AMX_SetString(AMX* amx, cell param, string str) {
+	cell *Dest;
+	amx_GetAddr(amx, param, &Dest);
+	amx_SetString(Dest, str.c_str(), 0, 0, str.length() + 1);
+	return 1;
+}
