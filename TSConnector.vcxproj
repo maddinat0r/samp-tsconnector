@@ -90,7 +90,7 @@
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="CTeamspeak.cpp" />
+    <ClCompile Include="src\CTeamspeak.cpp" />
     <ClCompile Include="src\main.cpp" />
     <ClCompile Include="src\natives.cpp" />
     <ClCompile Include="src\SDK\amxplugin.cpp" />

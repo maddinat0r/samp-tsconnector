@@ -1,6 +1,7 @@
 boost/
-*.user
 Debug/
 Release/
+*.user
 *.sdf
 *.suo
+*.opensdf

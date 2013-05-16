@@ -24,7 +24,7 @@
     <ClCompile Include="src\natives.cpp">
       <Filter>Quelldateien</Filter>
     </ClCompile>
-    <ClCompile Include="CTeamspeak.cpp">
+    <ClCompile Include="src\CTeamspeak.cpp">
       <Filter>Quelldateien</Filter>
     </ClCompile>
   </ItemGroup>
