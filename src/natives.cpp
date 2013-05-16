@@ -154,8 +154,7 @@ cell AMX_NATIVE_CALL native_TSC_SetChannelUserLimit(AMX* amx, cell* params) {
 	return (cell)CTeamspeak::ParseError(SendRes);
 }
 
-
-cell AMX_NATIVE_CALL native_TSC_FindChannel(AMX* amx, cell* params) {
+cell AMX_NATIVE_CALL native_TSC_GetChannelIDByName(AMX* amx, cell* params) {
 	stringstream StrBuf;
 	string ChannelName = AMX_GetString(amx, params[1]);
 	CTeamspeak::EscapeString(&ChannelName);
@@ -164,8 +163,7 @@ cell AMX_NATIVE_CALL native_TSC_FindChannel(AMX* amx, cell* params) {
 	CTeamspeak::Send(StrBuf.str());
 	StrBuf.str("");
 
-	int ChannelID = -1, 
-		ErrorID = -1;
+	int ChannelID = -1;
 
 	string SendRes;
 	CTeamspeak::Recv(&SendRes);
@@ -175,4 +173,64 @@ cell AMX_NATIVE_CALL native_TSC_FindChannel(AMX* amx, cell* params) {
 		return -1;//CTeamspeak::ParseError(SendRes);
 	ChannelID = CTeamspeak::ParseInteger(SendRes, "cid");
 	return (cell)ChannelID;
+}
+
+
+cell AMX_NATIVE_CALL native_TSC_GetClientUIDByName(AMX* amx, cell* params) {
+	string UserName = AMX_GetString(amx, params[1]);
+	//CTeamspeak::EscapeString(&ReasonMsg); //I don't think we have to escape usernames
+	stringstream StrBuf;
+	StrBuf << "clientfind pattern=" << UserName;
+	CTeamspeak::Send(StrBuf.str());
+	StrBuf.str("");
+
+	int UserID = -1;
+	string SendRes;
+	CTeamspeak::Recv(&SendRes);
+	if(SendRes.find('|') != -1) //more than one user in result
+		return -1;
+	if(SendRes.find("error") != -1)
+		return -1;//CTeamspeak::ParseError(SendRes);
+	UserID = CTeamspeak::ParseInteger(SendRes, "clid");
+	return (cell)UserID;
+}
+
+cell AMX_NATIVE_CALL native_TSC_KickClient(AMX* amx, cell* params) {
+	if(params[1] < 0 || (params[2] != 1 && params[2] != 2))
+		return -1;
+	int KickReasonID;
+	switch(params[2]) {
+	case KICK_TYPE_CHANNEL:
+		KickReasonID = 4;
+		break;
+	case KICK_TYPE_SERVER:
+		KickReasonID = 5;
+		break;
+	default:
+		return -1;
+	}
+	string ReasonMsg = AMX_GetString(amx, params[3]);
+	CTeamspeak::EscapeString(&ReasonMsg);
+	stringstream StrBuf;
+	StrBuf << "clientkick clid=" << params[1] << " reasonid=" << KickReasonID << " reasonmsg=" << ReasonMsg;
+	CTeamspeak::Send(StrBuf.str());
+	StrBuf.str("");
+	string SendRes;
+	CTeamspeak::Recv(&SendRes);
+	return (cell)CTeamspeak::ParseError(SendRes);
+}
+
+cell AMX_NATIVE_CALL native_TSC_BanClient(AMX* amx, cell* params) {
+	if(params[1] < 0)
+		return -1;
+	
+	string ReasonMsg = AMX_GetString(amx, params[3]);
+	CTeamspeak::EscapeString(&ReasonMsg);
+	stringstream StrBuf;
+	StrBuf << "banclient clid=" << params[1] << " time=" << params[2] << " banreason=" << ReasonMsg;
+	CTeamspeak::Send(StrBuf.str());
+	StrBuf.str("");
+	string SendRes;
+	CTeamspeak::Recv(&SendRes);
+	return (cell)CTeamspeak::ParseError(SendRes);
 }

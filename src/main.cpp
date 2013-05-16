@@ -26,7 +26,7 @@ PLUGIN_EXPORT bool PLUGIN_CALL Load(void **ppData) {
 	WSAStartup(MAKEWORD(2,0), &wsa_unused);
 #endif
 
-	logprintf("TSConnector v0.0.1 loaded.");
+	logprintf("TSConnector v0.1 loaded.");
 
 	return 1;
 }
@@ -55,13 +55,17 @@ const AMX_NATIVE_INFO NativesList[] = {
 
 	{"TSC_CreateChannel",			native_TSC_CreateChannel},
 	{"TSC_DeleteChannel",			native_TSC_DeleteChannel},
-	{"TSC_FindChannel",				native_TSC_FindChannel},
+	{"TSC_GetChannelIDByName",		native_TSC_GetChannelIDByName},
 	{"TSC_SetChannelName",			native_TSC_SetChannelName},
 	{"TSC_SetChannelDescription",	native_TSC_SetChannelDescription},
 	{"TSC_SetChannelType",			native_TSC_SetChannelType},
 	{"TSC_SetChannelPassword",		native_TSC_SetChannelPassword},
 	{"TSC_SetChannelTalkPower",		native_TSC_SetChannelTalkPower},
 	{"TSC_SetChannelUserLimit",		native_TSC_SetChannelUserLimit},
+
+	{"TSC_GetClientUIDByName",		native_TSC_GetClientUIDByName},
+	{"TSC_KickClient",				native_TSC_KickClient},
+	{"TSC_BanClient",				native_TSC_BanClient},
 	{NULL, NULL}
 };
 
