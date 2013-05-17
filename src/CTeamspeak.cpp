@@ -18,8 +18,7 @@ bool CTeamspeak::Connect(const char *ip, const char *port) {
 	CTeamspeak::SocketID = socket(sRes->ai_family, sRes->ai_socktype, sRes->ai_protocol);
 	connect(CTeamspeak::SocketID, sRes->ai_addr, sRes->ai_addrlen);
 
-	//int flag = 1;
-    //int result = setsockopt(SocketID, IPPROTO_TCP, TCP_NODELAY, (char *) &flag, sizeof(int)); 
+	SetTimeoutTime(100);
 	
 	if(Recv(NULL) == 5) //Only "TS3"-greeting recieved
 		Recv(NULL);
@@ -34,6 +33,26 @@ bool CTeamspeak::Close() {
 #endif
 
 	SocketID = 0;
+
+	return true;
+}
+
+bool CTeamspeak::SetTimeoutTime(unsigned int millisecs) {
+	if(!SocketID)
+		return false;
+#ifdef _WIN32
+	DWORD Timeout = millisecs;
+	if(setsockopt(SocketID, SOL_SOCKET, SO_RCVTIMEO, (char *)&Timeout, sizeof(Timeout)) < 0) {
+		return logprintf("Warning! An error occured in TSConnector while setting timeout time."), false;
+	}
+#else
+	struct timeval sTimeout;      
+    sTimeout.tv_sec = 0;
+    sTimeout.tv_usec = millisecs * 1000;
+    if (setsockopt (SocketID, SOL_SOCKET, SO_RCVTIMEO, (char *)&sTimeout, sizeof(sTimeout)) {
+		return logprintf("Warning! An error occured in TSConnector while setting timeout time."), false;
+	}
+#endif
 	return true;
 }
 

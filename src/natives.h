@@ -24,6 +24,7 @@ cell AMX_NATIVE_CALL native_TSC_KickClient(AMX* amx, cell* params);
 cell AMX_NATIVE_CALL native_TSC_BanClient(AMX* amx, cell* params);
 
 
+cell AMX_NATIVE_CALL native_TSC_SetTimeoutTime(AMX* amx, cell* params);
 #endif
 
 /*

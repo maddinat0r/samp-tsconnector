@@ -18,6 +18,7 @@ public:
 	static int SocketID;
 	static bool Connect(const char *ip, const char *port);
 	static bool Close();
+	static bool SetTimeoutTime(unsigned int millisecs);
 
 	static bool Send(string cmd);
 	static int Recv(string *dest);
