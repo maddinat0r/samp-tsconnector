@@ -79,8 +79,10 @@ bool CTeamspeak::ExpectIntVal(string valname, int *val, int *error) {
 	(*val) = -1;
 	(*error) = -1;
 	string str;
-	while( ((*val) == -1 && (*error) >= 0) || (*error) == -1) {
-		CTeamspeak::Recv(&str);
+	while( ((*val) == -1 && (*error) == 0) || (*error) == -1) {
+		if(CTeamspeak::Recv(&str) == SOCKET_ERROR)
+			return false;
+
 
 		if((*error) == -1)
 			(*error) = CTeamspeak::ParseError(str);

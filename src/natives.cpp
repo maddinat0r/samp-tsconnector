@@ -20,26 +20,29 @@ cell AMX_NATIVE_CALL native_TSC_Login(AMX* amx, cell* params) {
 	StrBuf << "login client_login_name=" << AMX_GetString(amx, params[1]) << " client_login_password=" << AMX_GetString(amx, params[2]) <<"\n";
 	string SendResult;
 	CTeamspeak::Send(StrBuf.str());
-	CTeamspeak::Recv(&SendResult);
+	if(CTeamspeak::Recv(&SendResult) == SOCKET_ERROR)
+		return -1;
 	return CTeamspeak::ParseError(SendResult);
 }
 
 
-cell AMX_NATIVE_CALL native_TSC_SetActiveVServer(AMX* amx, cell* params) {
+cell AMX_NATIVE_CALL native_TSC_SetActiveVServer(AMX* amx, cell* params) {  
 	stringstream StrBuf;
 	StrBuf << "serveridgetbyport virtualserver_port=" << AMX_GetString(amx, params[1]);
 	CTeamspeak::Send(StrBuf.str());
 	StrBuf.str("");
 
-	int ServerID, ErrorID;
-	CTeamspeak::ExpectIntVal("server_id", &ServerID, &ErrorID);
+	int ServerID = 1, ErrorID = -1;
+	if(CTeamspeak::ExpectIntVal("server_id", &ServerID, &ErrorID) == false)
+		return -1;
 
-	if(ServerID && ErrorID >= 0) {
+	if(ServerID && ErrorID == 0) {
 		StrBuf << "use sid=" << ServerID;
 		CTeamspeak::Send(StrBuf.str());
 		StrBuf.str("");
 		string SendRes;
-		CTeamspeak::Recv(&SendRes);
+		if(CTeamspeak::Recv(&SendRes) == SOCKET_ERROR)
+			return -1;
 		ErrorID = CTeamspeak::ParseError(SendRes);
 	}
 	return ErrorID;
@@ -56,7 +59,8 @@ cell AMX_NATIVE_CALL native_TSC_CreateChannel(AMX* amx, cell* params) {
 
 	int ChannelID = -1, 
 		ErrorID = -1;
-	CTeamspeak::ExpectIntVal("cid", &ChannelID, &ErrorID);
+	if(CTeamspeak::ExpectIntVal("cid", &ChannelID, &ErrorID) == false)
+		return -1;
 	return (cell)ChannelID;
 }
 
@@ -66,7 +70,8 @@ cell AMX_NATIVE_CALL native_TSC_DeleteChannel(AMX* amx, cell* params) {
 	CTeamspeak::Send(StrBuf.str());
 	StrBuf.str("");
 	string SendRes;
-	CTeamspeak::Recv(&SendRes);
+	if(CTeamspeak::Recv(&SendRes) == SOCKET_ERROR)
+		return -1;
 	return (cell)CTeamspeak::ParseError(SendRes);
 }
 
@@ -78,7 +83,8 @@ cell AMX_NATIVE_CALL native_TSC_SetChannelName(AMX* amx, cell* params) {
 	CTeamspeak::Send(StrBuf.str());
 	StrBuf.str("");
 	string SendRes;
-	CTeamspeak::Recv(&SendRes);
+	if(CTeamspeak::Recv(&SendRes) == SOCKET_ERROR)
+		return -1;
 	return (cell)CTeamspeak::ParseError(SendRes);
 }
 
@@ -90,7 +96,8 @@ cell AMX_NATIVE_CALL native_TSC_SetChannelDescription(AMX* amx, cell* params) {
 	CTeamspeak::Send(StrBuf.str());
 	StrBuf.str("");
 	string SendRes;
-	CTeamspeak::Recv(&SendRes);
+	if(CTeamspeak::Recv(&SendRes) == SOCKET_ERROR)
+		return -1;
 	return (cell)CTeamspeak::ParseError(SendRes);
 }
 
@@ -116,7 +123,8 @@ cell AMX_NATIVE_CALL native_TSC_SetChannelType(AMX* amx, cell* params) {
 	CTeamspeak::Send(StrBuf.str());
 	StrBuf.str("");
 	string SendRes;
-	CTeamspeak::Recv(&SendRes);
+	if(CTeamspeak::Recv(&SendRes) == SOCKET_ERROR)
+		return -1;
 	return (cell)CTeamspeak::ParseError(SendRes);
 }
 
@@ -128,7 +136,8 @@ cell AMX_NATIVE_CALL native_TSC_SetChannelPassword(AMX* amx, cell* params) {
 	CTeamspeak::Send(StrBuf.str());
 	StrBuf.str("");
 	string SendRes;
-	CTeamspeak::Recv(&SendRes);
+	if(CTeamspeak::Recv(&SendRes) == SOCKET_ERROR)
+		return -1;
 	return (cell)CTeamspeak::ParseError(SendRes);
 }
 
@@ -138,7 +147,8 @@ cell AMX_NATIVE_CALL native_TSC_SetChannelTalkPower(AMX* amx, cell* params) {
 	CTeamspeak::Send(StrBuf.str());
 	StrBuf.str("");
 	string SendRes;
-	CTeamspeak::Recv(&SendRes);
+	if(CTeamspeak::Recv(&SendRes) == SOCKET_ERROR)
+		return -1;
 	return (cell)CTeamspeak::ParseError(SendRes);
 }
 
@@ -150,7 +160,8 @@ cell AMX_NATIVE_CALL native_TSC_SetChannelUserLimit(AMX* amx, cell* params) {
 	CTeamspeak::Send(StrBuf.str());
 	StrBuf.str("");
 	string SendRes;
-	CTeamspeak::Recv(&SendRes);
+	if(CTeamspeak::Recv(&SendRes) == SOCKET_ERROR)
+		return -1;
 	return (cell)CTeamspeak::ParseError(SendRes);
 }
 
@@ -166,7 +177,8 @@ cell AMX_NATIVE_CALL native_TSC_GetChannelIDByName(AMX* amx, cell* params) {
 	int ChannelID = -1;
 
 	string SendRes;
-	CTeamspeak::Recv(&SendRes);
+	if(CTeamspeak::Recv(&SendRes) == SOCKET_ERROR)
+		return -1;
 	if(SendRes.find('|') != -1) //more than one channel in result
 		return -1;
 	if(SendRes.find("error") != -1)
@@ -178,7 +190,7 @@ cell AMX_NATIVE_CALL native_TSC_GetChannelIDByName(AMX* amx, cell* params) {
 
 cell AMX_NATIVE_CALL native_TSC_GetClientUIDByName(AMX* amx, cell* params) {
 	string UserName = AMX_GetString(amx, params[1]);
-	//CTeamspeak::EscapeString(&ReasonMsg); //I don't think we have to escape usernames
+	CTeamspeak::EscapeString(&UserName);
 	stringstream StrBuf;
 	StrBuf << "clientfind pattern=" << UserName;
 	CTeamspeak::Send(StrBuf.str());
@@ -186,7 +198,8 @@ cell AMX_NATIVE_CALL native_TSC_GetClientUIDByName(AMX* amx, cell* params) {
 
 	int UserID = -1;
 	string SendRes;
-	CTeamspeak::Recv(&SendRes);
+	if(CTeamspeak::Recv(&SendRes) == SOCKET_ERROR)
+		return -1;
 	if(SendRes.find('|') != -1) //more than one user in result
 		return -1;
 	if(SendRes.find("error") != -1)
@@ -198,6 +211,7 @@ cell AMX_NATIVE_CALL native_TSC_GetClientUIDByName(AMX* amx, cell* params) {
 cell AMX_NATIVE_CALL native_TSC_KickClient(AMX* amx, cell* params) {
 	if(params[1] < 0 || (params[2] != 1 && params[2] != 2))
 		return -1;
+
 	int KickReasonID;
 	switch(params[2]) {
 	case KICK_TYPE_CHANNEL:
@@ -216,14 +230,15 @@ cell AMX_NATIVE_CALL native_TSC_KickClient(AMX* amx, cell* params) {
 	CTeamspeak::Send(StrBuf.str());
 	StrBuf.str("");
 	string SendRes;
-	CTeamspeak::Recv(&SendRes);
+	if(CTeamspeak::Recv(&SendRes) == SOCKET_ERROR)
+		return -1;
 	return (cell)CTeamspeak::ParseError(SendRes);
 }
 
 cell AMX_NATIVE_CALL native_TSC_BanClient(AMX* amx, cell* params) {
 	if(params[1] < 0)
 		return -1;
-	
+
 	string ReasonMsg = AMX_GetString(amx, params[3]);
 	CTeamspeak::EscapeString(&ReasonMsg);
 	stringstream StrBuf;
@@ -231,7 +246,8 @@ cell AMX_NATIVE_CALL native_TSC_BanClient(AMX* amx, cell* params) {
 	CTeamspeak::Send(StrBuf.str());
 	StrBuf.str("");
 	string SendRes;
-	CTeamspeak::Recv(&SendRes);
+	if(CTeamspeak::Recv(&SendRes) == SOCKET_ERROR)
+		return -1;
 	return (cell)CTeamspeak::ParseError(SendRes);
 }
 

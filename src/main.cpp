@@ -27,7 +27,6 @@ PLUGIN_EXPORT bool PLUGIN_CALL Load(void **ppData) {
 #endif
 
 	logprintf("TSConnector v0.1 loaded.");
-
 	return 1;
 }
 
