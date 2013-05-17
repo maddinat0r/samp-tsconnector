@@ -14,7 +14,7 @@ bool CTeamspeak::Connect(const char *ip, const char *port) {
 	sHints.ai_family = AF_UNSPEC;
 	sHints.ai_socktype = SOCK_STREAM;
 
-	getaddrinfo("127.0.0.1", "10011", &sHints, &sRes);
+	getaddrinfo(ip, port, &sHints, &sRes);
 	CTeamspeak::SocketID = socket(sRes->ai_family, sRes->ai_socktype, sRes->ai_protocol);
 	connect(CTeamspeak::SocketID, sRes->ai_addr, sRes->ai_addrlen);
 
