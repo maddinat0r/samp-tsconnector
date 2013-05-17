@@ -4,15 +4,15 @@
 #define TSConnector_included
 
 
-enum ChannelTypes {
+enum {
 	CHANNEL_TYPE_PERMANENT = 1,
-	CHANNEL_TYPE_SEMI_PERMANENT = 2,
-	CHANNEL_TYPE_TEMPORARY = 3
+	CHANNEL_TYPE_SEMI_PERMANENT,
+	CHANNEL_TYPE_TEMPORARY
 };
 
-enum KickTypes {
+enum {
 	KICK_TYPE_CHANNEL = 1,
-	KICK_TYPE_SERVER = 2
+	KICK_TYPE_SERVER
 };
 
 
@@ -35,3 +35,5 @@ native TSC_SetChannelUserLimit(channelid, maxuser);
 native TSC_GetClientUIDByName(name[]);
 native TSC_KickClient(uid, kicktype, reason[]);
 native TSC_BanClient(uid, seconds, reason[]);
+
+native TSC_SetTimeoutTime(milliseconds);
