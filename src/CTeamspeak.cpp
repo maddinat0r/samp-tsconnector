@@ -18,7 +18,7 @@ bool CTeamspeak::Connect(const char *ip, const char *port) {
 	CTeamspeak::SocketID = socket(sRes->ai_family, sRes->ai_socktype, sRes->ai_protocol);
 	connect(CTeamspeak::SocketID, sRes->ai_addr, sRes->ai_addrlen);
 
-	SetTimeoutTime(100);
+	SetTimeoutTime(200);
 	
 	if(Recv(NULL) == 5) //Only "TS3"-greeting recieved
 		Recv(NULL);
@@ -38,7 +38,7 @@ bool CTeamspeak::Close() {
 }
 
 bool CTeamspeak::SetTimeoutTime(unsigned int millisecs) {
-	if(!SocketID)
+	if(SocketID <= 0)
 		return false;
 #ifdef _WIN32
 	DWORD Timeout = millisecs;
