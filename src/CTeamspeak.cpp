@@ -29,7 +29,7 @@ bool CTeamspeak::Close() {
 #ifdef _WIN32
 	closesocket(CTeamspeak::SocketID);
 #else
-	close(sockfd);
+	close(CTeamspeak::SocketID);
 #endif
 
 	SocketID = 0;
@@ -49,7 +49,7 @@ bool CTeamspeak::SetTimeoutTime(unsigned int millisecs) {
 	struct timeval sTimeout;      
     sTimeout.tv_sec = 0;
     sTimeout.tv_usec = millisecs * 1000;
-    if (setsockopt (SocketID, SOL_SOCKET, SO_RCVTIMEO, (char *)&sTimeout, sizeof(sTimeout)) {
+    if (setsockopt (SocketID, SOL_SOCKET, SO_RCVTIMEO, (char *)&sTimeout, sizeof(sTimeout))) {
 		return logprintf("Warning! An error occured in TSConnector while setting timeout time."), false;
 	}
 #endif
