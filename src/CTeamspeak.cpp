@@ -86,7 +86,7 @@ bool CTeamspeak::ExpectIntVal(string valname, int *val, int *error) {
 
 		if((*error) == -1)
 			(*error) = CTeamspeak::ParseError(str);
-		if((*val) == -1)
+		if((*val) == -1 && (*error) == 0)
 			(*val) = CTeamspeak::ParseInteger(str, valname);
 	}
 	return true;
