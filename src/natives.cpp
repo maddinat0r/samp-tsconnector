@@ -244,6 +244,23 @@ cell AMX_NATIVE_CALL native_TSC_GetChannelClientList(AMX* amx, cell* params) {
 	return ClientList.size();
 }
 
+cell AMX_NATIVE_CALL native_TSC_SetClientChannelGroup(AMX* amx, cell* params) {
+	if(params[1] <= 0 || params[2] <= 0 || params[3] <= 0)
+		return -1;
+	
+	int ClientDBID = CTeamspeak::GetClientDBIDByID(params[1]);
+	if(ClientDBID <= 0)
+		return -1;
+	stringstream StrBuf;
+	StrBuf << "setclientchannelgroup cgid=" << params[2] << " cid=" << params[3] << " cldbid=" << ClientDBID;
+	CTeamspeak::Send(StrBuf.str());
+	StrBuf.str("");
+	string SendRes;
+	if(CTeamspeak::Recv(&SendRes) == SOCKET_ERROR)
+		return -1;
+	return (cell)CTeamspeak::ParseError(SendRes);
+}
+
 cell AMX_NATIVE_CALL native_TSC_GetClientIDByName(AMX* amx, cell* params) {
 	string UserName = AMX_GetString(amx, params[1]);
 	CTeamspeak::EscapeString(&UserName);

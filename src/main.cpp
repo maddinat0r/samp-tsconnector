@@ -63,6 +63,7 @@ const AMX_NATIVE_INFO NativesList[] = {
 	{"TSC_GetChannelName",				native_TSC_GetChannelName},
 	{"TSC_GetChannelClientList",		native_TSC_GetChannelClientList},
 
+	{"TSC_SetClientChannelGroup",		native_TSC_SetClientChannelGroup},
 	{"TSC_GetClientIDByName",			native_TSC_GetClientIDByName},
 	{NULL, NULL}
 };
