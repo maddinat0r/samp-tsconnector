@@ -60,6 +60,7 @@ const AMX_NATIVE_INFO NativesList[] = {
 	{"TSC_BanClient",				native_TSC_BanClient},
 
 	{"TSC_SetTimeoutTime",			native_TSC_SetTimeoutTime},
+	{"TSC_GetChannelName",				native_TSC_GetChannelName},
 	{"TSC_GetClientIDByName",			native_TSC_GetClientIDByName},
 	{NULL, NULL}
 };

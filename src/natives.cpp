@@ -181,6 +181,26 @@ cell AMX_NATIVE_CALL native_TSC_GetChannelIDByName(AMX* amx, cell* params) {
 }
 
 
+cell AMX_NATIVE_CALL native_TSC_GetChannelName(AMX* amx, cell* params) {
+	if(params[1] <= 0)
+		return -1;
+
+	stringstream StrBuf; 
+	StrBuf << "channelinfo cid=" << params[1];
+	CTeamspeak::Send(StrBuf.str());
+	StrBuf.str("");
+
+	string ChannelName;
+	int ErrorID = -1;
+	if(CTeamspeak::ExpectStringVal("channel_name", &ChannelName, &ErrorID) == false)
+		return -1;
+
+	CTeamspeak::UnEscapeString(&ChannelName);
+	AMX_SetString(amx, params[2], ChannelName);
+	
+	return ErrorID;
+}
+
 cell AMX_NATIVE_CALL native_TSC_GetClientIDByName(AMX* amx, cell* params) {
 	string UserName = AMX_GetString(amx, params[1]);
 	CTeamspeak::EscapeString(&UserName);
