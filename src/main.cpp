@@ -24,7 +24,7 @@ PLUGIN_EXPORT bool PLUGIN_CALL Load(void **ppData) {
 	WSAStartup(MAKEWORD(2,0), &wsa_unused);
 #endif
 
-	logprintf("TSConnector v0.2 loaded.");
+	logprintf("TSConnector v0.2.1 loaded.");
 	return 1;
 }
 
@@ -77,22 +77,15 @@ const AMX_NATIVE_INFO NativesList[] = {
 	{NULL, NULL}
 };
 
-/*
+
 PLUGIN_EXPORT int PLUGIN_CALL AmxLoad(AMX *amx) {
-	p_Amx.push_back(amx);
 	return amx_Register(amx, NativesList, -1);
 }
 
 PLUGIN_EXPORT int PLUGIN_CALL AmxUnload(AMX *amx) { 
-	for (list<AMX *>::iterator i = p_Amx.begin(); i != p_Amx.end(); i++) {
-		if (* i == amx) {
-			p_Amx.erase(i);
-			break;
-		}
-	}
 	return AMX_ERR_NONE;
 }
-*/
+
 
 string AMX_GetString(AMX* amx, cell param) {
 	cell *String;
