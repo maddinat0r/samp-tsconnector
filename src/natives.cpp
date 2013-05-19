@@ -181,7 +181,7 @@ cell AMX_NATIVE_CALL native_TSC_GetChannelIDByName(AMX* amx, cell* params) {
 }
 
 
-cell AMX_NATIVE_CALL native_TSC_GetClientUIDByName(AMX* amx, cell* params) {
+cell AMX_NATIVE_CALL native_TSC_GetClientIDByName(AMX* amx, cell* params) {
 	string UserName = AMX_GetString(amx, params[1]);
 	CTeamspeak::EscapeString(&UserName);
 	stringstream StrBuf;

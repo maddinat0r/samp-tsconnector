@@ -56,11 +56,11 @@ const AMX_NATIVE_INFO NativesList[] = {
 	{"TSC_SetChannelTalkPower",		native_TSC_SetChannelTalkPower},
 	{"TSC_SetChannelUserLimit",		native_TSC_SetChannelUserLimit},
 
-	{"TSC_GetClientUIDByName",		native_TSC_GetClientUIDByName},
 	{"TSC_KickClient",				native_TSC_KickClient},
 	{"TSC_BanClient",				native_TSC_BanClient},
 
 	{"TSC_SetTimeoutTime",			native_TSC_SetTimeoutTime},
+	{"TSC_GetClientIDByName",			native_TSC_GetClientIDByName},
 	{NULL, NULL}
 };
 
