@@ -40,35 +40,39 @@ PLUGIN_EXPORT void PLUGIN_CALL Unload() {
 extern "C"
 #endif
 const AMX_NATIVE_INFO NativesList[] = {
-	{"TSC_Connect",					native_TSC_Connect},
-	{"TSC_Disconnect",				native_TSC_Disconnect},
-	{"TSC_Login",					native_TSC_Login},
+	{"TSC_Connect",						native_TSC_Connect},
+	{"TSC_Disconnect",					native_TSC_Disconnect},
+	{"TSC_Login",						native_TSC_Login},
 
-	{"TSC_SetActiveVServer",		native_TSC_SetActiveVServer},
+	{"TSC_SetActiveVServer",			native_TSC_SetActiveVServer},
+	{"TSC_SetTimeoutTime",				native_TSC_SetTimeoutTime},
 
-	{"TSC_CreateChannel",			native_TSC_CreateChannel},
-	{"TSC_DeleteChannel",			native_TSC_DeleteChannel},
-	{"TSC_GetChannelIDByName",		native_TSC_GetChannelIDByName},
-	{"TSC_SetChannelName",			native_TSC_SetChannelName},
-	{"TSC_SetChannelDescription",	native_TSC_SetChannelDescription},
-	{"TSC_SetChannelType",			native_TSC_SetChannelType},
-	{"TSC_SetChannelPassword",		native_TSC_SetChannelPassword},
-	{"TSC_SetChannelTalkPower",		native_TSC_SetChannelTalkPower},
-	{"TSC_SetChannelUserLimit",		native_TSC_SetChannelUserLimit},
 
-	{"TSC_KickClient",				native_TSC_KickClient},
-	{"TSC_BanClient",				native_TSC_BanClient},
+	{"TSC_CreateChannel",				native_TSC_CreateChannel},
+	{"TSC_DeleteChannel",				native_TSC_DeleteChannel},
+	{"TSC_GetChannelIDByName",			native_TSC_GetChannelIDByName},
+	{"TSC_SetChannelName",				native_TSC_SetChannelName},
+	{"TSC_SetChannelDescription",		native_TSC_SetChannelDescription},
+	{"TSC_SetChannelType",				native_TSC_SetChannelType},
+	{"TSC_SetChannelPassword",			native_TSC_SetChannelPassword},
+	{"TSC_SetChannelTalkPower",			native_TSC_SetChannelTalkPower},
+	{"TSC_SetChannelUserLimit",			native_TSC_SetChannelUserLimit},
 
-	{"TSC_SetTimeoutTime",			native_TSC_SetTimeoutTime},
 	{"TSC_GetChannelName",				native_TSC_GetChannelName},
 	{"TSC_GetChannelClientList",		native_TSC_GetChannelClientList},
+
+	
+	{"TSC_KickClient",					native_TSC_KickClient},
+	{"TSC_BanClient",					native_TSC_BanClient},
 
 	{"TSC_SetClientChannelGroup",		native_TSC_SetClientChannelGroup},
 	{"TSC_AddClientToServerGroup",		native_TSC_AddClientToServerGroup},
 	{"TSC_RemoveClientFromServerGroup",	native_TSC_RemoveClientFromServerGroup},
+
 	{"TSC_GetClientName",				native_TSC_GetClientName},
 	{"TSC_GetClientIDByName",			native_TSC_GetClientIDByName},
 	{"TSC_GetClientCurrentChannelID",	native_TSC_GetClientCurrentChannelID},
+
 	{NULL, NULL}
 };
 

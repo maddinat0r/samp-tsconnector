@@ -244,6 +244,9 @@ cell AMX_NATIVE_CALL native_TSC_GetChannelClientList(AMX* amx, cell* params) {
 	return ClientList.size();
 }
 
+
+
+
 cell AMX_NATIVE_CALL native_TSC_SetClientChannelGroup(AMX* amx, cell* params) {
 	if(params[1] <= 0 || params[2] <= 0 || params[3] <= 0)
 		return -1;
@@ -294,6 +297,7 @@ cell AMX_NATIVE_CALL native_TSC_RemoveClientFromServerGroup(AMX* amx, cell* para
 		return -1;
 	return (cell)CTeamspeak::ParseError(SendRes);
 }
+
 
 cell AMX_NATIVE_CALL native_TSC_GetClientName(AMX* amx, cell* params) {
 	if(params[1] <= 0)
@@ -349,6 +353,7 @@ cell AMX_NATIVE_CALL native_TSC_GetClientCurrentChannelID(AMX* amx, cell* params
 		return -1;
 	return ChannelID;
 }
+
 
 cell AMX_NATIVE_CALL native_TSC_KickClient(AMX* amx, cell* params) {
 	if(params[1] < 0 || (params[2] != 1 && params[2] != 2))
