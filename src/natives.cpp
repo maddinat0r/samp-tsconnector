@@ -34,6 +34,13 @@ cell AMX_NATIVE_CALL native_TSC_SetActiveVServer(AMX* amx, cell* params) {
 	return CTeamspeak::ParseError(SendRes);
 }
 
+cell AMX_NATIVE_CALL native_TSC_SetTimeoutTime(AMX* amx, cell* params) {
+	if(params[1] < 0)
+		return -1;
+
+	return (cell)CTeamspeak::SetTimeoutTime(params[1]);
+}
+
 
 cell AMX_NATIVE_CALL native_TSC_CreateChannel(AMX* amx, cell* params) {
 	stringstream StrBuf;
