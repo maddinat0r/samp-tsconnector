@@ -64,6 +64,7 @@ const AMX_NATIVE_INFO NativesList[] = {
 	
 	{"TSC_KickClient",					native_TSC_KickClient},
 	{"TSC_BanClient",					native_TSC_BanClient},
+	{"TSC_MoveClient",					native_TSC_MoveClient},
 
 	{"TSC_SetClientChannelGroup",		native_TSC_SetClientChannelGroup},
 	{"TSC_AddClientToServerGroup",		native_TSC_AddClientToServerGroup},

@@ -397,3 +397,17 @@ cell AMX_NATIVE_CALL native_TSC_BanClient(AMX* amx, cell* params) {
 		return -1;
 	return (cell)CTeamspeak::ParseError(SendRes);
 }
+
+cell AMX_NATIVE_CALL native_TSC_MoveClient(AMX* amx, cell* params) {
+	if(params[1] <= 0 || params[2] <= 0)
+		return -1;
+	
+	stringstream StrBuf;
+	StrBuf << "clientmove clid=" << params[1] << " cid=" << params[2];
+	CTeamspeak::Send(StrBuf.str());
+	StrBuf.str("");
+	string SendRes;
+	if(CTeamspeak::Recv(&SendRes) == SOCKET_ERROR)
+		return -1;
+	return (cell)CTeamspeak::ParseError(SendRes);
+}

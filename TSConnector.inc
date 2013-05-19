@@ -40,6 +40,7 @@ native TSC_GetChannelClientList(channelid, list[]);
 
 native TSC_KickClient(clientid, kicktype, reason[]);
 native TSC_BanClient(clientid, seconds, reason[]);
+native TSC_MoveClient(clientid, channelid);
 
 native TSC_SetClientChannelGroup(clientid, groupid, channelid);
 native TSC_AddClientToServerGroup(clientid, groupid);

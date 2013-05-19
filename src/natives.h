@@ -32,6 +32,7 @@ cell AMX_NATIVE_CALL native_TSC_GetChannelClientList(AMX* amx, cell* params);
 //client natives
 cell AMX_NATIVE_CALL native_TSC_KickClient(AMX* amx, cell* params);
 cell AMX_NATIVE_CALL native_TSC_BanClient(AMX* amx, cell* params);
+cell AMX_NATIVE_CALL native_TSC_MoveClient(AMX* amx, cell* params);
 
 cell AMX_NATIVE_CALL native_TSC_SetClientChannelGroup(AMX* amx, cell* params);
 cell AMX_NATIVE_CALL native_TSC_AddClientToServerGroup(AMX* amx, cell* params);
