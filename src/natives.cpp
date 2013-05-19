@@ -397,12 +397,3 @@ cell AMX_NATIVE_CALL native_TSC_BanClient(AMX* amx, cell* params) {
 		return -1;
 	return (cell)CTeamspeak::ParseError(SendRes);
 }
-
-
-
-cell AMX_NATIVE_CALL native_TSC_SetTimeoutTime(AMX* amx, cell* params) {
-	if(params[1] < 0)
-		return -1;
-
-	return (cell)CTeamspeak::SetTimeoutTime(params[1]);
-}
