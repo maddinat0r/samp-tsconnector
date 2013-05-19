@@ -208,4 +208,18 @@ bool CTeamspeak::UnEscapeString(string *str) {
 	return true;
 }
 
+
+
+int CTeamspeak::GetClientDBIDByID(int clientid) {
+	if(clientid <= 0)
+		return -1;
+	stringstream StrBuf; 
+	StrBuf << "clientinfo clid=" << clientid;
+	Send(StrBuf.str());
+	StrBuf.str("");
+
+	int ClientDBID = -1, ErrorID = -1;
+	if(ExpectIntVal("client_database_id", &ClientDBID, &ErrorID) == false)
+		return -1;
+	return ClientDBID;
 }

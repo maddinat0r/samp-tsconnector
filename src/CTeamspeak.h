@@ -33,6 +33,8 @@ public:
 	static bool EscapeString(string *str);
 	static bool UnEscapeString(string *str);
 
+
+	static int GetClientDBIDByID(int clientid);
 };
 
 
