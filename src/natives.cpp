@@ -295,6 +295,26 @@ cell AMX_NATIVE_CALL native_TSC_RemoveClientFromServerGroup(AMX* amx, cell* para
 	return (cell)CTeamspeak::ParseError(SendRes);
 }
 
+cell AMX_NATIVE_CALL native_TSC_GetClientName(AMX* amx, cell* params) {
+	if(params[1] <= 0)
+		return -1;
+
+	stringstream StrBuf; 
+	StrBuf << "clientinfo clid=" << params[1];
+	CTeamspeak::Send(StrBuf.str());
+	StrBuf.str("");
+
+	string ClientName;
+	int ErrorID = -1;
+	if(CTeamspeak::ExpectStringVal("client_nickname", &ClientName, &ErrorID) == false)
+		return -1;
+
+	CTeamspeak::UnEscapeString(&ClientName);
+	AMX_SetString(amx, params[2], ClientName);
+	
+	return ErrorID;
+}
+
 cell AMX_NATIVE_CALL native_TSC_GetClientIDByName(AMX* amx, cell* params) {
 	string UserName = AMX_GetString(amx, params[1]);
 	CTeamspeak::EscapeString(&UserName);

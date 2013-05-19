@@ -42,4 +42,5 @@ native TSC_BanClient(uid, seconds, reason[]);
 native TSC_SetClientChannelGroup(clientid, groupid, channelid);
 native TSC_AddClientToServerGroup(clientid, groupid);
 native TSC_RemoveClientFromServerGroup(clientid, groupid);
+native TSC_GetClientName(clientid, dest[]);
 native TSC_GetClientIDByName(name[]);
