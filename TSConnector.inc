@@ -34,6 +34,8 @@ native TSC_SetChannelTalkPower(channelid, talkpower);
 native TSC_SetChannelUserLimit(channelid, maxuser);
 
 native TSC_GetChannelName(channelid, dest[]);
+native TSC_GetChannelClientList(channelid, list[]);
+	
 native TSC_KickClient(uid, kicktype, reason[]);
 native TSC_BanClient(uid, seconds, reason[]);
 

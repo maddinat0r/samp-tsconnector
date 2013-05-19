@@ -201,6 +201,49 @@ cell AMX_NATIVE_CALL native_TSC_GetChannelName(AMX* amx, cell* params) {
 	return ErrorID;
 }
 
+cell AMX_NATIVE_CALL native_TSC_GetChannelClientList(AMX* amx, cell* params) {
+	if(params[1] <= 0)
+		return -1;
+
+	int TargetChannelID = params[1];
+	
+	CTeamspeak::Send("clientlist");
+	string SendRes;
+	if(CTeamspeak::Recv(&SendRes) == SOCKET_ERROR)
+		return -1;
+	if(SendRes.find("error") != -1 && SendRes.find("clid") == -1) {
+		int ErrorID = CTeamspeak::ParseError(SendRes);
+		SendRes.clear();
+		if(ErrorID == 0) {
+			if(CTeamspeak::Recv(&SendRes) == SOCKET_ERROR)
+				return -1;
+		} else
+			return -1;
+	}
+
+	vector<int> ClientList;
+
+	boost::regex rx("clid=([0-9]+) cid=([0-9]+)");
+	boost::regex_iterator<std::string::const_iterator> RxIter(SendRes.begin(), SendRes.end(), rx);
+	boost::regex_iterator<std::string::const_iterator> RxEnd;
+	
+	//[1]: clientid, [2]:channelid
+    for( ;RxIter != RxEnd; ++RxIter) {
+		int TmpChannelID = -1, TmpClientID = -1;
+		stringstream ConvBuf((*RxIter)[2]);
+		ConvBuf >> TmpChannelID;
+        if(TmpChannelID == TargetChannelID) {
+			stringstream ConvBuf2((*RxIter)[1]);
+			ConvBuf2 >> TmpClientID;
+			ClientList.push_back(TmpClientID);
+		}
+    }
+
+	string wtf (ClientList.begin(), ClientList.end());
+	AMX_SetString(amx, params[2], wtf);
+	return ClientList.size();
+}
+
 cell AMX_NATIVE_CALL native_TSC_GetClientIDByName(AMX* amx, cell* params) {
 	string UserName = AMX_GetString(amx, params[1]);
 	CTeamspeak::EscapeString(&UserName);

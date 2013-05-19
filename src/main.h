@@ -28,8 +28,10 @@ typedef void (*logprintf_t)(char* format, ...);
 
 //STD
 #include <string>
+#include <vector>
 
 using std::string;
+using std::vector;
 
 
 extern logprintf_t logprintf;
