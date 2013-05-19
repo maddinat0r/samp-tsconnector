@@ -2,7 +2,6 @@
 
 #ifndef INC_MAIN_H
 #define INC_MAIN_H
-//#pragma warning (disable: 4005 4700 996)
 
 #include <malloc.h>
 
@@ -28,12 +27,9 @@ typedef void (*logprintf_t)(char* format, ...);
 
 
 //STD
-#include <list>
 #include <string>
 
-using std::list;
 using std::string;
-
 
 
 extern logprintf_t logprintf;

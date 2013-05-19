@@ -5,16 +5,14 @@
 
 #include "CTeamspeak.h"
 
-list<AMX *> p_Amx;
 void **ppPluginData;
 extern void *pAMXFunctions;
 logprintf_t logprintf;
 
 
 
-
 PLUGIN_EXPORT unsigned int PLUGIN_CALL Supports() {
-	return SUPPORTS_VERSION | SUPPORTS_AMX_NATIVES | SUPPORTS_PROCESS_TICK; 
+	return SUPPORTS_VERSION | SUPPORTS_AMX_NATIVES; 
 }
 
 PLUGIN_EXPORT bool PLUGIN_CALL Load(void **ppData) {
@@ -34,13 +32,9 @@ PLUGIN_EXPORT void PLUGIN_CALL Unload() {
 #ifdef _WIN32
 	WSACleanup();	
 #endif
-	p_Amx.clear();
 	logprintf("TSConnector unloaded.");
 }
 
-PLUGIN_EXPORT void PLUGIN_CALL ProcessTick() {
-	
-}
 
 #if defined __cplusplus
 extern "C"
@@ -70,6 +64,7 @@ const AMX_NATIVE_INFO NativesList[] = {
 	{NULL, NULL}
 };
 
+/*
 PLUGIN_EXPORT int PLUGIN_CALL AmxLoad(AMX *amx) {
 	p_Amx.push_back(amx);
 	return amx_Register(amx, NativesList, -1);
@@ -84,7 +79,7 @@ PLUGIN_EXPORT int PLUGIN_CALL AmxUnload(AMX *amx) {
 	}
 	return AMX_ERR_NONE;
 }
-
+*/
 
 string AMX_GetString(AMX* amx, cell param) {
 	cell *String;
