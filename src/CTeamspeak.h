@@ -24,9 +24,11 @@ public:
 	static int Recv(string *dest);
 	
 	static bool ExpectIntVal(string valname, int *val, int *error);
+	static bool ExpectStringVal(string valname, string *val, int *error);
 
 	static int ParseError(string str);
 	static int ParseInteger(string str, string valname);
+	static bool ParseString(string str, string valname, string *dest);
 
 	static bool EscapeString(string *str);
 };

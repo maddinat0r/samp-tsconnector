@@ -92,6 +92,35 @@ bool CTeamspeak::ExpectIntVal(string valname, int *val, int *error) {
 	return true;
 }
 
+bool CTeamspeak::ExpectStringVal(string valname, string *val, int *error) {
+	(*val).clear();
+	(*error) = -1;
+	string str;
+	while( ((*val).length() == 0 && (*error) == 0) || (*error) == -1) {
+		if(CTeamspeak::Recv(&str) == SOCKET_ERROR)
+			return false;
+		
+		if((*error) == -1)
+			(*error) = CTeamspeak::ParseError(str);
+		if((*val).length() == 0 && (*error) == 0)
+			CTeamspeak::ParseString(str, valname, val);
+	}
+	return true;
+}
+
+bool CTeamspeak::ParseString(string str, string valname, string *dest) {
+	stringstream StrBuf;
+	StrBuf << valname << "=([^ ]+)";
+	boost::regex rx(StrBuf.str());
+	StrBuf.str("");
+	boost::match_results<std::string::const_iterator> rxRes;
+	if(boost::regex_search(str, rxRes, rx)) {
+		(*dest).assign(rxRes[1]);
+		return true;
+	}
+	return false;
+}
+
 int CTeamspeak::ParseInteger(string str, string valname) {
 	stringstream StrBuf;
 	int ReturnVal = -1;
