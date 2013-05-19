@@ -2,9 +2,6 @@
 
 #include "CTeamspeak.h"
 
-
-
-
 cell AMX_NATIVE_CALL native_TSC_Connect(AMX* amx, cell* params) {
 	CTeamspeak::Connect(AMX_GetString(amx, params[1]).c_str(), "10011");
 	return 1;
@@ -28,24 +25,13 @@ cell AMX_NATIVE_CALL native_TSC_Login(AMX* amx, cell* params) {
 
 cell AMX_NATIVE_CALL native_TSC_SetActiveVServer(AMX* amx, cell* params) {  
 	stringstream StrBuf;
-	StrBuf << "serveridgetbyport virtualserver_port=" << AMX_GetString(amx, params[1]);
+	StrBuf << "use port=" << AMX_GetString(amx, params[1]);
 	CTeamspeak::Send(StrBuf.str());
 	StrBuf.str("");
-
-	int ServerID = 1, ErrorID = -1;
-	if(CTeamspeak::ExpectIntVal("server_id", &ServerID, &ErrorID) == false)
+	string SendRes;
+	if(CTeamspeak::Recv(&SendRes) == SOCKET_ERROR)
 		return -1;
-
-	if(ServerID && ErrorID == 0) {
-		StrBuf << "use sid=" << ServerID;
-		CTeamspeak::Send(StrBuf.str());
-		StrBuf.str("");
-		string SendRes;
-		if(CTeamspeak::Recv(&SendRes) == SOCKET_ERROR)
-			return -1;
-		ErrorID = CTeamspeak::ParseError(SendRes);
-	}
-	return ErrorID;
+	return CTeamspeak::ParseError(SendRes);
 }
 
 
