@@ -31,6 +31,8 @@ public:
 	static bool ParseString(string str, string valname, string *dest);
 
 	static bool EscapeString(string *str);
+	static bool UnEscapeString(string *str);
+
 };
 
 
