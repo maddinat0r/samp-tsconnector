@@ -68,6 +68,7 @@ const AMX_NATIVE_INFO NativesList[] = {
 	{"TSC_RemoveClientFromServerGroup",	native_TSC_RemoveClientFromServerGroup},
 	{"TSC_GetClientName",				native_TSC_GetClientName},
 	{"TSC_GetClientIDByName",			native_TSC_GetClientIDByName},
+	{"TSC_GetClientCurrentChannelID",	native_TSC_GetClientCurrentChannelID},
 	{NULL, NULL}
 };
 

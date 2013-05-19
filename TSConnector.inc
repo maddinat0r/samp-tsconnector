@@ -23,6 +23,7 @@ native TSC_Login(user[], pass[]);
 native TSC_SetActiveVServer(port[]);
 native TSC_SetTimeoutTime(milliseconds);
 
+
 native TSC_CreateChannel(channelname[]);
 native TSC_DeleteChannel(channelid);
 native TSC_GetChannelIDByName(channelname[]);
@@ -36,11 +37,14 @@ native TSC_SetChannelUserLimit(channelid, maxuser);
 native TSC_GetChannelName(channelid, dest[]);
 native TSC_GetChannelClientList(channelid, list[]);
 	
+
 native TSC_KickClient(uid, kicktype, reason[]);
 native TSC_BanClient(uid, seconds, reason[]);
 
 native TSC_SetClientChannelGroup(clientid, groupid, channelid);
 native TSC_AddClientToServerGroup(clientid, groupid);
 native TSC_RemoveClientFromServerGroup(clientid, groupid);
+
 native TSC_GetClientName(clientid, dest[]);
 native TSC_GetClientIDByName(name[]);
+native TSC_GetClientCurrentChannelID(clientid);

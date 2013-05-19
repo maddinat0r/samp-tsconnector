@@ -335,6 +335,21 @@ cell AMX_NATIVE_CALL native_TSC_GetClientIDByName(AMX* amx, cell* params) {
 	return (cell)UserID;
 }
 
+cell AMX_NATIVE_CALL native_TSC_GetClientCurrentChannelID(AMX* amx, cell* params) {
+	if(params[1] <= 0)
+		return -1;
+
+	stringstream StrBuf; 
+	StrBuf << "clientinfo clid=" << params[1];
+	CTeamspeak::Send(StrBuf.str());
+	StrBuf.str("");
+
+	int ChannelID = -1, ErrorID = -1;
+	if(CTeamspeak::ExpectIntVal("cid", &ChannelID, &ErrorID) == false)
+		return -1;
+	return ChannelID;
+}
+
 cell AMX_NATIVE_CALL native_TSC_KickClient(AMX* amx, cell* params) {
 	if(params[1] < 0 || (params[2] != 1 && params[2] != 2))
 		return -1;
