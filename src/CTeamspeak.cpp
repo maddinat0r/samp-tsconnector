@@ -65,9 +65,9 @@ bool CTeamspeak::Send(string cmd) {
 }
 
 int CTeamspeak::Recv(string *dest) {
-	char buf[1024];
-	memset(buf, 0, 1024);
-	int bytes = recv(SocketID, buf, 1023, 0);
+	char buf[2048];
+	memset(buf, 0, sizeof(buf));
+	int bytes = recv(SocketID, buf, sizeof(buf)-1, 0);
 	if(dest != NULL)
 		(*dest) = buf;
 	return bytes;
