@@ -356,7 +356,7 @@ cell AMX_NATIVE_CALL native_TSC_GetClientCurrentChannelID(AMX* amx, cell* params
 
 
 cell AMX_NATIVE_CALL native_TSC_KickClient(AMX* amx, cell* params) {
-	if(params[1] < 0 || (params[2] != 1 && params[2] != 2))
+	if(params[1] <= 0 || (params[2] != 1 && params[2] != 2))
 		return -1;
 
 	int KickReasonID;
@@ -383,7 +383,7 @@ cell AMX_NATIVE_CALL native_TSC_KickClient(AMX* amx, cell* params) {
 }
 
 cell AMX_NATIVE_CALL native_TSC_BanClient(AMX* amx, cell* params) {
-	if(params[1] < 0)
+	if(params[1] <= 0)
 		return -1;
 
 	string ReasonMsg = AMX_GetString(amx, params[3]);
