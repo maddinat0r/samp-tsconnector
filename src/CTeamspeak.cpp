@@ -14,9 +14,13 @@ bool CTeamspeak::Connect(const char *ip, const char *port) {
 	sHints.ai_family = AF_UNSPEC;
 	sHints.ai_socktype = SOCK_STREAM;
 
-	getaddrinfo(ip, port, &sHints, &sRes);
-	CTeamspeak::SocketID = socket(sRes->ai_family, sRes->ai_socktype, sRes->ai_protocol);
-	connect(CTeamspeak::SocketID, sRes->ai_addr, sRes->ai_addrlen);
+	if(getaddrinfo(ip.c_str(), "10011", &sHints, &sRes) != 0)
+		return false;
+	SocketID = socket(sRes->ai_family, sRes->ai_socktype, sRes->ai_protocol);
+	if(SocketID == -1)
+		return false;
+	if(connect(CTeamspeak::SocketID, sRes->ai_addr, sRes->ai_addrlen) == SOCKET_ERROR)
+		return false;
 
 	SetTimeoutTime(200);
 	
