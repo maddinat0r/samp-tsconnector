@@ -22,7 +22,7 @@ typedef void (*logprintf_t)(char* format, ...);
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <netdb.h>
-#define SOCKET_ERROR -1
+#define SOCKET_ERROR (-1)
 #endif
 
 

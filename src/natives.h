@@ -24,6 +24,7 @@ cell AMX_NATIVE_CALL native_TSC_SetChannelType(AMX* amx, cell* params);
 cell AMX_NATIVE_CALL native_TSC_SetChannelPassword(AMX* amx, cell* params);
 cell AMX_NATIVE_CALL native_TSC_SetChannelTalkPower(AMX* amx, cell* params);
 cell AMX_NATIVE_CALL native_TSC_SetChannelUserLimit(AMX* amx, cell* params);
+cell AMX_NATIVE_CALL native_TSC_SetChannelSubChannel(AMX* amx, cell* params);
 
 cell AMX_NATIVE_CALL native_TSC_GetChannelName(AMX* amx, cell* params);
 cell AMX_NATIVE_CALL native_TSC_GetChannelClientList(AMX* amx, cell* params);

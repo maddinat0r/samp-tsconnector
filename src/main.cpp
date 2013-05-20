@@ -57,6 +57,7 @@ const AMX_NATIVE_INFO NativesList[] = {
 	{"TSC_SetChannelPassword",			native_TSC_SetChannelPassword},
 	{"TSC_SetChannelTalkPower",			native_TSC_SetChannelTalkPower},
 	{"TSC_SetChannelUserLimit",			native_TSC_SetChannelUserLimit},
+	{"TSC_SetChannelSubChannel",		native_TSC_SetChannelSubChannel},
 
 	{"TSC_GetChannelName",				native_TSC_GetChannelName},
 	{"TSC_GetChannelClientList",		native_TSC_GetChannelClientList},

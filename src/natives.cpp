@@ -397,3 +397,19 @@ cell AMX_NATIVE_CALL native_TSC_MoveClient(AMX* amx, cell* params) {
 		return -1;
 	return (cell)CTeamspeak::ParseError(SendRes);
 }
+
+cell AMX_NATIVE_CALL native_TSC_SetChannelSubChannel(AMX* amx, cell* params) {
+	int ChannelID = params[1],
+		ParentChannelID = params[2];
+	if(ChannelID <= 0 || ParentChannelID < 0)
+		return -1;
+
+	stringstream StrBuf;
+	StrBuf << "channelmove cid=" << ChannelID << " cpid=" << ParentChannelID;
+	CTeamspeak::Send(StrBuf.str());
+	StrBuf.str("");
+	string SendRes;
+	if(CTeamspeak::Recv(&SendRes) == SOCKET_ERROR)
+		return -1;
+	return (cell)CTeamspeak::ParseError(SendRes);
+}
