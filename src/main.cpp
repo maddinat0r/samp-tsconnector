@@ -62,6 +62,7 @@ const AMX_NATIVE_INFO NativesList[] = {
 
 	{"TSC_GetChannelName",				native_TSC_GetChannelName},
 	{"TSC_GetChannelClientList",		native_TSC_GetChannelClientList},
+	{"TSC_GetSubChannelListOnChannel",	native_TSC_GetSubChannelListOnChannel},
 
 	
 	{"TSC_KickClient",					native_TSC_KickClient},

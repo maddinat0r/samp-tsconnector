@@ -38,6 +38,7 @@ native TSC_MoveChannelBelowChannel(channelid, parentchannelid);
 
 native TSC_GetChannelName(channelid, dest[]);
 native TSC_GetChannelClientList(channelid, list[]);
+native TSC_GetSubChannelListOnChannel(channelid, list[]);
 	
 
 native TSC_KickClient(clientid, kicktype, reason[]);

@@ -429,3 +429,46 @@ cell AMX_NATIVE_CALL native_TSC_MoveChannelBelowChannel(AMX* amx, cell* params) 
 		return -1;
 	return (cell)CTeamspeak::ParseError(SendRes);
 }
+
+cell AMX_NATIVE_CALL native_TSC_GetSubChannelListOnChannel(AMX* amx, cell* params) {
+	if(params[1] <= 0)
+		return -1;
+
+	int TargetChannelID = params[1];
+	
+	CTeamspeak::Send("channellist");
+	string SendRes;
+	if(CTeamspeak::Recv(&SendRes) == SOCKET_ERROR)
+		return -1;
+	if(SendRes.find("error") != -1 && SendRes.find("cid") == -1) {
+		int ErrorID = CTeamspeak::ParseError(SendRes);
+		SendRes.clear();
+		if(ErrorID == 0) {
+			if(CTeamspeak::Recv(&SendRes) == SOCKET_ERROR)
+				return -1;
+		} else
+			return -1;
+	}
+
+	vector<int> SubChannelList;
+
+	boost::regex rx("cid=([0-9]+) pid=([0-9]+)");
+	boost::regex_iterator<std::string::const_iterator> RxIter(SendRes.begin(), SendRes.end(), rx);
+	boost::regex_iterator<std::string::const_iterator> RxEnd;
+	
+	//[1]: channelid, [2]:parentchannelid
+    for( ;RxIter != RxEnd; ++RxIter) {
+		int TmpChannelID = -1, TmpPChannelID = -1;
+		stringstream ConvBuf((*RxIter)[2]);
+		ConvBuf >> TmpPChannelID;
+        if(TmpPChannelID == TargetChannelID) {
+			stringstream ConvBuf2((*RxIter)[1]);
+			ConvBuf2 >> TmpChannelID;
+			SubChannelList.push_back(TmpChannelID);
+		}
+    }
+
+	string wtf (SubChannelList.begin(), SubChannelList.end());
+	AMX_SetString(amx, params[2], wtf);
+	return SubChannelList.size();
+}

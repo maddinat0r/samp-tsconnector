@@ -29,6 +29,7 @@ cell AMX_NATIVE_CALL native_TSC_MoveChannelBelowChannel(AMX* amx, cell* params);
 
 cell AMX_NATIVE_CALL native_TSC_GetChannelName(AMX* amx, cell* params);
 cell AMX_NATIVE_CALL native_TSC_GetChannelClientList(AMX* amx, cell* params);
+cell AMX_NATIVE_CALL native_TSC_GetSubChannelListOnChannel(AMX* amx, cell* params);
 
 
 //client natives
