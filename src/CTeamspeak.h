@@ -16,7 +16,14 @@ using std::stringstream;
 class CTeamspeak {
 public:
 	static int SocketID;
-	static bool Connect(const char *ip, const char *port);
+	static string 
+		IP, Port,
+		LoginName, LoginPass;
+
+	static bool Connect(string ip/*, const char *port*/);
+	static int Login(string login, string pass);
+	static int SetActiveVServer(string port);
+
 	static bool Close();
 	static bool SetTimeoutTime(unsigned int millisecs);
 

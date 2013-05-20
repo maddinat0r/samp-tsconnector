@@ -3,8 +3,7 @@
 #include "CTeamspeak.h"
 
 cell AMX_NATIVE_CALL native_TSC_Connect(AMX* amx, cell* params) {
-	CTeamspeak::Connect(AMX_GetString(amx, params[1]).c_str(), "10011");
-	return 1;
+	return CTeamspeak::Connect(AMX_GetString(amx, params[1]));;
 }
 
 cell AMX_NATIVE_CALL native_TSC_Disconnect(AMX* amx, cell* params) {
@@ -13,25 +12,12 @@ cell AMX_NATIVE_CALL native_TSC_Disconnect(AMX* amx, cell* params) {
 }
 
 cell AMX_NATIVE_CALL native_TSC_Login(AMX* amx, cell* params) {
-	stringstream StrBuf;
-	StrBuf << "login client_login_name=" << AMX_GetString(amx, params[1]) << " client_login_password=" << AMX_GetString(amx, params[2]) <<"\n";
-	string SendResult;
-	CTeamspeak::Send(StrBuf.str());
-	if(CTeamspeak::Recv(&SendResult) == SOCKET_ERROR)
-		return -1;
-	return CTeamspeak::ParseError(SendResult);
+	return CTeamspeak::Login(AMX_GetString(amx, params[1]), AMX_GetString(amx, params[2]));
 }
 
 
 cell AMX_NATIVE_CALL native_TSC_SetActiveVServer(AMX* amx, cell* params) {  
-	stringstream StrBuf;
-	StrBuf << "use port=" << AMX_GetString(amx, params[1]);
-	CTeamspeak::Send(StrBuf.str());
-	StrBuf.str("");
-	string SendRes;
-	if(CTeamspeak::Recv(&SendRes) == SOCKET_ERROR)
-		return -1;
-	return CTeamspeak::ParseError(SendRes);
+	return CTeamspeak::SetActiveVServer(AMX_GetString(amx, params[1]));
 }
 
 cell AMX_NATIVE_CALL native_TSC_SetTimeoutTime(AMX* amx, cell* params) {

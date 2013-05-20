@@ -3,10 +3,15 @@
 #include "CTeamspeak.h"
 
 int CTeamspeak::SocketID = 0;
+string 
+	CTeamspeak::IP, CTeamspeak::Port,
+	CTeamspeak::LoginName, CTeamspeak::LoginPass;
 
-bool CTeamspeak::Connect(const char *ip, const char *port) {
+bool CTeamspeak::Connect(string ip/*, const char *port*/) {
 	if(SocketID != 0)
 		Close();
+
+	IP = ip;
 
 	struct addrinfo sHints, *sRes;
 	
@@ -29,6 +34,33 @@ bool CTeamspeak::Connect(const char *ip, const char *port) {
 	return true;
 }
 
+int CTeamspeak::Login(string login, string pass) {
+	LoginName = login;
+	LoginPass = pass;
+
+	stringstream StrBuf;
+	StrBuf << "login client_login_name=" << login << " client_login_password=" << pass <<"\n";
+	string SendResult;
+	Send(StrBuf.str());
+	if(Recv(&SendResult) == SOCKET_ERROR)
+		return -1;
+	return ParseError(SendResult);
+}
+
+int CTeamspeak::SetActiveVServer(string port) {
+	Port = port;
+
+	stringstream StrBuf;
+	StrBuf << "use port=" << port;
+	Send(StrBuf.str());
+	StrBuf.str("");
+	string SendRes;
+	if(Recv(&SendRes) == SOCKET_ERROR)
+		return -1;
+	return ParseError(SendRes);
+}
+
+
 bool CTeamspeak::Close() {
 #ifdef _WIN32
 	closesocket(CTeamspeak::SocketID);
@@ -47,14 +79,14 @@ bool CTeamspeak::SetTimeoutTime(unsigned int millisecs) {
 #ifdef _WIN32
 	DWORD Timeout = millisecs;
 	if(setsockopt(SocketID, SOL_SOCKET, SO_RCVTIMEO, (char *)&Timeout, sizeof(Timeout)) < 0) {
-		return logprintf("Warning! An error occured in TSConnector while setting timeout time."), false;
+		return logprintf("Warning! An error occured in TSConnector while setting the timeout time."), false;
 	}
 #else
 	struct timeval sTimeout;      
     sTimeout.tv_sec = 0;
     sTimeout.tv_usec = millisecs * 1000;
     if (setsockopt (SocketID, SOL_SOCKET, SO_RCVTIMEO, (char *)&sTimeout, sizeof(sTimeout))) {
-		return logprintf("Warning! An error occured in TSConnector while setting timeout time."), false;
+		return logprintf("Warning! An error occured in TSConnector while setting the timeout time."), false;
 	}
 #endif
 	return true;
@@ -64,7 +96,21 @@ bool CTeamspeak::SetTimeoutTime(unsigned int millisecs) {
 bool CTeamspeak::Send(string cmd) {
 	if(cmd.at(cmd.length()-1) != '\n')
 		cmd.append("\n");
-	send(SocketID, cmd.c_str(), cmd.length(), 0);
+	int ErrorID = send(SocketID, cmd.c_str(), cmd.length(), 0);
+	if(ErrorID == SOCKET_ERROR) {
+#ifdef _WIN32
+		if(WSAGetLastError() == WSAENOTCONN)
+#else
+		if(errno == ENOTCONN)
+#endif
+		{
+			//attempt reconnect
+			if(Connect(IP.c_str()) == false || Login(LoginName, LoginPass) != 0 ||SetActiveVServer(Port) != 0) {
+				logprintf("[ERROR] Teamspeak Connector could not connect to Teamspeak server.");
+			}
+		}
+
+	}
 	return true;
 }
 
@@ -74,6 +120,22 @@ int CTeamspeak::Recv(string *dest) {
 	int bytes = recv(SocketID, buf, sizeof(buf)-1, 0);
 	if(dest != NULL)
 		(*dest) = buf;
+
+	if(bytes == SOCKET_ERROR) {
+#ifdef _WIN32
+		if(WSAGetLastError() == WSAENOTCONN)
+#else
+		if(errno == ENOTCONN)
+#endif
+		{
+			//attempt reconnect
+			if(Connect(IP.c_str()) == false || Login(LoginName, LoginPass) != 0 ||SetActiveVServer(Port) != 0) {
+				logprintf("[ERROR] Teamspeak Connector could not connect to Teamspeak server.");
+			}
+		}
+
+	}
+
 	return bytes;
 }
 
