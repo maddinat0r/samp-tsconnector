@@ -244,11 +244,11 @@ cell AMX_NATIVE_CALL native_TSC_SetClientChannelGroup(AMX* amx, cell* params) {
 	if(params[1] <= 0 || params[2] <= 0 || params[3] <= 0)
 		return -1;
 	
-	int ClientDBID = CTeamspeak::GetClientDBIDByID(params[1]);
-	if(ClientDBID <= 0)
-		return -1;
+	//int ClientDBID = CTeamspeak::GetClientDBIDByID(params[1]);
+	//if(ClientDBID <= 0)
+		//return -1;
 	stringstream StrBuf;
-	StrBuf << "setclientchannelgroup cgid=" << params[2] << " cid=" << params[3] << " cldbid=" << ClientDBID;
+	StrBuf << "setclientchannelgroup cgid=" << params[2] << " cid=" << params[3] << " cldbid=" << params[1];
 	CTeamspeak::Send(StrBuf.str());
 	StrBuf.str("");
 	string SendRes;
@@ -261,11 +261,11 @@ cell AMX_NATIVE_CALL native_TSC_AddClientToServerGroup(AMX* amx, cell* params) {
 	if(params[1] <= 0 || params[2] <= 0)
 		return -1;
 	
-	int ClientDBID = CTeamspeak::GetClientDBIDByID(params[1]);
-	if(ClientDBID <= 0)
-		return -1;
+	//int ClientDBID = CTeamspeak::GetClientDBIDByID(params[1]);
+	//if(ClientDBID <= 0)
+		//return -1;
 	stringstream StrBuf;
-	StrBuf << "servergroupaddclient sgid=" << params[2] << " cldbid=" << ClientDBID;
+	StrBuf << "servergroupaddclient sgid=" << params[2] << " cldbid=" << params[1];
 	CTeamspeak::Send(StrBuf.str());
 	StrBuf.str("");
 	string SendRes;
@@ -278,11 +278,11 @@ cell AMX_NATIVE_CALL native_TSC_RemoveClientFromServerGroup(AMX* amx, cell* para
 	if(params[1] <= 0 || params[2] <= 0)
 		return -1;
 	
-	int ClientDBID = CTeamspeak::GetClientDBIDByID(params[1]);
-	if(ClientDBID <= 0)
-		return -1;
+	//int ClientDBID = CTeamspeak::GetClientDBIDByID(params[1]);
+	//if(ClientDBID <= 0)
+		//return -1;
 	stringstream StrBuf;
-	StrBuf << "servergroupdelclient sgid=" << params[2] << " cldbid=" << ClientDBID;
+	StrBuf << "servergroupdelclient sgid=" << params[2] << " cldbid=" << params[1];
 	CTeamspeak::Send(StrBuf.str());
 	StrBuf.str("");
 	string SendRes;

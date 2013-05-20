@@ -45,9 +45,9 @@ native TSC_KickClient(clientid, kicktype, reason[]);
 native TSC_BanClient(clientid, seconds, reason[]);
 native TSC_MoveClient(clientid, channelid);
 
-native TSC_SetClientChannelGroup(clientid, groupid, channelid);
-native TSC_AddClientToServerGroup(clientid, groupid);
-native TSC_RemoveClientFromServerGroup(clientid, groupid);
+native TSC_SetClientChannelGroup(clientdbid, groupid, channelid);
+native TSC_AddClientToServerGroup(clientdbid, groupid);
+native TSC_RemoveClientFromServerGroup(clientdbid, groupid);
 
 native TSC_GetClientName(clientid, dest[]);
 native TSC_GetClientIDByName(name[]);
