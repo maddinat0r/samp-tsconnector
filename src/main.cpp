@@ -24,7 +24,7 @@ PLUGIN_EXPORT bool PLUGIN_CALL Load(void **ppData) {
 	WSAStartup(MAKEWORD(2,0), &wsa_unused);
 #endif
 
-	logprintf("TSConnector v0.2.1 loaded.");
+	logprintf("TSConnector v0.3 loaded.");
 	return 1;
 }
 
