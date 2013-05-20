@@ -41,6 +41,8 @@ cell AMX_NATIVE_CALL native_TSC_SetClientChannelGroup(AMX* amx, cell* params);
 cell AMX_NATIVE_CALL native_TSC_AddClientToServerGroup(AMX* amx, cell* params);
 cell AMX_NATIVE_CALL native_TSC_RemoveClientFromServerGroup(AMX* amx, cell* params);
 
+cell AMX_NATIVE_CALL native_TSC_GetClientDBIDByUID(AMX* amx, cell* params);
+cell AMX_NATIVE_CALL native_TSC_GetClientDBIDByID(AMX* amx, cell* params);
 cell AMX_NATIVE_CALL native_TSC_GetClientName(AMX* amx, cell* params);
 cell AMX_NATIVE_CALL native_TSC_GetClientIDByName(AMX* amx, cell* params);
 cell AMX_NATIVE_CALL native_TSC_GetClientCurrentChannelID(AMX* amx, cell* params);

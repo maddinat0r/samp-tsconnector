@@ -48,6 +48,8 @@ native TSC_MoveClient(clientid, channelid);
 native TSC_SetClientChannelGroup(clientdbid, groupid, channelid);
 native TSC_AddClientToServerGroup(clientdbid, groupid);
 native TSC_RemoveClientFromServerGroup(clientdbid, groupid);
+native TSC_GetClientDBIDByUID(uid[]);
+native TSC_GetClientDBIDByID(clientid);
 
 native TSC_GetClientName(clientid, dest[]);
 native TSC_GetClientIDByName(name[]);

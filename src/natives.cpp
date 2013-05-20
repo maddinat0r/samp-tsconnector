@@ -486,3 +486,25 @@ cell AMX_NATIVE_CALL native_TSC_GetSubChannelListOnChannel(AMX* amx, cell* param
 	AMX_SetString(amx, params[2], wtf);
 	return SubChannelList.size();
 }
+
+cell AMX_NATIVE_CALL native_TSC_GetClientDBIDByID(AMX* amx, cell* params) {
+	if(params[1] <= 0)
+		return -1;
+	int ClientDBID = CTeamspeak::GetClientDBIDByID(params[1]);
+	if(ClientDBID <= 0)
+		return -1;
+	return ClientDBID;
+}
+
+cell AMX_NATIVE_CALL native_TSC_GetClientDBIDByUID(AMX* amx, cell* params) {
+	string UID = AMX_GetString(amx, params[1]);
+	stringstream StrBuf; 
+	StrBuf << "clientdbfind pattern=" << UID << " -uid";
+	CTeamspeak::Send(StrBuf.str());
+	StrBuf.str("");
+
+	int ClientDBID = -1, ErrorID = -1;
+	if(CTeamspeak::ExpectIntVal("cldbid", &ClientDBID, &ErrorID) == false)
+		return -1;
+	return ClientDBID;
+}

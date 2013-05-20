@@ -72,7 +72,9 @@ const AMX_NATIVE_INFO NativesList[] = {
 	{"TSC_SetClientChannelGroup",		native_TSC_SetClientChannelGroup},
 	{"TSC_AddClientToServerGroup",		native_TSC_AddClientToServerGroup},
 	{"TSC_RemoveClientFromServerGroup",	native_TSC_RemoveClientFromServerGroup},
-
+	
+	{"TSC_GetClientDBIDByUID",			native_TSC_GetClientDBIDByUID},
+	{"TSC_GetClientDBIDByID",			native_TSC_GetClientDBIDByID},
 	{"TSC_GetClientName",				native_TSC_GetClientName},
 	{"TSC_GetClientIDByName",			native_TSC_GetClientIDByName},
 	{"TSC_GetClientCurrentChannelID",	native_TSC_GetClientCurrentChannelID},
