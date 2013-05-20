@@ -34,6 +34,7 @@ native TSC_SetChannelPassword(channelid, channelpasswd[]);
 native TSC_SetChannelTalkPower(channelid, talkpower);
 native TSC_SetChannelUserLimit(channelid, maxuser);
 native TSC_SetChannelSubChannel(channelid, parentchannelid);
+native TSC_MoveChannelBelowChannel(channelid, parentchannelid);
 
 native TSC_GetChannelName(channelid, dest[]);
 native TSC_GetChannelClientList(channelid, list[]);
