@@ -160,8 +160,15 @@ cell AMX_NATIVE_CALL native_TSC_GetChannelIDByName(AMX* amx, cell* params) {
 		return -1;
 	if(SendRes.find('|') != -1) //more than one channel in result
 		return -1;
-	if(SendRes.find("error") != -1)
-		return -1;//CTeamspeak::ParseError(SendRes);
+	if(SendRes.find("error") != -1) {
+		if(CTeamspeak::ParseError(SendRes) == 0) {
+			if(CTeamspeak::Recv(&SendRes) == SOCKET_ERROR) {
+				return -1; 
+			}
+		}
+		else
+			return -1;
+	}
 	ChannelID = CTeamspeak::ParseInteger(SendRes, "cid");
 	return (cell)ChannelID;
 }
@@ -314,13 +321,20 @@ cell AMX_NATIVE_CALL native_TSC_GetClientIDByName(AMX* amx, cell* params) {
 	StrBuf.str("");
 
 	int UserID = -1;
-	string SendRes;
+	string SendRes; 
 	if(CTeamspeak::Recv(&SendRes) == SOCKET_ERROR)
 		return -1;
 	if(SendRes.find('|') != -1) //more than one user in result
 		return -1;
-	if(SendRes.find("error") != -1)
-		return -1;//CTeamspeak::ParseError(SendRes);
+	if(SendRes.find("error") != -1) {
+		if(CTeamspeak::ParseError(SendRes) == 0) {
+			if(CTeamspeak::Recv(&SendRes) == SOCKET_ERROR) {
+				return -1; 
+			}
+		}
+		else
+			return -1;
+	}
 	UserID = CTeamspeak::ParseInteger(SendRes, "clid");
 	return (cell)UserID;
 }
