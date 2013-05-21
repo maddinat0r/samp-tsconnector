@@ -153,23 +153,9 @@ cell AMX_NATIVE_CALL native_TSC_GetChannelIDByName(AMX* amx, cell* params) {
 	CTeamspeak::Send(StrBuf.str());
 	StrBuf.str("");
 
-	int ChannelID = -1;
-
-	string SendRes;
-	if(CTeamspeak::Recv(&SendRes) == SOCKET_ERROR)
+	int ChannelID = -1, ErrorID = -1;
+	if(CTeamspeak::ExpectIntVal("cid", &ChannelID, &ErrorID) == false)
 		return -1;
-	if(SendRes.find('|') != -1) //more than one channel in result
-		return -1;
-	if(SendRes.find("error") != -1) {
-		if(CTeamspeak::ParseError(SendRes) == 0) {
-			if(CTeamspeak::Recv(&SendRes) == SOCKET_ERROR) {
-				return -1; 
-			}
-		}
-		else
-			return -1;
-	}
-	ChannelID = CTeamspeak::ParseInteger(SendRes, "cid");
 	return (cell)ChannelID;
 }
 
@@ -244,9 +230,6 @@ cell AMX_NATIVE_CALL native_TSC_SetClientChannelGroup(AMX* amx, cell* params) {
 	if(params[1] <= 0 || params[2] <= 0 || params[3] <= 0)
 		return -1;
 	
-	//int ClientDBID = CTeamspeak::GetClientDBIDByID(params[1]);
-	//if(ClientDBID <= 0)
-		//return -1;
 	stringstream StrBuf;
 	StrBuf << "setclientchannelgroup cgid=" << params[2] << " cid=" << params[3] << " cldbid=" << params[1];
 	CTeamspeak::Send(StrBuf.str());
@@ -261,9 +244,6 @@ cell AMX_NATIVE_CALL native_TSC_AddClientToServerGroup(AMX* amx, cell* params) {
 	if(params[1] <= 0 || params[2] <= 0)
 		return -1;
 	
-	//int ClientDBID = CTeamspeak::GetClientDBIDByID(params[1]);
-	//if(ClientDBID <= 0)
-		//return -1;
 	stringstream StrBuf;
 	StrBuf << "servergroupaddclient sgid=" << params[2] << " cldbid=" << params[1];
 	CTeamspeak::Send(StrBuf.str());
@@ -278,9 +258,6 @@ cell AMX_NATIVE_CALL native_TSC_RemoveClientFromServerGroup(AMX* amx, cell* para
 	if(params[1] <= 0 || params[2] <= 0)
 		return -1;
 	
-	//int ClientDBID = CTeamspeak::GetClientDBIDByID(params[1]);
-	//if(ClientDBID <= 0)
-		//return -1;
 	stringstream StrBuf;
 	StrBuf << "servergroupdelclient sgid=" << params[2] << " cldbid=" << params[1];
 	CTeamspeak::Send(StrBuf.str());
@@ -320,22 +297,9 @@ cell AMX_NATIVE_CALL native_TSC_GetClientIDByName(AMX* amx, cell* params) {
 	CTeamspeak::Send(StrBuf.str());
 	StrBuf.str("");
 
-	int UserID = -1;
-	string SendRes; 
-	if(CTeamspeak::Recv(&SendRes) == SOCKET_ERROR)
+	int UserID = -1, ErrorID = -1;
+	if(CTeamspeak::ExpectIntVal("clid", &UserID, &ErrorID) == false)
 		return -1;
-	if(SendRes.find('|') != -1) //more than one user in result
-		return -1;
-	if(SendRes.find("error") != -1) {
-		if(CTeamspeak::ParseError(SendRes) == 0) {
-			if(CTeamspeak::Recv(&SendRes) == SOCKET_ERROR) {
-				return -1; 
-			}
-		}
-		else
-			return -1;
-	}
-	UserID = CTeamspeak::ParseInteger(SendRes, "clid");
 	return (cell)UserID;
 }
 

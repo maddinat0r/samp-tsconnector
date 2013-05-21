@@ -96,18 +96,17 @@ bool CTeamspeak::SetTimeoutTime(unsigned int millisecs) {
 bool CTeamspeak::Send(string cmd) {
 	if(cmd.at(cmd.length()-1) != '\n')
 		cmd.append("\n");
-	int ErrorID = send(SocketID, cmd.c_str(), cmd.length(), 0);
-	if(ErrorID == SOCKET_ERROR) {
+
+	if(send(SocketID, cmd.c_str(), cmd.length(), 0) == SOCKET_ERROR) {
 #ifdef _WIN32
-		if(WSAGetLastError() == WSAENOTCONN)
+		int errorid = WSAGetLastError();
 #else
-		if(errno == ENOTCONN)
+		int errorid = errno;
 #endif
-		{
-			//attempt reconnect
-			if(Connect(IP.c_str()) == false || Login(LoginName, LoginPass) != 0 ||SetActiveVServer(Port) != 0) {
-				logprintf("[ERROR] Teamspeak Connector could not connect to Teamspeak server.");
-			}
+		logprintf("[ERROR] TSConnector encountered an error at \"Send\": %d", errorid);
+		//attempt reconnect
+		if(Connect(IP.c_str()) == false || Login(LoginName, LoginPass) != 0 ||SetActiveVServer(Port) != 0) {
+			logprintf("[ERROR] Teamspeak Connector could not connect to Teamspeak server.");
 		}
 
 	}
@@ -120,19 +119,21 @@ int CTeamspeak::Recv(string *dest) {
 	int bytes = recv(SocketID, buf, sizeof(buf)-1, 0);
 	if(dest != NULL)
 		(*dest) = buf;
-
+	
 	if(bytes == SOCKET_ERROR) {
 #ifdef _WIN32
-		if(WSAGetLastError() == WSAENOTCONN)
+		int errorid = WSAGetLastError();
 #else
-		if(errno == ENOTCONN)
+		int errorid = errno;
 #endif
-		{
-			//attempt reconnect
-			if(Connect(IP.c_str()) == false || Login(LoginName, LoginPass) != 0 ||SetActiveVServer(Port) != 0) {
-				logprintf("[ERROR] Teamspeak Connector could not connect to Teamspeak server.");
-			}
+		logprintf("[ERROR] TSConnector encountered an error at \"Recv\": %d", errorid);
+		//if(errorid == WSAENOTCONN)
+		//{
+		//attempt reconnect
+		if(Connect(IP.c_str()) == false || Login(LoginName, LoginPass) != 0 ||SetActiveVServer(Port) != 0) {
+			logprintf("[ERROR] Teamspeak Connector could not connect to Teamspeak server.");
 		}
+		//}
 
 	}
 
@@ -149,10 +150,12 @@ bool CTeamspeak::ExpectIntVal(string valname, int *val, int *error) {
 		if(CTeamspeak::Recv(&str) == SOCKET_ERROR)
 			return false;
 
-
-		if((*error) == -1)
+		if(str.find('|') != -1) //more than one result
+			return false;
+		
+		if(str.find("error") != -1)
 			(*error) = CTeamspeak::ParseError(str);
-		if((*val) == -1 && (*error) == 0)
+		if((*error) <= 0 && (*val) == -1)
 			(*val) = CTeamspeak::ParseInteger(str, valname);
 	}
 	return true;
@@ -166,9 +169,12 @@ bool CTeamspeak::ExpectStringVal(string valname, string *val, int *error) {
 		if(CTeamspeak::Recv(&str) == SOCKET_ERROR)
 			return false;
 		
-		if((*error) == -1)
+		if(str.find('|') != -1) //more than one result
+			return false;
+
+		if(str.find("error") != -1)
 			(*error) = CTeamspeak::ParseError(str);
-		if((*val).length() == 0 && (*error) == 0)
+		if((*error) <= 0 && (*val).length() == 0)
 			CTeamspeak::ParseString(str, valname, val);
 	}
 	return true;
