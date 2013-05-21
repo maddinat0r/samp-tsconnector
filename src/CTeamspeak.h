@@ -8,6 +8,11 @@
 #include <boost/regex.hpp>
 #include <sstream>
 
+#ifdef BOOST_REGEX_MAX_CACHE_BLOCKS
+#undef BOOST_REGEX_MAX_CACHE_BLOCKS
+#endif
+#define BOOST_REGEX_MAX_CACHE_BLOCKS 32
+
 using std::stringstream;
 
 
