@@ -92,6 +92,7 @@
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="src\CCallback.cpp" />
     <ClCompile Include="src\CTeamspeak.cpp" />
     <ClCompile Include="src\main.cpp" />
     <ClCompile Include="src\natives.cpp" />
@@ -99,6 +100,7 @@
     <ClCompile Include="src\thread.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="src\CCallback.h" />
     <ClInclude Include="src\CTeamspeak.h" />
     <ClInclude Include="src\main.h" />
     <ClInclude Include="src\natives.h" />

@@ -30,6 +30,9 @@
     <ClCompile Include="src\thread.cpp">
       <Filter>Quelldateien</Filter>
     </ClCompile>
+    <ClCompile Include="src\CCallback.cpp">
+      <Filter>Quelldateien</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\main.h">
@@ -42,6 +45,9 @@
       <Filter>Quelldateien</Filter>
     </ClInclude>
     <ClInclude Include="src\thread.h">
+      <Filter>Quelldateien</Filter>
+    </ClInclude>
+    <ClInclude Include="src\CCallback.h">
       <Filter>Quelldateien</Filter>
     </ClInclude>
   </ItemGroup>

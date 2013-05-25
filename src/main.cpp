@@ -5,6 +5,7 @@
 #include "thread.h"
 
 #include "CTeamspeak.h"
+#include "CCallback.h"
 
 
 list<AMX*> AmxList;
@@ -13,7 +14,29 @@ extern void *pAMXFunctions;
 logprintf_t logprintf;
 
 PLUGIN_EXPORT void PLUGIN_CALL ProcessTick() {
+	while(!CCallback::IsQueueEmpty()) {
+		CCallback *Callback = CCallback::GetNextCallback();
 
+		int CB_IDX;
+		for (list<AMX*>::iterator amx = AmxList.begin(), end = AmxList.end(); amx != end; ++amx) {
+			if (amx_FindPublic( (*amx), Callback->Name.c_str(), &CB_IDX) == AMX_ERR_NONE) {
+				queue<cell> AmxAddresses;
+				while(!Callback->Params.empty()) {
+					cell tmpAddress;
+					amx_PushString( (*amx), &tmpAddress, NULL, Callback->Params.top().c_str(), 0, 0);
+					Callback->Params.pop();
+					AmxAddresses.push(tmpAddress);
+				}
+				amx_Exec( (*amx), NULL, CB_IDX);
+				while(!AmxAddresses.empty()) {
+					amx_Release( (*amx), AmxAddresses.front());
+					AmxAddresses.pop();
+				}
+			}
+		}
+
+		delete Callback;
+	}
 }
 
 PLUGIN_EXPORT unsigned int PLUGIN_CALL Supports() {
