@@ -7,6 +7,7 @@
 
 #include <boost/regex.hpp>
 #include <sstream>
+#include <queue>
 
 #ifdef BOOST_REGEX_MAX_CACHE_BLOCKS
 #undef BOOST_REGEX_MAX_CACHE_BLOCKS
@@ -14,33 +15,60 @@
 #define BOOST_REGEX_MAX_CACHE_BLOCKS 32
 
 using std::stringstream;
+using std::queue;
 
 
 
-
-class CTeamspeak {
+class CCommand {
 public:
-	static int SocketID;
-	static string 
-		IP, Port,
-		LoginName, LoginPass;
-
-	static bool Connect(string ip/*, const char *port*/);
-	static int Login(string login, string pass);
-	static int SetActiveVServer(string port);
-
-	static bool Close();
-	static bool SetTimeoutTime(unsigned int millisecs);
-
-	static bool Send(string cmd);
-	static int Recv(string *dest);
+	CCommand(string cmd, string valname=string()) :
+		Command(cmd), ValName(valname) {}
+	CCommand() :
+		Command(string()), ValName(string()) {}
 	
+	string Command;
+	//Recv only
+	string ValName;
 
-
-
-
+	//multiple search
+	string MFind;
 };
 
+typedef queue<CCommand*> CommandList;
+
+class CTeamspeak {
+private:
+	static CMutex SocketMutex;
+	static queue<CommandList*> SendQueue;
+
+	int SocketID;
+	string 
+		IP, Port,
+		LoginName, LoginPass, LoginNick;
+public:
+	bool Connect(string ip, string vport);
+	int Login(string login, string pass, string nickname);
+
+	bool Disconnect();
+	bool SetTimeoutTime(unsigned int millisecs);
+
+	bool Send(string cmd);
+	int Recv(string *dest);
+	
+	static bool AddCommandListToQueue(CommandList *cmdlist);
+	static CommandList *GetNextCommandList();
+	static bool IsQueueEmpty();
+
+	bool EscapeString(string *str);
+	bool UnEscapeString(string *str);
+
+	bool IsLoggedIn() {
+		return (LoginName.size() > 0); }
+
+	CTeamspeak();
+	~CTeamspeak();
+};
+extern CTeamspeak TSServer;
 
 /*
 enum ChannelTypes {
