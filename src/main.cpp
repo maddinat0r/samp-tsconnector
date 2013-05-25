@@ -11,10 +11,12 @@ void **ppPluginData;
 extern void *pAMXFunctions;
 logprintf_t logprintf;
 
+PLUGIN_EXPORT void PLUGIN_CALL ProcessTick() {
 
+}
 
 PLUGIN_EXPORT unsigned int PLUGIN_CALL Supports() {
-	return SUPPORTS_VERSION | SUPPORTS_AMX_NATIVES; 
+	return SUPPORTS_VERSION | SUPPORTS_AMX_NATIVES | SUPPORTS_PROCESS_TICK; 
 }
 
 PLUGIN_EXPORT bool PLUGIN_CALL Load(void **ppData) {
