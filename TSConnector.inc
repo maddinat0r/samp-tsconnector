@@ -5,12 +5,6 @@
 
 
 enum {
-	CHANNEL_TYPE_PERMANENT = 1,
-	CHANNEL_TYPE_SEMI_PERMANENT,
-	CHANNEL_TYPE_TEMPORARY
-};
-
-enum {
 	KICK_TYPE_CHANNEL = 1,
 	KICK_TYPE_SERVER
 };
@@ -56,19 +50,7 @@ Return:
 */
 
 
-native TSC_SetActiveVServer(port[]);
-/*Parameters:
-	port[]: the port of the virtual server
-	
-Usage:
-	Sets the active virtual server. This has to be called after each TSC_Connect to select the 
-	virtual server on which all commands are executed.	
-	
-Return:
-	0 on success,
-	-1 on connection failure,
-	otherwise a Teamspeak error ID
-*/
+
 
 native TSC_SetTimeoutTime(milliseconds);
 /*Parameters:
@@ -93,13 +75,9 @@ Usage:
 	Creates a new channel with the specified channel name.
 	
 Return:
-	channel ID on success,
-	-1 on connection failure
-*/
 
 native TSC_DeleteChannel(channelid);
 /*Parameters:
-	channelid: ID of a Teamspeak channel
 	
 Usage:
 	Deletes a channel specified with the channel ID.
@@ -110,18 +88,12 @@ Return:
 	otherwise a Teamspeak error ID
 */
 
-native TSC_GetChannelIDByName(channelname[]);
 /*Parameters:
 	channelname[]: name of a Teamspeak channel
 	
 Usage:
-	Returns the channel ID of a channel with the specified channel name. 
-	The names have not to be exactly the same, if looking for channel "MyChannel1" and specifying 
-	the channel name as "MyChannel", the channel will still be found.
 	
 Return:
-	channel ID on success,
-	-1 on connection failure, on Teamspeak error or if more than one channels found with the given name
 */
 
 
@@ -146,21 +118,6 @@ native TSC_SetChannelDescription(channelid, channeldesc[]);
 
 Usage:
 	Changes a channels description.
-	
-Return:
-	0 on success,
-	-1 on connection failure,
-	otherwise a Teamspeak error ID
-*/
-
-native TSC_SetChannelType(channelid, channeltype);
-/*Parameters:
-	channelid: channel ID of a Teamspeak channel
-	channeltype: type of channel
-
-Usage:
-	Sets a channels type. Available types are 
-	'CHANNEL_TYPE_PERMANENT', 'CHANNEL_TYPE_SEMI_PERMANENT' and 'CHANNEL_TYPE_TEMPORARY'.
 	
 Return:
 	0 on success,
@@ -195,21 +152,6 @@ Return:
 	-1 on connection failure,
 	otherwise a Teamspeak error ID
 */
-
-native TSC_SetChannelUserLimit(channelid, maxuser);
-/*Parameters:
-	channelid: channel ID of a Teamspeak channel
-	maxuser: maximal number of users
-
-Usage:
-	Sets the maximal number of users allowed in a channel.
-	
-Return:
-	0 on success,
-	-1 on connection failure,
-	otherwise a Teamspeak error ID
-*/
-
 native TSC_SetChannelSubChannel(channelid, parentchannelid);
 /*Parameters:
 	channelid: channel ID of a Teamspeak channel
@@ -239,46 +181,21 @@ Return:
 */
 
 
-native TSC_GetChannelName(channelid, dest[]);
 /*Parameters:
-	channelid: channel ID of a Teamspeak channel
-	dest[]: destination value for the channel name
 
 Usage:
-	Gets the channel name of a channel.
 	
 Return:
-	0 on success,
-	-1 on connection failure,
-	otherwise a Teamspeak error ID
 */
 
-native TSC_GetChannelClientList(channelid, list[]);
 /*Parameters:
-	channelid: channel ID of a Teamspeak channel
-	list[]: destination variable for a array of client ids
 
 Usage:
-	Gets a list of client ids currently in a channel.
 	
 Return:
-	-1 on connection failure,
-	number of clients on success
 */
 
-native TSC_GetSubChannelListOnChannel(channelid, list[]);
 /*Parameters:
-	channelid: channel ID of a Teamspeak channel
-	list[]: destination variable for a array of channel ids
-
-Usage:
-	Gets a list of channel ids which are currently a sub-channel of 
-	the channel specified with channelid.
-	
-Return:
-	-1 on connection failure,
-	number of channels on success
-*/
 
 	
 
@@ -372,65 +289,20 @@ Return:
 */
 
 
-native TSC_GetClientDBIDByUID(uid[]);
 /*Parameters:
-	uid[]: unique ID of Teamspeak user
 
-Usage:
-	Gets a clients database ID by his unique ID.
-	
-Return:
-	-1 on failure,
-	database ID on success
 */
 
-native TSC_GetClientDBIDByID(clientid);
 /*Parameters:
-	clientid: client ID of Teamspeak user
 
-Usage:
-	Gets a clients database ID by his ID.
-	
-Return:
-	-1 on failure,
-	database ID on success
 */
 
-native TSC_GetClientName(clientid, dest[]);
 /*Parameters:
-	clientid: client ID of a Teamspeak user
-	dest[]: destination variable for the clients username
 
-Usage:
-	Gets a clients username.
-	
-Return:
-	0 on success,
-	-1 on connection failure,
-	otherwise a Teamspeak error ID
 */
 
-native TSC_GetClientIDByName(name[]);
 /*Parameters:
-	name[]: name of a Teamspeak user
-
-Usage:
-	Returns the client ID of a Teamspeak user specified by the name.
-	
-Return:
-	client ID on success,
-	-1 on connection failure, on Teamspeak error or if more than one clients found with the given name
 */
 
-native TSC_GetClientCurrentChannelID(clientid);
 /*Parameters:
-	clientid: client ID of a Teamspeak user
-
-Usage:
-	Returns the channel ID which the client is currently in.
-	
-Return:
-	-1 on connection failure,
-	channel ID on success
-*/
 
