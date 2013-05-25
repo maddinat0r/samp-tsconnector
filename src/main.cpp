@@ -53,7 +53,6 @@ PLUGIN_EXPORT bool PLUGIN_CALL Load(void **ppData) {
 		return 0;
 #endif
 
-	logprintf("TSConnector v0.3.1 loaded.");
 
 #ifdef WIN32
 	DWORD ThreadID = 0;
@@ -68,6 +67,7 @@ PLUGIN_EXPORT bool PLUGIN_CALL Load(void **ppData) {
 #endif
 
 
+	logprintf("TSConnector v0.4 loaded.");
 	return 1;
 }
 
