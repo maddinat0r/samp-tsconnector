@@ -5,6 +5,8 @@
 
 #include "CTeamspeak.h"
 
+
+list<AMX*> AmxList;
 void **ppPluginData;
 extern void *pAMXFunctions;
 logprintf_t logprintf;
@@ -71,10 +73,17 @@ const AMX_NATIVE_INFO NativesList[] = {
 
 
 PLUGIN_EXPORT int PLUGIN_CALL AmxLoad(AMX *amx) {
+	AmxList.push_back(amx);
 	return amx_Register(amx, NativesList, -1);
 }
 
-PLUGIN_EXPORT int PLUGIN_CALL AmxUnload(AMX *amx) { 
+PLUGIN_EXPORT int PLUGIN_CALL AmxUnload(AMX *amx) {
+	for(list<AMX*>::iterator i = AmxList.begin(), max = AmxList.end(); i != max; ++i) {
+		if( (*i) == amx) {
+			AmxList.erase(i);
+			break;
+		}
+	}
 	return AMX_ERR_NONE;
 }
 

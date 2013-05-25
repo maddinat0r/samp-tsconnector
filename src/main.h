@@ -23,23 +23,24 @@ typedef void (*logprintf_t)(char* format, ...);
 #include <sys/socket.h>
 #include <netdb.h>
 #include <errno.h>
+
 #define SOCKET_ERROR (-1)
 #endif
-
 
 
 //STD
 #include <string>
 #include <vector>
+#include <list>
 
 using std::string;
 using std::vector;
+using std::list;
 
 
 extern logprintf_t logprintf;
 
 string AMX_GetString(AMX* amx, cell param);
 int AMX_SetString(AMX* amx, cell param, string str);
-
 
 #endif
