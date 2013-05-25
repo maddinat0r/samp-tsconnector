@@ -10,17 +10,18 @@ enum {
 };
 
 
-native TSC_Connect(ip[]);
+native TSC_Connect(ip[], port[]);
 /*Parameters:
 	ip[]: the IP of the Teamspeak server
+	port[]: port of the virtual server
 	
 Usage:
 	Establishes a connection to the Teamspeak server.
 	This native has to be called before all other natives.
 	
 Return: 
-	1 on success,
-	0 on failure
+	0 on success,
+	-1 on failure
 */
 
 native TSC_Disconnect();
@@ -34,14 +35,15 @@ Return:
 	none
 */
 
-native TSC_Login(user[], pass[]);
+native TSC_Login(user[], pass[], nickname[]);
 /*Parameters:
 	user[]: the username of the Serverquery account
 	pass[]: the password of the Serverquery account
+	nickname[]: the nickname of the Serverquery account
 	
 Usage:
 	Logs into the Teamspeak server with the Serverquery account details in.
-	Most of the natives won't work without a valid login, because they need admin rights to get executed.
+	All of the natives won't work without a valid login, because they need admin rights to get executed.
 	
 Return:
 	0 on success,
@@ -75,133 +77,99 @@ Usage:
 	Creates a new channel with the specified channel name.
 	
 Return:
-
-native TSC_DeleteChannel(channelid);
-/*Parameters:
-	
-Usage:
-	Deletes a channel specified with the channel ID.
-	
-Return:
-	0 on success,
-	-1 on connection failure,
-	otherwise a Teamspeak error ID
+	none
 */
 
+native TSC_DeleteChannel(channelname[]);
 /*Parameters:
 	channelname[]: name of a Teamspeak channel
 	
 Usage:
+	Deletes a channel and kicks all clients out of the deleted channel if there were any.
 	
 Return:
+	none
 */
 
 
-native TSC_SetChannelName(channelid, channelname[]);
+native TSC_SetChannelName(channelname[], newchannelname[]);
 /*Parameters:
-	channelid: channel ID of a Teamspeak channel
+	channelname[]: channel name of a Teamspeak channel
 	channelname[]: new channel name to set
 
 Usage:
 	Renames a channel.
 	
 Return:
-	0 on success,
-	-1 on connection failure,
-	otherwise a Teamspeak error ID
+	none
 */
 
-native TSC_SetChannelDescription(channelid, channeldesc[]);
+native TSC_SetChannelDescription(channelname[], channeldesc[]);
 /*Parameters:
-	channelid: channel ID of a Teamspeak channel
+	channelname[]: channel name of a Teamspeak channel
 	channeldesc[]: new channel description to set
 
 Usage:
 	Changes a channels description.
 	
 Return:
-	0 on success,
-	-1 on connection failure,
-	otherwise a Teamspeak error ID
+	none
 */
 
-native TSC_SetChannelPassword(channelid, channelpasswd[]);
+native TSC_SetChannelPassword(channelname[], channelpasswd[]);
 /*Parameters:
-	channelid: channel ID of a Teamspeak channel
+	channelname[]: channel name of a Teamspeak channel
 	channelpasswd[]: new channel password to set
 
 Usage:
 	Sets a channels password. Use a empty string to remove the password.
 	
 Return:
-	0 on success,
-	-1 on connection failure,
-	otherwise a Teamspeak error ID
+	none
 */
 
-native TSC_SetChannelTalkPower(channelid, talkpower);
+native TSC_SetChannelTalkPower(channelname[], talkpower);
 /*Parameters:
-	channelid: channel ID of a Teamspeak channel
+	channelname[]: channel name of a Teamspeak channel
 	talkpower: new needed talkpower
 
 Usage:
 	Sets the talkpower needed in this channel.
 	
 Return:
-	0 on success,
-	-1 on connection failure,
-	otherwise a Teamspeak error ID
+	none
 */
-native TSC_SetChannelSubChannel(channelid, parentchannelid);
+
+native TSC_SetChannelSubChannel(channelname[], parentchannelname[]);
 /*Parameters:
-	channelid: channel ID of a Teamspeak channel
-	parentchannelid: parent channel ID of the Teamspeak channel
+	channelname[]: channel name of a Teamspeak channel
+	parentchannelname[]: parent channel name of the Teamspeak channel
 
 Usage:
-	Puts the channel specified with channelid in the channel specified by parentchannelid as sub-channel.
+	Puts the channel specified with channelname in the channel specified by parentchannelname as sub-channel.
 	
 Return:
-	0 on success,
-	-1 on connection failure,
-	otherwise a Teamspeak error ID
+	none
 */
 
-native TSC_MoveChannelBelowChannel(channelid, parentchannelid);
+native TSC_MoveChannelBelowChannel(channelname[], parentchannelname[]);
 /*Parameters:
-	channelid: channel ID of a Teamspeak channel
-	parentchannelid: parent channel ID of the Teamspeak channel
+	channelname[]: channel name of a Teamspeak channel
+	parentchannelname[]: parent channel name of the Teamspeak channel
 
 Usage:
-	Moves a channel specified with channelid under a channel specified with parentchannelid.
+	Moves a channel specified with channelname under a channel specified with parentchannelname.
 	
 Return:
-	0 on success,
-	-1 on connection failure,
-	otherwise a Teamspeak error ID
+	none
 */
 
 
-/*Parameters:
-
-Usage:
-	
-Return:
-*/
-
-/*Parameters:
-
-Usage:
-	
-Return:
-*/
-
-/*Parameters:
-
 	
 
-native TSC_KickClient(clientid, kicktype, reason[]);
+native TSC_KickClient(uid[], kicktype, reason[]);
 /*Parameters:
-	clientid: client ID of a Teamspeak user
+	uid[]: unique ID of a Teamspeak user
 	kicktype: type of kick
 	reason[]: reason message
 
@@ -210,14 +178,12 @@ Usage:
 	from the server if kicktype = 'KICK_TYPE_SERVER'.
 	
 Return:
-	0 on success,
-	-1 on connection failure,
-	otherwise a Teamspeak error ID
+	none
 */
 
-native TSC_BanClient(clientid, seconds, reason[]);
+native TSC_BanClient(uid[], seconds, reason[]);
 /*Parameters:
-	clientid: client ID of a Teamspeak user
+	uid[]: unique ID of a Teamspeak user
 	seconds: amount of seconds the ban will last
 	reason[]: reason message
 
@@ -225,84 +191,108 @@ Usage:
 	Bans a client from the server.
 	
 Return:
-	0 on success,
-	-1 on connection failure,
-	otherwise a Teamspeak error ID
+	none
 */
 
-native TSC_MoveClient(clientid, channelid);
+native TSC_MoveClient(uid[], channelname[]);
 /*Parameters:
-	clientid: client ID of a Teamspeak user
-	channelid: channel ID of a Teamspeak channel
+	uid[]: unique ID of a Teamspeak user
+	channelname[]: channel name of a Teamspeak channel
 
 Usage:
 	Moves a client to the specified channel.
 	
 Return:
-	0 on success,
-	-1 on connection failure,
-	otherwise a Teamspeak error ID
+	none
 */
 
 
-native TSC_SetClientChannelGroup(clientdbid, groupid, channelid);
+native TSC_SetClientChannelGroup(uid[], groupid, channelname[]);
 /*Parameters:
-	clientdbid: client database ID of a Teamspeak user
+	uid[]: unique ID of a Teamspeak user
 	groupid: group ID of a Teamspeak channel group
-	channelid: channel ID of a Teamspeak channel
+	channelname[]: channel name of a Teamspeak channel
 
 Usage:
 	Sets a clients channel group for the desired channel.
 	
 Return:
-	0 on success,
-	-1 on connection failure,
-	otherwise a Teamspeak error ID
+	none
 */
 
-native TSC_AddClientToServerGroup(clientdbid, groupid);
+native TSC_AddClientToServerGroup(uid[], groupid);
 /*Parameters:
-	clientdbid: client database ID of a Teamspeak user
+	uid[]: unique ID of a Teamspeak user
 	groupid: group ID of a Teamspeak server group
 
 Usage:
 	Adds a client to a server group.
 	
 Return:
-	0 on success,
-	-1 on connection failure,
-	otherwise a Teamspeak error ID
+	none
 */
 
-native TSC_RemoveClientFromServerGroup(clientdbid, groupid);
+native TSC_RemoveClientFromServerGroup(uid[], groupid);
 /*Parameters:
-	clientdbid: client database ID of a Teamspeak user
+	uid[]: unique ID of a Teamspeak user
 	groupid: group ID of a Teamspeak server group
 
 Usage:
 	Removes a client from a server group.
 	
 Return:
-	0 on success,
-	-1 on connection failure,
-	otherwise a Teamspeak error ID
+	none
 */
 
 
+forward TSC_OnClientConnect(nickname[], uid[]);
 /*Parameters:
+	nickname[]: nickname of the Teamspeak user
+	uid[]: unique ID of the Teamspeak user
 
+Event:
+	Called when client joins the server.
 */
 
+forward TSC_OnClientDisconnect(uid[]);
 /*Parameters:
+	uid[]: unique ID of the Teamspeak user
 
+Event:
+	Called when client leaves the server.
 */
 
-/*Parameters:
 
+forward TSC_OnClientChannelMove(nickname[], uid[], channelname[]);
+/*Parameters:
+	nickname[]: nickname of the Teamspeak user
+	uid[]: unique ID of the Teamspeak user
+	channelname[]: name of the channel to which the user is moving
+
+Event:
+	Called when client moves/switches to a channel
 */
 
+forward TSC_OnClientChannelText(nickname[], uid[], channelname[], msg[]);
 /*Parameters:
+	nickname[]: nickname of the Teamspeak user
+	uid[]: unique ID of the Teamspeak user
+	channelname[]: channel name
+	msg[]: message
+
+Event:
+	Called when client sends a message in a channel.
+	!WARNING! Only works for ONE channel! (the channel where the serverquery is, by default the
+	default channel). You can change the channel by moving the serverquery user to the desired channel
+	with 'TSC_MoveClient("serveradmin", "Target Channel")'
 */
 
+forward TSC_OnClientServerText(nickname[], uid[], msg[]);
 /*Parameters:
+	nickname[]: nickname of the Teamspeak user
+	uid[]: unique ID of the Teamspeak user
+	msg[]: message
 
+Event:
+	Called when client sends a message in the server.
+*/
