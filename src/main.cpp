@@ -100,7 +100,7 @@ string AMX_GetString(AMX* amx, cell param) {
 	amx_GetString(Dest, String, 0, UNLIMITED);
 	Dest[Len] = '\0';
 	string Return(Dest);
-	delete Dest;
+	delete[] Dest;
 	return Return;
 }
 
