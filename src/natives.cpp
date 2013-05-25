@@ -16,10 +16,6 @@ cell AMX_NATIVE_CALL native_TSC_Login(AMX* amx, cell* params) {
 }
 
 
-cell AMX_NATIVE_CALL native_TSC_SetActiveVServer(AMX* amx, cell* params) {  
-	return CTeamspeak::SetActiveVServer(AMX_GetString(amx, params[1]));
-}
-
 cell AMX_NATIVE_CALL native_TSC_SetTimeoutTime(AMX* amx, cell* params) {
 	if(params[1] < 0)
 		return -1;
@@ -80,9 +76,14 @@ cell AMX_NATIVE_CALL native_TSC_SetChannelDescription(AMX* amx, cell* params) {
 	return (cell)CTeamspeak::ParseError(SendRes);
 }
 
-cell AMX_NATIVE_CALL native_TSC_SetChannelType(AMX* amx, cell* params) {
+//native TSC_SetChannelType(channelname[], type);
+/*cell AMX_NATIVE_CALL native_TSC_SetChannelType(AMX* amx, cell* params) {
 	stringstream StrBuf;
-	string ChannelType;
+	string 
+		ChannelName = AMX_GetString(amx, params[1]),
+		ChannelType;
+	TSServer.EscapeString(&ChannelName);
+
 	switch(params[2]) {
 	case CHANNEL_TYPE_PERMANENT:
 		ChannelType = "channel_flag_permanent";
@@ -96,16 +97,22 @@ cell AMX_NATIVE_CALL native_TSC_SetChannelType(AMX* amx, cell* params) {
 		break;
 
 	default:
-		return -1;
+		return 0;
 	}
-	StrBuf << "channeledit cid=" << params[1] << " " << ChannelType << "=1";
-	CTeamspeak::Send(StrBuf.str());
+
+	CommandList *cmds = new CommandList;
+
+	StrBuf << "channelfind pattern=" << ChannelName;
+	cmds->push(new CCommand(StrBuf.str(), "cid"));
+	StrBuf.clear();
 	StrBuf.str("");
-	string SendRes;
-	if(CTeamspeak::Recv(&SendRes) == SOCKET_ERROR)
-		return -1;
-	return (cell)CTeamspeak::ParseError(SendRes);
-}
+
+	StrBuf << "channeledit cid=<>  " << ChannelType << "=1";
+	cmds->push(new CCommand(StrBuf.str()));
+
+	TSServer.AddCommandListToQueue(cmds);
+	return 1;
+}*/
 
 cell AMX_NATIVE_CALL native_TSC_SetChannelPassword(AMX* amx, cell* params) {
 	stringstream StrBuf;
@@ -131,97 +138,31 @@ cell AMX_NATIVE_CALL native_TSC_SetChannelTalkPower(AMX* amx, cell* params) {
 	return (cell)CTeamspeak::ParseError(SendRes);
 }
 
-cell AMX_NATIVE_CALL native_TSC_SetChannelUserLimit(AMX* amx, cell* params) {
+//native TSC_SetChannelUserLimit(channelname[], maxuser);
+/*cell AMX_NATIVE_CALL native_TSC_SetChannelUserLimit(AMX* amx, cell* params) {
 	if(params[2] < 0)
 		params[2] = 0;
 	stringstream StrBuf;
 	StrBuf << "channeledit cid=" << params[1] << " channel_maxclients=" << params[2];
-	CTeamspeak::Send(StrBuf.str());
+	TSServer.Send(StrBuf.str());
 	StrBuf.str("");
 	string SendRes;
-	if(CTeamspeak::Recv(&SendRes) == SOCKET_ERROR)
+	if(TSServer.Recv(&SendRes) == SOCKET_ERROR)
 		return -1;
-	return (cell)CTeamspeak::ParseError(SendRes);
-}
+	return (cell)TSServer.ParseError(SendRes);
+}*/
 
-cell AMX_NATIVE_CALL native_TSC_GetChannelIDByName(AMX* amx, cell* params) {
 	stringstream StrBuf;
-	string ChannelName = AMX_GetString(amx, params[1]);
-	CTeamspeak::EscapeString(&ChannelName);
-	StrBuf << "channelfind pattern=" << ChannelName << "\n";
-	string tmp = StrBuf.str();
-	CTeamspeak::Send(StrBuf.str());
+
+
+
 	StrBuf.str("");
 
-	int ChannelID = -1, ErrorID = -1;
-	if(CTeamspeak::ExpectIntVal("cid", &ChannelID, &ErrorID) == false)
-		return -1;
-	return (cell)ChannelID;
+
 }
 
-
-cell AMX_NATIVE_CALL native_TSC_GetChannelName(AMX* amx, cell* params) {
-	if(params[1] <= 0)
-		return -1;
-
-	stringstream StrBuf; 
-	StrBuf << "channelinfo cid=" << params[1];
-	CTeamspeak::Send(StrBuf.str());
-	StrBuf.str("");
-
-	string ChannelName;
-	int ErrorID = -1;
-	if(CTeamspeak::ExpectStringVal("channel_name", &ChannelName, &ErrorID) == false)
-		return -1;
-
-	CTeamspeak::UnEscapeString(&ChannelName);
-	AMX_SetString(amx, params[2], ChannelName);
 	
-	return ErrorID;
-}
 
-cell AMX_NATIVE_CALL native_TSC_GetChannelClientList(AMX* amx, cell* params) {
-	if(params[1] <= 0)
-		return -1;
-
-	int TargetChannelID = params[1];
-	
-	CTeamspeak::Send("clientlist");
-	string SendRes;
-	if(CTeamspeak::Recv(&SendRes) == SOCKET_ERROR)
-		return -1;
-	if(SendRes.find("error") != -1 && SendRes.find("clid") == -1) {
-		int ErrorID = CTeamspeak::ParseError(SendRes);
-		SendRes.clear();
-		if(ErrorID == 0) {
-			if(CTeamspeak::Recv(&SendRes) == SOCKET_ERROR)
-				return -1;
-		} else
-			return -1;
-	}
-
-	vector<int> ClientList;
-
-	boost::regex rx("clid=([0-9]+) cid=([0-9]+)");
-	boost::regex_iterator<std::string::const_iterator> RxIter(SendRes.begin(), SendRes.end(), rx);
-	boost::regex_iterator<std::string::const_iterator> RxEnd;
-	
-	//[1]: clientid, [2]:channelid
-    for( ;RxIter != RxEnd; ++RxIter) {
-		int TmpChannelID = -1, TmpClientID = -1;
-		stringstream ConvBuf((*RxIter)[2]);
-		ConvBuf >> TmpChannelID;
-        if(TmpChannelID == TargetChannelID) {
-			stringstream ConvBuf2((*RxIter)[1]);
-			ConvBuf2 >> TmpClientID;
-			ClientList.push_back(TmpClientID);
-		}
-    }
-
-	string wtf (ClientList.begin(), ClientList.end());
-	AMX_SetString(amx, params[2], wtf);
-	return ClientList.size();
-}
 
 
 
@@ -269,53 +210,19 @@ cell AMX_NATIVE_CALL native_TSC_RemoveClientFromServerGroup(AMX* amx, cell* para
 }
 
 
-cell AMX_NATIVE_CALL native_TSC_GetClientName(AMX* amx, cell* params) {
-	if(params[1] <= 0)
-		return -1;
-
-	stringstream StrBuf; 
-	StrBuf << "clientinfo clid=" << params[1];
-	CTeamspeak::Send(StrBuf.str());
 	StrBuf.str("");
 
-	string ClientName;
-	int ErrorID = -1;
-	if(CTeamspeak::ExpectStringVal("client_nickname", &ClientName, &ErrorID) == false)
-		return -1;
 
-	CTeamspeak::UnEscapeString(&ClientName);
-	AMX_SetString(amx, params[2], ClientName);
-	
-	return ErrorID;
 }
 
-cell AMX_NATIVE_CALL native_TSC_GetClientIDByName(AMX* amx, cell* params) {
-	string UserName = AMX_GetString(amx, params[1]);
-	CTeamspeak::EscapeString(&UserName);
 	stringstream StrBuf;
-	StrBuf << "clientfind pattern=" << UserName;
-	CTeamspeak::Send(StrBuf.str());
 	StrBuf.str("");
 
-	int UserID = -1, ErrorID = -1;
-	if(CTeamspeak::ExpectIntVal("clid", &UserID, &ErrorID) == false)
-		return -1;
-	return (cell)UserID;
 }
 
-cell AMX_NATIVE_CALL native_TSC_GetClientCurrentChannelID(AMX* amx, cell* params) {
-	if(params[1] <= 0)
-		return -1;
 
-	stringstream StrBuf; 
-	StrBuf << "clientinfo clid=" << params[1];
-	CTeamspeak::Send(StrBuf.str());
 	StrBuf.str("");
 
-	int ChannelID = -1, ErrorID = -1;
-	if(CTeamspeak::ExpectIntVal("cid", &ChannelID, &ErrorID) == false)
-		return -1;
-	return ChannelID;
 }
 
 
@@ -408,67 +315,12 @@ cell AMX_NATIVE_CALL native_TSC_MoveChannelBelowChannel(AMX* amx, cell* params) 
 	return (cell)CTeamspeak::ParseError(SendRes);
 }
 
-cell AMX_NATIVE_CALL native_TSC_GetSubChannelListOnChannel(AMX* amx, cell* params) {
-	if(params[1] <= 0)
-		return -1;
 
-	int TargetChannelID = params[1];
 	
-	CTeamspeak::Send("channellist");
-	string SendRes;
-	if(CTeamspeak::Recv(&SendRes) == SOCKET_ERROR)
-		return -1;
-	if(SendRes.find("error") != -1 && SendRes.find("cid") == -1) {
-		int ErrorID = CTeamspeak::ParseError(SendRes);
-		SendRes.clear();
-		if(ErrorID == 0) {
-			if(CTeamspeak::Recv(&SendRes) == SOCKET_ERROR)
-				return -1;
-		} else
-			return -1;
-	}
 
-	vector<int> SubChannelList;
 
-	boost::regex rx("cid=([0-9]+) pid=([0-9]+)");
-	boost::regex_iterator<std::string::const_iterator> RxIter(SendRes.begin(), SendRes.end(), rx);
-	boost::regex_iterator<std::string::const_iterator> RxEnd;
 	
-	//[1]: channelid, [2]:parentchannelid
-    for( ;RxIter != RxEnd; ++RxIter) {
-		int TmpChannelID = -1, TmpPChannelID = -1;
-		stringstream ConvBuf((*RxIter)[2]);
-		ConvBuf >> TmpPChannelID;
-        if(TmpPChannelID == TargetChannelID) {
-			stringstream ConvBuf2((*RxIter)[1]);
-			ConvBuf2 >> TmpChannelID;
-			SubChannelList.push_back(TmpChannelID);
-		}
-    }
 
-	string wtf (SubChannelList.begin(), SubChannelList.end());
-	AMX_SetString(amx, params[2], wtf);
-	return SubChannelList.size();
-}
 
-cell AMX_NATIVE_CALL native_TSC_GetClientDBIDByID(AMX* amx, cell* params) {
-	if(params[1] <= 0)
-		return -1;
-	int ClientDBID = CTeamspeak::GetClientDBIDByID(params[1]);
-	if(ClientDBID <= 0)
-		return -1;
-	return ClientDBID;
-}
-
-cell AMX_NATIVE_CALL native_TSC_GetClientDBIDByUID(AMX* amx, cell* params) {
-	string UID = AMX_GetString(amx, params[1]);
-	stringstream StrBuf; 
-	StrBuf << "clientdbfind pattern=" << UID << " -uid";
-	CTeamspeak::Send(StrBuf.str());
 	StrBuf.str("");
 
-	int ClientDBID = -1, ErrorID = -1;
-	if(CTeamspeak::ExpectIntVal("cldbid", &ClientDBID, &ErrorID) == false)
-		return -1;
-	return ClientDBID;
-}

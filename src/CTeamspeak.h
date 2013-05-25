@@ -35,26 +35,20 @@ public:
 	static bool Send(string cmd);
 	static int Recv(string *dest);
 	
-	static bool ExpectIntVal(string valname, int *val, int *error);
-	static bool ExpectStringVal(string valname, string *val, int *error);
-
-	static int ParseError(string str);
-	static int ParseInteger(string str, string valname);
-	static bool ParseString(string str, string valname, string *dest);
-
-	static bool EscapeString(string *str);
-	static bool UnEscapeString(string *str);
 
 
-	static int GetClientDBIDByID(int clientid);
+
+
 };
 
 
+/*
 enum ChannelTypes {
 	CHANNEL_TYPE_PERMANENT = 1,
 	CHANNEL_TYPE_SEMI_PERMANENT,
 	CHANNEL_TYPE_TEMPORARY
 };
+*/
 
 enum KickTypes {
 	KICK_TYPE_CHANNEL = 1,
