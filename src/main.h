@@ -19,6 +19,7 @@ typedef void (*logprintf_t)(char* format, ...);
 #include <Ws2tcpip.h>
 
 #else //Linux
+#include <pthread.h>
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <netdb.h>

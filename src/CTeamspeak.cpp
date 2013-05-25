@@ -1,4 +1,5 @@
 #include "main.h"
+#include "thread.h"
 
 #include "CTeamspeak.h"
 

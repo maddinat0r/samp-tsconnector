@@ -4,6 +4,7 @@
 #define INC_CTEAMSPEAK_H
 
 #include "main.h"
+#include "thread.h"
 
 #include <boost/regex.hpp>
 #include <sstream>

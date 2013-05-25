@@ -96,11 +96,13 @@
     <ClCompile Include="src\main.cpp" />
     <ClCompile Include="src\natives.cpp" />
     <ClCompile Include="src\SDK\amxplugin.cpp" />
+    <ClCompile Include="src\thread.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\CTeamspeak.h" />
     <ClInclude Include="src\main.h" />
     <ClInclude Include="src\natives.h" />
+    <ClInclude Include="src\thread.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

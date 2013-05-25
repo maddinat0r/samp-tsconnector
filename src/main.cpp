@@ -2,6 +2,7 @@
 
 #include "main.h"
 #include "natives.h"
+#include "thread.h"
 
 #include "CTeamspeak.h"
 
@@ -30,6 +31,20 @@ PLUGIN_EXPORT bool PLUGIN_CALL Load(void **ppData) {
 #endif
 
 	logprintf("TSConnector v0.3.1 loaded.");
+
+#ifdef WIN32
+	DWORD ThreadID = 0;
+	HANDLE ThreadHandle = CreateThread(NULL, 0, &SocketThread, NULL, 0, &ThreadID);
+	CloseHandle(ThreadHandle);
+#else
+	pthread_t threadHandle;
+	pthread_attr_t attr;
+	pthread_attr_init(&attr);
+	pthread_attr_setdetachstate(&attr, PTHREAD_CREATE_DETACHED);
+	pthread_create(&threadHandle, &attr, &SocketThread, NULL);
+#endif
+
+
 	return 1;
 }
 
@@ -37,6 +52,7 @@ PLUGIN_EXPORT void PLUGIN_CALL Unload() {
 #ifdef _WIN32
 	WSACleanup();	
 #endif
+	ThreadAlive = false;
 	logprintf("TSConnector unloaded.");
 }
 
