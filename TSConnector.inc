@@ -244,6 +244,74 @@ Return:
 	none
 */
 
+native TSC_ToggleClientTalkAbility(uid[], bool:toggle);
+/*Parameters:
+	uid[]: unique ID of a Teamspeak user
+	toggle: talk ability status
+
+Usage:
+	Gives a client the ability to talk if his talk power is too low
+	and removes it.
+	
+Return:
+	none
+*/
+
+
+native TSC_PokeClient(uid[], msg[]);
+/*Parameters:
+	uid[]: unique ID of a Teamspeak user
+	msg[]: message the user will recieve
+
+Usage:
+	Pokes a client.
+	
+Return:
+	none
+*/
+
+
+
+
+native TSC_SendClientMessage(uid[], msg[]);
+/*Parameters:
+	uid[]: unique ID of a Teamspeak user
+	msg[]: message the user will recieve
+
+Usage:
+	Sends a message to a specified client.
+	
+Return:
+	none
+*/
+
+native TSC_SendChannelMessage(channelname[], msg[]);
+/*Parameters:
+	channelname[]: name of the target channel
+	msg[]: message the channel will recieve
+
+Usage:
+	Sends a message to a specified channel.
+	ATTENTION: messages to whole channels can only be sent to the channel
+	where the serverquery client is currently in! See 'TSC_OnClientChannelText'
+	for more informations.
+	
+Return:
+	none
+*/
+
+native TSC_SendServerMessage(msg[]);
+/*Parameters:
+	msg[]: message the current virtual server will recieve
+
+Usage:
+	Sends a message to the current virtual server.
+	
+Return:
+	none
+*/
+
+
 
 forward TSC_OnClientConnect(nickname[], uid[]);
 /*Parameters:
@@ -254,8 +322,9 @@ Event:
 	Called when client joins the server.
 */
 
-forward TSC_OnClientDisconnect(uid[]);
+forward TSC_OnClientDisconnect(nickname[], uid[]);
 /*Parameters:
+	nickname[]: nickname of the Teamspeak user
 	uid[]: unique ID of the Teamspeak user
 
 Event:
