@@ -15,8 +15,6 @@
 #include <unistd.h>
 
 #define SLEEP(x) { usleep(x * 1000); }
-typedef unsigned long DWORD;
-typedef unsigned int UINT;
 #endif
 
 

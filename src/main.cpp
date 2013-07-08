@@ -20,18 +20,18 @@ PLUGIN_EXPORT void PLUGIN_CALL ProcessTick() {
 		int CB_IDX;
 		for (list<AMX*>::iterator amx = AmxList.begin(), end = AmxList.end(); amx != end; ++amx) {
 			if (amx_FindPublic( (*amx), Callback->Name.c_str(), &CB_IDX) == AMX_ERR_NONE) {
-				queue<cell> AmxAddresses;
+				cell AmxAddress = -1;
 				while(!Callback->Params.empty()) {
 					cell tmpAddress;
 					amx_PushString( (*amx), &tmpAddress, NULL, Callback->Params.top().c_str(), 0, 0);
 					Callback->Params.pop();
-					AmxAddresses.push(tmpAddress);
+					if(AmxAddress == -1)
+						AmxAddress = tmpAddress;
 				}
+
 				amx_Exec( (*amx), NULL, CB_IDX);
-				while(!AmxAddresses.empty()) {
-					amx_Release( (*amx), AmxAddresses.front());
-					AmxAddresses.pop();
-				}
+				if(AmxAddress >= NULL)
+					amx_Release( (*amx), AmxAddress);
 			}
 		}
 
@@ -130,24 +130,9 @@ PLUGIN_EXPORT int PLUGIN_CALL AmxUnload(AMX *amx) {
 }
 
 
-string AMX_GetString(AMX* amx, cell param) {
-	cell *String;
-	char *Dest;
-	int Len;
-	amx_GetAddr(amx, param, &String);
-	amx_StrLen(String, &Len);
-	Dest = new char[Len + 1];
-	amx_GetString(Dest, String, 0, UNLIMITED);
-	Dest[Len] = '\0';
-	string Return(Dest);
-	delete[] Dest;
-	return Return;
-}
-
-
-int AMX_SetString(AMX* amx, cell param, string str) {
+int AMX_SetString(AMX* amx, cell param, const char *str) {
 	cell *Dest;
 	amx_GetAddr(amx, param, &Dest);
-	amx_SetString(Dest, str.c_str(), 0, 0, str.length() + 1);
+	amx_SetString(Dest, str, 0, 0, strlen(str) + 1);
 	return 1;
 }

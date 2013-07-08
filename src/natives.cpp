@@ -3,7 +3,12 @@
 #include "CTeamspeak.h"
 
 cell AMX_NATIVE_CALL native_TSC_Connect(AMX* amx, cell* params) {
-	return TSServer.Connect(AMX_GetString(amx, params[1]), AMX_GetString(amx, params[2]));
+	char 
+		*IP = NULL,
+		*VPort = NULL;
+	amx_StrParam(amx, params[1], IP);
+	amx_StrParam(amx, params[2], VPort);
+	return TSServer.Connect(IP, VPort);
 }
 
 cell AMX_NATIVE_CALL native_TSC_Disconnect(AMX* amx, cell* params) {
@@ -12,7 +17,14 @@ cell AMX_NATIVE_CALL native_TSC_Disconnect(AMX* amx, cell* params) {
 }
 
 cell AMX_NATIVE_CALL native_TSC_Login(AMX* amx, cell* params) {
-	return TSServer.Login(AMX_GetString(amx, params[1]), AMX_GetString(amx, params[2]), AMX_GetString(amx, params[3]));
+	char
+		*Login = NULL,
+		*Pass = NULL,
+		*Nick = NULL;
+	amx_StrParam(amx, params[1], Login);
+	amx_StrParam(amx, params[2], Pass);
+	amx_StrParam(amx, params[3], Nick);
+	return TSServer.Login(Login, Pass, Nick);
 }
 
 
@@ -26,56 +38,66 @@ cell AMX_NATIVE_CALL native_TSC_SetTimeoutTime(AMX* amx, cell* params) {
 
 //native TSC_CreateChannel(channelname[]);
 cell AMX_NATIVE_CALL native_TSC_CreateChannel(AMX* amx, cell* params) {
-	stringstream StrBuf;
-	string ChannelName = AMX_GetString(amx, params[1]);
-	TSServer.EscapeString(&ChannelName);
+	char *ChannelNameTmp = NULL;
+	amx_StrParam(amx, params[1], ChannelNameTmp);
+
+	string ChannelName(ChannelNameTmp);
+	TSServer.EscapeString(ChannelName);
+
 
 	CommandList *cmds = new CommandList;
-	StrBuf << "channelcreate channel_name=" << ChannelName;
-	cmds->push(new CCommand(StrBuf.str()));
+
+	string CmdStr("channelcreate channel_name=");
+	CmdStr.append(ChannelName);
+	cmds->push(new CCommand(CmdStr));
 
 	TSServer.AddCommandListToQueue(cmds);
-
 	return 1;
 }
 
 //native TSC_DeleteChannel(channelname[]);
 cell AMX_NATIVE_CALL native_TSC_DeleteChannel(AMX* amx, cell* params) {
-	string ChannelName = AMX_GetString(amx, params[1]);
-	TSServer.EscapeString(&ChannelName);
-	stringstream StrBuf;
+	char *ChannelNameTmp = NULL;
+	amx_StrParam(amx, params[1], ChannelNameTmp);
+
+	string ChannelName(ChannelNameTmp);
+	TSServer.EscapeString(ChannelName);
+	
+
 	CommandList *cmds = new CommandList;
 
-	StrBuf << "channelfind pattern=" << ChannelName; 
-	cmds->push(new CCommand(StrBuf.str(), "cid"));
-	StrBuf.clear();
-	StrBuf.str("");
+	string CmdStr("channelfind pattern=");
+	CmdStr.append(ChannelName);
+	cmds->push(new CCommand(CmdStr, "cid"));
 
-	StrBuf << "channeldelete cid=<1> force=1";
-	cmds->push(new CCommand(StrBuf.str()));
+	cmds->push(new CCommand("channeldelete cid=<1> force=1"));
 
 	TSServer.AddCommandListToQueue(cmds);
-
 	return 1;
 }
 
 //native TSC_SetChannelName(channelname[], newname[]);
 cell AMX_NATIVE_CALL native_TSC_SetChannelName(AMX* amx, cell* params) {
-	stringstream StrBuf;
-	string ChannelName = AMX_GetString(amx, params[1]);
-	string NewChannelName = AMX_GetString(amx, params[2]);
-	TSServer.EscapeString(&ChannelName);
-	TSServer.EscapeString(&NewChannelName);
+	char *TmpParam = NULL;
+
+	amx_StrParam(amx, params[1], TmpParam);
+	string ChannelName(TmpParam);
+	TSServer.EscapeString(ChannelName);
+
+	amx_StrParam(amx, params[2], TmpParam);
+	string NewChannelName(TmpParam);
+	TSServer.EscapeString(NewChannelName);
+
 
 	CommandList *cmds = new CommandList;
 
-	StrBuf << "channelfind pattern=" << ChannelName;
-	cmds->push(new CCommand(StrBuf.str(), "cid"));
-	StrBuf.clear();
-	StrBuf.str("");
+	string CmdStr("channelfind pattern=");
+	CmdStr.append(ChannelName);
+	cmds->push(new CCommand(CmdStr, "cid"));
 
-	StrBuf << "channeledit cid=<1> channel_name=" << NewChannelName;
-	cmds->push(new CCommand(StrBuf.str()));
+	CmdStr.assign("channeledit cid=<1> channel_name=");
+	CmdStr.append(NewChannelName);
+	cmds->push(new CCommand(CmdStr));
 
 	TSServer.AddCommandListToQueue(cmds);
 	return 1;
@@ -83,21 +105,26 @@ cell AMX_NATIVE_CALL native_TSC_SetChannelName(AMX* amx, cell* params) {
 
 //native TSC_SetChannelDescription(channelname[], desc[]);
 cell AMX_NATIVE_CALL native_TSC_SetChannelDescription(AMX* amx, cell* params) {
-	stringstream StrBuf;
-	string ChannelName = AMX_GetString(amx, params[1]);
-	string Desc = AMX_GetString(amx, params[2]);
-	TSServer.EscapeString(&ChannelName);
-	TSServer.EscapeString(&Desc);
+	char *TmpParam = NULL;
+
+	amx_StrParam(amx, params[1], TmpParam);
+	string ChannelName(TmpParam);
+	TSServer.EscapeString(ChannelName);
+
+	amx_StrParam(amx, params[2], TmpParam);
+	string Desc(TmpParam);
+	TSServer.EscapeString(Desc);
+
 
 	CommandList *cmds = new CommandList;
 
-	StrBuf << "channelfind pattern=" << ChannelName;
-	cmds->push(new CCommand(StrBuf.str(), "cid"));
-	StrBuf.clear();
-	StrBuf.str("");
+	string CmdStr("channelfind pattern=");
+	CmdStr.append(ChannelName);
+	cmds->push(new CCommand(CmdStr, "cid"));
 
-	StrBuf << "channeledit cid=<1> channel_description=" << Desc;
-	cmds->push(new CCommand(StrBuf.str()));
+	CmdStr.assign("channeledit cid=<1> channel_description=");
+	CmdStr.append(Desc);
+	cmds->push(new CCommand(CmdStr));
 
 	TSServer.AddCommandListToQueue(cmds);
 	return 1;
@@ -143,22 +170,26 @@ cell AMX_NATIVE_CALL native_TSC_SetChannelDescription(AMX* amx, cell* params) {
 
 //native TSC_SetChannelPassword(channelname[], password[]);
 cell AMX_NATIVE_CALL native_TSC_SetChannelPassword(AMX* amx, cell* params) {
-	stringstream StrBuf;
-	string 
-		ChannelName = AMX_GetString(amx, params[1]),
-		ChannelPasswd = AMX_GetString(amx, params[2]);
-	TSServer.EscapeString(&ChannelName);
-	TSServer.EscapeString(&ChannelPasswd);
+	char *TmpParam = NULL;
+
+	amx_StrParam(amx, params[1], TmpParam);
+	string ChannelName(TmpParam);
+	TSServer.EscapeString(ChannelName);
+
+	amx_StrParam(amx, params[2], TmpParam);
+	string ChannelPasswd(TmpParam);
+	TSServer.EscapeString(ChannelPasswd);
+
 
 	CommandList *cmds = new CommandList;
 
-	StrBuf << "channelfind pattern=" << ChannelName;
-	cmds->push(new CCommand(StrBuf.str(), "cid"));
-	StrBuf.clear();
-	StrBuf.str("");
+	string CmdStr("channelfind pattern=");
+	CmdStr.append(ChannelName);
+	cmds->push(new CCommand(CmdStr, "cid"));
 
-	StrBuf << "channeledit cid=<1> channel_password=" << ChannelPasswd;
-	cmds->push(new CCommand(StrBuf.str()));
+	CmdStr.assign("channeledit cid=<1> channel_password=");
+	CmdStr.append(ChannelPasswd);
+	cmds->push(new CCommand(CmdStr));
 
 	TSServer.AddCommandListToQueue(cmds);
 	return 1;
@@ -166,19 +197,21 @@ cell AMX_NATIVE_CALL native_TSC_SetChannelPassword(AMX* amx, cell* params) {
 
 //native TSC_SetChannelTalkPower(channelname[], talkpower);
 cell AMX_NATIVE_CALL native_TSC_SetChannelTalkPower(AMX* amx, cell* params) {
-	stringstream StrBuf;
-	string ChannelName = AMX_GetString(amx, params[1]);
-	TSServer.EscapeString(&ChannelName);
+	char *TmpParam = NULL;
+	amx_StrParam(amx, params[1], TmpParam);
+	string ChannelName(TmpParam);
+	TSServer.EscapeString(ChannelName);
+
 
 	CommandList *cmds = new CommandList;
 
-	StrBuf << "channelfind pattern=" << ChannelName;
-	cmds->push(new CCommand(StrBuf.str(), "cid"));
-	StrBuf.clear();
-	StrBuf.str("");
+	string CmdStr("channelfind pattern=");
+	CmdStr.append(ChannelName);
+	cmds->push(new CCommand(CmdStr, "cid"));
 
-	StrBuf << "channeledit cid=<1> channel_needed_talk_power=" << params[2];
-	cmds->push(new CCommand(StrBuf.str()));
+	char FormatTmp[64];
+	sprintf(FormatTmp, "channeledit cid=<1> channel_needed_talk_power=%d", (int)params[2]);
+	cmds->push(new CCommand(FormatTmp));
 
 	TSServer.AddCommandListToQueue(cmds);
 	return 1;
@@ -200,28 +233,28 @@ cell AMX_NATIVE_CALL native_TSC_SetChannelTalkPower(AMX* amx, cell* params) {
 
 //native TSC_SetChannelSubChannel(channelname[], parentchannelname[]);
 cell AMX_NATIVE_CALL native_TSC_SetChannelSubChannel(AMX* amx, cell* params) {
-	stringstream StrBuf;
-	string
-		ChannelName = AMX_GetString(amx, params[1]),
-		ParentChannelName = AMX_GetString(amx, params[2]);
-	TSServer.EscapeString(&ChannelName);
-	TSServer.EscapeString(&ParentChannelName);
+	char *TmpParam = NULL;
+
+	amx_StrParam(amx, params[1], TmpParam);
+	string ChannelName(TmpParam);
+	TSServer.EscapeString(ChannelName);
+
+	amx_StrParam(amx, params[2], TmpParam);
+	string ParentChannelName(TmpParam);
+	TSServer.EscapeString(ParentChannelName);
 
 	
 	CommandList *cmds = new CommandList;
 
-	StrBuf << "channelfind pattern=" << ChannelName;
-	cmds->push(new CCommand(StrBuf.str(), "cid"));
-	StrBuf.clear();
-	StrBuf.str("");
+	string CmdStr("channelfind pattern=");
+	CmdStr.append(ChannelName);
+	cmds->push(new CCommand(CmdStr, "cid"));
 
-	StrBuf << "channelfind pattern=" << ParentChannelName;
-	cmds->push(new CCommand(StrBuf.str(), "cid"));
-	StrBuf.clear();
-	StrBuf.str("");
-
-	StrBuf << "channelmove cid=<1> cpid=<2>";
-	cmds->push(new CCommand(StrBuf.str()));
+	CmdStr.assign("channelfind pattern=");
+	CmdStr.append(ParentChannelName);
+	cmds->push(new CCommand(CmdStr, "cid"));
+	
+	cmds->push(new CCommand("channelmove cid=<1> cpid=<2>"));
 
 	TSServer.AddCommandListToQueue(cmds);
 	return 1;
@@ -229,27 +262,28 @@ cell AMX_NATIVE_CALL native_TSC_SetChannelSubChannel(AMX* amx, cell* params) {
 
 //native TSC_MoveChannelBelowChannel(channelname[], parentchannelname[]);
 cell AMX_NATIVE_CALL native_TSC_MoveChannelBelowChannel(AMX* amx, cell* params) {
-	stringstream StrBuf;
-	string
-		ChannelName = AMX_GetString(amx, params[1]),
-		ParentChannelName = AMX_GetString(amx, params[2]);
-	TSServer.EscapeString(&ChannelName);
-	TSServer.EscapeString(&ParentChannelName);
+	char *TmpParam = NULL;
+
+	amx_StrParam(amx, params[1], TmpParam);
+	string ChannelName(TmpParam);
+	TSServer.EscapeString(ChannelName);
+
+	amx_StrParam(amx, params[2], TmpParam);
+	string ParentChannelName(TmpParam);
+	TSServer.EscapeString(ParentChannelName);
+
 	
 	CommandList *cmds = new CommandList;
 
-	StrBuf << "channelfind pattern=" << ChannelName;
-	cmds->push(new CCommand(StrBuf.str(), "cid"));
-	StrBuf.clear();
-	StrBuf.str("");
+	string CmdStr("channelfind pattern=");
+	CmdStr.append(ChannelName);
+	cmds->push(new CCommand(CmdStr, "cid"));
 
-	StrBuf << "channelfind pattern=" << ParentChannelName;
-	cmds->push(new CCommand(StrBuf.str(), "cid"));
-	StrBuf.clear();
-	StrBuf.str("");
+	CmdStr.assign("channelfind pattern=");
+	CmdStr.append(ParentChannelName);
+	cmds->push(new CCommand(CmdStr, "cid"));
 
-	StrBuf << "channeledit cid=<1> channel_order=<2>";
-	cmds->push(new CCommand(StrBuf.str()));
+	cmds->push(new CCommand("channeledit cid=<1> channel_order=<2>"));
 
 	TSServer.AddCommandListToQueue(cmds);
 	return 1;
@@ -257,27 +291,29 @@ cell AMX_NATIVE_CALL native_TSC_MoveChannelBelowChannel(AMX* amx, cell* params) 
 
 //native TSC_SetClientChannelGroup(uid[], groupid, channelname[]);
 cell AMX_NATIVE_CALL native_TSC_SetClientChannelGroup(AMX* amx, cell* params) {
-	stringstream StrBuf;
-	string
-		UID = AMX_GetString(amx, params[1]),
-		ChannelName = AMX_GetString(amx, params[3]);
-	TSServer.EscapeString(&UID);
-	TSServer.EscapeString(&ChannelName);
+	char *TmpParam = NULL;
+
+	amx_StrParam(amx, params[1], TmpParam);
+	string UID(TmpParam);
+	TSServer.EscapeString(UID);
+
+	amx_StrParam(amx, params[3], TmpParam);
+	string ChannelName(TmpParam);
+	TSServer.EscapeString(ChannelName);
+	
 	
 	CommandList *cmds = new CommandList;
 
-	StrBuf << "channelfind pattern=" << ChannelName;
-	cmds->push(new CCommand(StrBuf.str(), "cid"));
-	StrBuf.clear();
-	StrBuf.str("");
+	string CmdStr("channelfind pattern=");
+	CmdStr.append(ChannelName);
+	cmds->push(new CCommand(CmdStr, "cid"));
 
-	StrBuf << "clientdbfind pattern=" << UID << " -uid";
-	cmds->push(new CCommand(StrBuf.str(), "cldbid"));
-	StrBuf.clear();
-	StrBuf.str("");
+	char FormatTmp[256];
+	sprintf(FormatTmp, "clientdbfind pattern=%s -uid", UID.c_str());
+	cmds->push(new CCommand(FormatTmp, "cldbid"));
 
-	StrBuf << "setclientchannelgroup cgid=" << params[2] << " cid=<1> cldbid=<2>";
-	cmds->push(new CCommand(StrBuf.str()));
+	sprintf(FormatTmp, "setclientchannelgroup cgid=%d cid=<1> cldbid=<2>", (int)params[2]);
+	cmds->push(new CCommand(FormatTmp));
 
 	TSServer.AddCommandListToQueue(cmds);
 	return 1;
@@ -285,20 +321,20 @@ cell AMX_NATIVE_CALL native_TSC_SetClientChannelGroup(AMX* amx, cell* params) {
 
 //native TSC_AddClientToServerGroup(uid[], groupid);
 cell AMX_NATIVE_CALL native_TSC_AddClientToServerGroup(AMX* amx, cell* params) {
-	stringstream StrBuf;
-	string
-		UID = AMX_GetString(amx, params[1]);
-	TSServer.EscapeString(&UID);
+	char *TmpParam = NULL;
+	amx_StrParam(amx, params[1], TmpParam);
+	string UID(TmpParam);
+	TSServer.EscapeString(UID);
 	
+
 	CommandList *cmds = new CommandList;
 
-	StrBuf << "clientdbfind pattern=" << UID << " -uid";
-	cmds->push(new CCommand(StrBuf.str(), "cldbid"));
-	StrBuf.clear();
-	StrBuf.str("");
+	char FormatTmp[256];
+	sprintf(FormatTmp, "clientdbfind pattern=%s -uid", UID.c_str());
+	cmds->push(new CCommand(FormatTmp, "cldbid"));
 
-	StrBuf << "servergroupaddclient sgid=" << params[2] << " cldbid=<1>";
-	cmds->push(new CCommand(StrBuf.str()));
+	sprintf(FormatTmp, "servergroupaddclient sgid=%d cldbid=<1>", (int)params[2]);
+	cmds->push(new CCommand(FormatTmp));
 
 	TSServer.AddCommandListToQueue(cmds);
 	return 1;
@@ -306,20 +342,20 @@ cell AMX_NATIVE_CALL native_TSC_AddClientToServerGroup(AMX* amx, cell* params) {
 
 //native TSC_RemoveClientFromServerGroup(uid[], groupid);
 cell AMX_NATIVE_CALL native_TSC_RemoveClientFromServerGroup(AMX* amx, cell* params) {
-	stringstream StrBuf;
-	string
-		UID = AMX_GetString(amx, params[1]);
-	TSServer.EscapeString(&UID);
+	char *TmpParam = NULL;
+	amx_StrParam(amx, params[1], TmpParam);
+	string UID(TmpParam);
+	TSServer.EscapeString(UID);
+
 	
 	CommandList *cmds = new CommandList;
 
-	StrBuf << "clientdbfind pattern=" << UID << " -uid";
-	cmds->push(new CCommand(StrBuf.str(), "cldbid"));
-	StrBuf.clear();
-	StrBuf.str("");
+	char FormatTmp[256];
+	sprintf(FormatTmp, "clientdbfind pattern=%s -uid", UID.c_str());
+	cmds->push(new CCommand(FormatTmp, "cldbid"));
 
-	StrBuf << "servergroupdelclient sgid=" << params[2] << " cldbid=<1>";
-	cmds->push(new CCommand(StrBuf.str()));
+	sprintf(FormatTmp, "servergroupdelclient sgid=%d cldbid=<1>", (int)params[2]);
+	cmds->push(new CCommand(FormatTmp));
 
 	TSServer.AddCommandListToQueue(cmds);
 	return 1;
@@ -343,12 +379,15 @@ cell AMX_NATIVE_CALL native_TSC_KickClient(AMX* amx, cell* params) {
 		return 0;
 	}
 
-	stringstream StrBuf;
-	string 
-		UID = AMX_GetString(amx, params[1]),
-		ReasonMsg = AMX_GetString(amx, params[3]);
-	TSServer.EscapeString(&UID);
-	TSServer.EscapeString(&ReasonMsg);
+	char *TmpParam = NULL;
+
+	amx_StrParam(amx, params[1], TmpParam);
+	string UID(TmpParam);
+	TSServer.EscapeString(UID);
+
+	amx_StrParam(amx, params[3], TmpParam);
+	string ReasonMsg(TmpParam);
+	TSServer.EscapeString(ReasonMsg);
 	
 
 	CommandList *cmds = new CommandList;
@@ -358,8 +397,9 @@ cell AMX_NATIVE_CALL native_TSC_KickClient(AMX* amx, cell* params) {
 	cmd1->MFind.append(UID);
 	cmds->push(cmd1);
 
-	StrBuf << "clientkick clid=<1> reasonid=" << KickReasonID << " reasonmsg=" << ReasonMsg;
-	cmds->push(new CCommand(StrBuf.str()));
+	char FormatTmp[256];
+	sprintf(FormatTmp, "clientkick clid=<1> reasonid=%d reasonmsg=%s", KickReasonID, ReasonMsg.c_str());
+	cmds->push(new CCommand(FormatTmp));
 
 	TSServer.AddCommandListToQueue(cmds);
 	return 1;
@@ -367,18 +407,22 @@ cell AMX_NATIVE_CALL native_TSC_KickClient(AMX* amx, cell* params) {
 
 //native TSC_BanClient(uid[], seconds, reason[]);
 cell AMX_NATIVE_CALL native_TSC_BanClient(AMX* amx, cell* params) {
-	stringstream StrBuf;
-	string 
-		UID = AMX_GetString(amx, params[1]),
-		ReasonMsg = AMX_GetString(amx, params[3]);
-	TSServer.EscapeString(&UID);
-	TSServer.EscapeString(&ReasonMsg);
+	char *TmpParam = NULL;
+
+	amx_StrParam(amx, params[1], TmpParam);
+	string UID(TmpParam);
+	TSServer.EscapeString(UID);
+
+	amx_StrParam(amx, params[3], TmpParam);
+	string ReasonMsg(TmpParam);
+	TSServer.EscapeString(ReasonMsg);
 	
 
 	CommandList *cmds = new CommandList;
 	
-	StrBuf << "banadd uid=" << UID << " time=" << params[2] << " banreason=" << ReasonMsg;
-	cmds->push(new CCommand(StrBuf.str()));
+	char FormatTmp[256];
+	sprintf(FormatTmp, "banadd uid=%s time=%d banreason=%s", UID.c_str(), (int)params[2], ReasonMsg.c_str());
+	cmds->push(new CCommand(FormatTmp));
 
 	TSServer.AddCommandListToQueue(cmds);
 	return 1;
@@ -386,12 +430,15 @@ cell AMX_NATIVE_CALL native_TSC_BanClient(AMX* amx, cell* params) {
 
 //native TSC_MoveClient(uid[], channelname[]);
 cell AMX_NATIVE_CALL native_TSC_MoveClient(AMX* amx, cell* params) {
-	stringstream StrBuf;
-	string 
-		UID = AMX_GetString(amx, params[1]),
-		ChannelName = AMX_GetString(amx, params[2]);
-	TSServer.EscapeString(&UID);
-	TSServer.EscapeString(&ChannelName);
+	char *TmpParam = NULL;
+
+	amx_StrParam(amx, params[1], TmpParam);
+	string UID(TmpParam);
+	TSServer.EscapeString(UID);
+
+	amx_StrParam(amx, params[2], TmpParam);
+	string ChannelName(TmpParam);
+	TSServer.EscapeString(ChannelName);
 	
 
 	CommandList *cmds = new CommandList;
@@ -401,13 +448,11 @@ cell AMX_NATIVE_CALL native_TSC_MoveClient(AMX* amx, cell* params) {
 	cmd1->MFind.append(UID);
 	cmds->push(cmd1);
 
-	StrBuf << "channelfind pattern=" << ChannelName;
-	cmds->push(new CCommand(StrBuf.str(), "cid"));
-	StrBuf.clear();
-	StrBuf.str("");
+	char FormatTmp[128];
+	sprintf(FormatTmp, "channelfind pattern=%s", ChannelName.c_str());
+	cmds->push(new CCommand(FormatTmp, "cid"));
 
-	StrBuf << "clientmove clid=<1> cid=<2>";
-	cmds->push(new CCommand(StrBuf.str()));
+	cmds->push(new CCommand("clientmove clid=<1> cid=<2>"));
 
 	TSServer.AddCommandListToQueue(cmds);
 	return 1;

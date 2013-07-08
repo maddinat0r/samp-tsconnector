@@ -3,6 +3,8 @@
 #ifndef INC_MAIN_H
 #define INC_MAIN_H
 
+#define _CRT_SECURE_NO_WARNINGS
+
 #include <malloc.h>
 
 //SAMP
@@ -24,6 +26,8 @@ typedef void (*logprintf_t)(char* format, ...);
 #include <sys/socket.h>
 #include <netdb.h>
 #include <errno.h>
+#include <unistd.h>
+#include <fcntl.h>
 
 #define SOCKET_ERROR (-1)
 #endif
@@ -41,7 +45,6 @@ using std::list;
 
 extern logprintf_t logprintf;
 
-string AMX_GetString(AMX* amx, cell param);
-int AMX_SetString(AMX* amx, cell param, string str);
+int AMX_SetString(AMX* amx, cell param, const char *str);
 
 #endif

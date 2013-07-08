@@ -7,7 +7,7 @@ CMutex CTeamspeak::SocketMutex;
 queue<CommandList*> CTeamspeak::SendQueue;
 CTeamspeak TSServer;
 
-CTeamspeak::CTeamspeak() : SocketID(-1)
+CTeamspeak::CTeamspeak() : SocketID(-1), LoggedIn(false), Connected(false)
 { }
 
 CTeamspeak::~CTeamspeak() {
@@ -15,85 +15,97 @@ CTeamspeak::~CTeamspeak() {
 		Disconnect();
 }
 
-bool CTeamspeak::Connect(string ip, string vport) {
+bool CTeamspeak::Connect(char *ip, char *vport) {
 	SocketMutex.Lock();
 
 	if(SocketID != -1)
 		Disconnect();
 
 	if(!IP.length()) {
-		IP = ip;
-		Port = vport;
+		IP.assign(ip);
+		Port.assign(vport);
 	}
+	
+	SocketMutex.Unlock();
+	return true;
+}
 
+bool CTeamspeak::ConnectT() {
+	if(!IP.length())
+		return false;
+	
+	SocketMutex.Lock();
 	struct addrinfo sHints, *sRes;
 	
 	memset(&sHints, 0, sizeof sHints);
 	sHints.ai_family = AF_UNSPEC;
 	sHints.ai_socktype = SOCK_STREAM;
 
-	if(getaddrinfo(ip.c_str(), "10011", &sHints, &sRes) != 0)
+	if(getaddrinfo(IP.c_str(), "10011", &sHints, &sRes) != 0)
 		return SocketMutex.Unlock(), false;
+
 	SocketID = socket(sRes->ai_family, sRes->ai_socktype, sRes->ai_protocol);
 	if(SocketID == -1)
 		return SocketMutex.Unlock(), false;
-	if(connect(CTeamspeak::SocketID, sRes->ai_addr, sRes->ai_addrlen) == SOCKET_ERROR)
+	if(connect(SocketID, sRes->ai_addr, sRes->ai_addrlen) == SOCKET_ERROR)
 		return SocketMutex.Unlock(), false;
 
-	/*
-#ifdef _WIN32
-	u_long iMode=1;
-	ioctlsocket(SocketID, FIONBIO, &iMode);
-#else
-	int flags = fcntl(fd, F_GETFL);
-	int result = fcntl(fd, F_SETFL, flags & ~O_NONBLOCK);
-#endif
-	*/
 
-	SetTimeoutTime(5);
-	
-	
-	//if(Recv(NULL) == 5) //Only "TS3"-greeting recieved
-		//Recv(NULL);
-	while(Recv(NULL) != SOCKET_ERROR) {}
-	
-	stringstream StrBuf;
-	StrBuf << "use port=" << vport;
-	Send(StrBuf.str());
-	StrBuf.str("");
+	SetTimeoutTime(10);
+	SLEEP(50);
+
+	string GreetingMsg, TmpRecvBuf;
+	while(Recv(&TmpRecvBuf) != SOCKET_ERROR) {
+		GreetingMsg.append(TmpRecvBuf);
+		TmpRecvBuf.clear();
+	}
+
+	char SendCmd[32];
+	sprintf(SendCmd, "use port=%s", Port.c_str());
+	Send(SendCmd);
+
 	string SendRes;
 	if(Recv(&SendRes) == SOCKET_ERROR)
-		return false;
+		return SocketMutex.Unlock(), false;
 
+	Connected = true;
 	SocketMutex.Unlock();
+
 	return true;
 }
 
-int CTeamspeak::Login(string login, string pass, string nickname) {
+int CTeamspeak::Login(char *login, char *pass, char *nickname) {
 	SocketMutex.Lock();
 	if(!LoginName.length()) {
-		LoginName = login;
-		LoginPass = pass;
-		LoginNick = nickname;
+		LoginName.assign(login);
+		LoginPass.assign(pass);
+		LoginNick.assign(nickname);
 	}
 	SocketMutex.Unlock();
+	return 0;
+}
 
-	stringstream StrBuf;
-	StrBuf << "login client_login_name=" << login << " client_login_password=" << pass <<"\n";
+int CTeamspeak::LoginT() {
+	if(!LoginName.length())
+		return -1;
+
+	char SendCmd[128];
+	sprintf(SendCmd, "login client_login_name=%s client_login_password=%s", LoginName.c_str(), LoginPass.c_str());
+	Send(SendCmd);
+	
 	string SendResult;
-	Send(StrBuf.str());
-	StrBuf.clear();
-	StrBuf.str(string());
 	if(Recv(&SendResult) == SOCKET_ERROR)
 		return -1;
 	
-	StrBuf << "clientupdate client_nickname=" << nickname;
-	Send(StrBuf.str());
+	sprintf(SendCmd, "clientupdate client_nickname=%s", LoginNick.c_str());
+	Send(SendCmd);
 	if(Recv(&SendResult) == SOCKET_ERROR)
 		return -1;
 
+	LoggedIn = true;
 	return 0;
 }
+
 
 
 bool CTeamspeak::Disconnect() {
@@ -105,6 +117,8 @@ bool CTeamspeak::Disconnect() {
 #endif
 
 	SocketID = -1;
+	LoggedIn = false;
+	Connected = false;
 	SocketMutex.Unlock();
 	return true;
 }
@@ -131,27 +145,28 @@ bool CTeamspeak::SetTimeoutTime(unsigned int millisecs) {
 }
 
 
-bool CTeamspeak::Send(string cmd) {
+int CTeamspeak::Send(string cmd) {
+	int errorid = 0;
 	SocketMutex.Lock();
 	if(cmd.at(cmd.length()-1) != '\n')
 		cmd.append("\n");
 
 	if(send(SocketID, cmd.c_str(), cmd.length(), 0) == SOCKET_ERROR) {
 #ifdef _WIN32
-		int errorid = WSAGetLastError();
+		errorid = WSAGetLastError();
 #else
-		int errorid = errno;
+		errorid = errno;
 #endif
 		logprintf("[ERROR] TSConnector encountered an error at \"Send\": %d", errorid);
 
 		//attempt reconnect
-		if(Connect(IP, Port) == false || Login(LoginName, LoginPass, LoginNick) != 0)
-			logprintf("[ERROR] Teamspeak Connector could not connect to Teamspeak server.");
+		if(ConnectT() == false || LoginT() != 0)
+			logprintf("[ERROR] TSConnector could not connect to Teamspeak server.");
 		
 
 	}
 	SocketMutex.Unlock();
-	return true;
+	return errorid;
 }
 
 int CTeamspeak::Recv(string *dest) {
@@ -164,6 +179,7 @@ int CTeamspeak::Recv(string *dest) {
 	memset(buf, 0, sizeof(buf));
 	
 	if( (ErrorID = recv(SocketID, buf, sizeof(buf)-1, 0)) == SOCKET_ERROR) {
+		
 	#ifdef _WIN32
 		int SocketErrorID = WSAGetLastError();
 		bool WouldBlock = (SocketErrorID == WSAEWOULDBLOCK);
@@ -173,20 +189,18 @@ int CTeamspeak::Recv(string *dest) {
 		bool WouldBlock = (SocketErrorID == EWOULDBLOCK);
 		bool TimedOut = (SocketErrorID == ETIMEDOUT);
 	#endif
+		//printf("SocketErrorID: %d\n", SocketErrorID);
 		if(!TimedOut && !WouldBlock) {
 			logprintf("[ERROR] TSConnector encountered an error at \"Recv\": %d", SocketErrorID);
 
-			//attempt reconnect
-			if(Connect(IP, Port) == false || Login(LoginName, LoginPass, LoginNick) != 0)
-				logprintf("[ERROR] Teamspeak Connector could not connect to Teamspeak server.");
+			ErrorID = -2;
 		}
+
 
 	}
 	else {
 		if(dest != NULL)
 			(*dest) = buf;
-		//if(strlen(buf) > 0)
-			//logprintf("[RECV] %s", buf);
 	}
 	SocketMutex.Unlock();
 	return ErrorID;
@@ -201,85 +215,81 @@ bool CTeamspeak::AddCommandListToQueue(CommandList *cmdlist) {
 }
 
 CommandList *CTeamspeak::GetNextCommandList() {
+	CommandList *NextVal = NULL;
 	SocketMutex.Lock();
-	CommandList *NextVal = SendQueue.front();
-	SendQueue.pop();
+	if(!SendQueue.empty()) {
+		NextVal = SendQueue.front();
+		SendQueue.pop();
+	}
 	SocketMutex.Unlock();
 	return NextVal;
 }
 
-bool CTeamspeak::IsQueueEmpty() {
-	SocketMutex.Lock();
-	bool IsEmpty = SendQueue.empty();
-	SocketMutex.Unlock();
-	return IsEmpty;
-}
-
-bool CTeamspeak::EscapeString(string *str) {
-	for(size_t s = 0; s < (*str).length(); ++s) {
-		char Char = (*str).at(s);
+bool CTeamspeak::EscapeString(string &str) {
+	for(size_t s = 0; s < str.length(); ++s) {
+		char Char = str.at(s);
 		if(Char == ' ')
-			(*str).replace(s, 1, "\\s"), s++;
+			str.replace(s, 1, "\\s"), s++;
 		else if(Char == '\\')
-			(*str).replace(s, 1, "\\\\"), s++;
+			str.replace(s, 1, "\\\\"), s++;
 		else if(Char == '/')
-			(*str).replace(s, 1, "\\/"), s++;
+			str.replace(s, 1, "\\/"), s++;
 		else if(Char == '|')
-			(*str).replace(s, 1, "\\p"), s++;
+			str.replace(s, 1, "\\p"), s++;
 		else if(Char == '\a')
-			(*str).replace(s, 1, "\\a"), s++;
+			str.replace(s, 1, "\\a"), s++;
 		else if(Char == '\b')
-			(*str).replace(s, 1, "\\b"), s++;
+			str.replace(s, 1, "\\b"), s++;
 		else if(Char == '\f')
-			(*str).replace(s, 1, "\\f"), s++;
+			str.replace(s, 1, "\\f"), s++;
 		else if(Char == '\n')
-			(*str).replace(s, 1, "\\n"), s++;
+			str.replace(s, 1, "\\n"), s++;
 		else if(Char == '\r')
-			(*str).replace(s, 1, "\\r"), s++;
+			str.replace(s, 1, "\\r"), s++;
 		else if(Char == '\t')
-			(*str).replace(s, 1, "\\t"), s++;
+			str.replace(s, 1, "\\t"), s++;
 		else if(Char == '\v')
-			(*str).replace(s, 1, "\\v"), s++;
+			str.replace(s, 1, "\\v"), s++;
 		
 	}
 	return true;
 }
 
-bool CTeamspeak::UnEscapeString(string *str) {
+bool CTeamspeak::UnEscapeString(string &str) {
 	int FoundPos;
 
-	while( (FoundPos = (*str).find("\\s")) != -1)
-		(*str).replace(FoundPos, 2, " ");
+	while( (FoundPos = str.find("\\s")) != -1)
+		str.replace(FoundPos, 2, " ");
 
-	while( (FoundPos = (*str).find("\\\\")) != -1)
-		(*str).replace(FoundPos, 2, "\\");
+	while( (FoundPos = str.find("\\\\")) != -1)
+		str.replace(FoundPos, 2, "\\");
 
-	while( (FoundPos = (*str).find("\\/")) != -1)
-		(*str).replace(FoundPos, 2, "/");
+	while( (FoundPos = str.find("\\/")) != -1)
+		str.replace(FoundPos, 2, "/");
 
-	while( (FoundPos = (*str).find("\\p")) != -1)
-		(*str).replace(FoundPos, 2, "|");
+	while( (FoundPos = str.find("\\p")) != -1)
+		str.replace(FoundPos, 2, "|");
 
-	while( (FoundPos = (*str).find("\\a")) != -1)
-		(*str).replace(FoundPos, 2, "\a");
+	while( (FoundPos = str.find("\\a")) != -1)
+		str.replace(FoundPos, 2, "\a");
 
-	while( (FoundPos = (*str).find("\\b")) != -1)
-		(*str).replace(FoundPos, 2, "\b");
+	while( (FoundPos = str.find("\\b")) != -1)
+		str.replace(FoundPos, 2, "\b");
 
-	while( (FoundPos = (*str).find("\\f")) != -1)
-		(*str).replace(FoundPos, 2, "\f");
+	while( (FoundPos = str.find("\\f")) != -1)
+		str.replace(FoundPos, 2, "\f");
 
-	while( (FoundPos = (*str).find("\\n")) != -1)
-		(*str).replace(FoundPos, 2, "\n");
+	while( (FoundPos = str.find("\\n")) != -1)
+		str.replace(FoundPos, 2, "\n");
 
-	while( (FoundPos = (*str).find("\\r")) != -1)
-		(*str).replace(FoundPos, 2, "\r");
+	while( (FoundPos = str.find("\\r")) != -1)
+		str.replace(FoundPos, 2, "\r");
 
-	while( (FoundPos = (*str).find("\\t")) != -1)
-		(*str).replace(FoundPos, 2, "\t");
+	while( (FoundPos = str.find("\\t")) != -1)
+		str.replace(FoundPos, 2, "\t");
 
-	while( (FoundPos = (*str).find("\\v")) != -1)
-		(*str).replace(FoundPos, 2, "\v");
+	while( (FoundPos = str.find("\\v")) != -1)
+		str.replace(FoundPos, 2, "\v");
 	
 	return true;
 }

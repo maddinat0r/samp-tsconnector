@@ -6,16 +6,16 @@
 #include "main.h"
 #include "thread.h"
 
-#include <boost/regex.hpp>
-#include <sstream>
 #include <queue>
 
 #ifdef BOOST_REGEX_MAX_CACHE_BLOCKS
 #undef BOOST_REGEX_MAX_CACHE_BLOCKS
 #endif
 #define BOOST_REGEX_MAX_CACHE_BLOCKS 32
+#include <boost/regex.hpp>
 
-using std::stringstream;
+#include <boost/lexical_cast.hpp>
+
 using std::queue;
 
 
@@ -24,8 +24,6 @@ class CCommand {
 public:
 	CCommand(string cmd, string valname=string()) :
 		Command(cmd), ValName(valname) {}
-	CCommand() :
-		Command(string()), ValName(string()) {}
 	
 	string Command;
 	//Recv only
@@ -46,25 +44,36 @@ private:
 	string 
 		IP, Port,
 		LoginName, LoginPass, LoginNick;
+
+	bool LoggedIn, Connected;
 public:
-	bool Connect(string ip, string vport);
-	int Login(string login, string pass, string nickname);
+	bool ConnectT();
+	int LoginT();
+	
+	bool Connect(char *ip, char *vport);
+	int Login(char *login, char *pass, char *nickname);
 
 	bool Disconnect();
 	bool SetTimeoutTime(unsigned int millisecs);
 
-	bool Send(string cmd);
+	int Send(string cmd);
 	int Recv(string *dest);
 	
 	static bool AddCommandListToQueue(CommandList *cmdlist);
 	static CommandList *GetNextCommandList();
-	static bool IsQueueEmpty();
 
-	bool EscapeString(string *str);
-	bool UnEscapeString(string *str);
+	bool EscapeString(string &str);
+	bool UnEscapeString(string &str);
 
-	bool IsLoggedIn() {
-		return (LoginName.size() > 0); }
+	inline bool IsLoggedIn() const {
+		return LoggedIn; }
+
+	inline bool IsConnected() const {
+		return Connected; }
+
+	inline const char *GetPort() const {
+		return Port.c_str();
+	}
 
 	CTeamspeak();
 	~CTeamspeak();
