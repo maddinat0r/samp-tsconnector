@@ -18,13 +18,12 @@ cell AMX_NATIVE_CALL native_TSC_DeleteChannel(AMX* amx, cell* params);
 
 cell AMX_NATIVE_CALL native_TSC_SetChannelName(AMX* amx, cell* params);
 cell AMX_NATIVE_CALL native_TSC_SetChannelDescription(AMX* amx, cell* params);
-//cell AMX_NATIVE_CALL native_TSC_SetChannelType(AMX* amx, cell* params);
+cell AMX_NATIVE_CALL native_TSC_SetChannelType(AMX* amx, cell* params);
 cell AMX_NATIVE_CALL native_TSC_SetChannelPassword(AMX* amx, cell* params);
 cell AMX_NATIVE_CALL native_TSC_SetChannelTalkPower(AMX* amx, cell* params);
-//cell AMX_NATIVE_CALL native_TSC_SetChannelUserLimit(AMX* amx, cell* params);
+cell AMX_NATIVE_CALL native_TSC_SetChannelUserLimit(AMX* amx, cell* params);
 cell AMX_NATIVE_CALL native_TSC_SetChannelSubChannel(AMX* amx, cell* params);
 cell AMX_NATIVE_CALL native_TSC_MoveChannelBelowChannel(AMX* amx, cell* params);
-
 
 
 //client natives

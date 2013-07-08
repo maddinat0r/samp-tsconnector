@@ -131,12 +131,14 @@ cell AMX_NATIVE_CALL native_TSC_SetChannelDescription(AMX* amx, cell* params) {
 }
 
 //native TSC_SetChannelType(channelname[], type);
-/*cell AMX_NATIVE_CALL native_TSC_SetChannelType(AMX* amx, cell* params) {
-	stringstream StrBuf;
+cell AMX_NATIVE_CALL native_TSC_SetChannelType(AMX* amx, cell* params) {
+	char *TmpParam = NULL;
+
+	amx_StrParam(amx, params[1], TmpParam);
 	string 
-		ChannelName = AMX_GetString(amx, params[1]),
+		ChannelName(TmpParam),
 		ChannelType;
-	TSServer.EscapeString(&ChannelName);
+	TSServer.EscapeString(ChannelName);
 
 	switch(params[2]) {
 	case CHANNEL_TYPE_PERMANENT:
@@ -156,17 +158,16 @@ cell AMX_NATIVE_CALL native_TSC_SetChannelDescription(AMX* amx, cell* params) {
 
 	CommandList *cmds = new CommandList;
 
-	StrBuf << "channelfind pattern=" << ChannelName;
-	cmds->push(new CCommand(StrBuf.str(), "cid"));
-	StrBuf.clear();
-	StrBuf.str("");
+	char CmdStr[64];
+	sprintf(CmdStr, "channelfind pattern=%s", ChannelName.c_str());
+	cmds->push(new CCommand(CmdStr, "cid"));
 
-	StrBuf << "channeledit cid=<>  " << ChannelType << "=1";
-	cmds->push(new CCommand(StrBuf.str()));
+	sprintf(CmdStr, "channeledit cid=<1>  %s=1", ChannelType.c_str());
+	cmds->push(new CCommand(CmdStr));
 
 	TSServer.AddCommandListToQueue(cmds);
 	return 1;
-}*/
+}
 
 //native TSC_SetChannelPassword(channelname[], password[]);
 cell AMX_NATIVE_CALL native_TSC_SetChannelPassword(AMX* amx, cell* params) {
@@ -218,18 +219,29 @@ cell AMX_NATIVE_CALL native_TSC_SetChannelTalkPower(AMX* amx, cell* params) {
 }
 
 //native TSC_SetChannelUserLimit(channelname[], maxuser);
-/*cell AMX_NATIVE_CALL native_TSC_SetChannelUserLimit(AMX* amx, cell* params) {
+cell AMX_NATIVE_CALL native_TSC_SetChannelUserLimit(AMX* amx, cell* params) {
 	if(params[2] < 0)
 		params[2] = 0;
-	stringstream StrBuf;
-	StrBuf << "channeledit cid=" << params[1] << " channel_maxclients=" << params[2];
-	TSServer.Send(StrBuf.str());
-	StrBuf.str("");
-	string SendRes;
-	if(TSServer.Recv(&SendRes) == SOCKET_ERROR)
-		return -1;
-	return (cell)TSServer.ParseError(SendRes);
-}*/
+
+	char *TmpParam = NULL;
+	amx_StrParam(amx, params[1], TmpParam);
+	string ChannelName(TmpParam);
+	TSServer.EscapeString(ChannelName);
+
+
+	CommandList *cmds = new CommandList;
+
+	string CmdStr("channelfind pattern=");
+	CmdStr.append(ChannelName);
+	cmds->push(new CCommand(CmdStr, "cid"));
+
+	char FormatTmp[64];
+	sprintf(FormatTmp, "channeledit cid=<1> channel_maxclients=%d", (int)params[2]);
+	cmds->push(new CCommand(FormatTmp));
+
+	TSServer.AddCommandListToQueue(cmds);
+	return 1;
+}
 
 //native TSC_SetChannelSubChannel(channelname[], parentchannelname[]);
 cell AMX_NATIVE_CALL native_TSC_SetChannelSubChannel(AMX* amx, cell* params) {

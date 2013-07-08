@@ -80,13 +80,12 @@ public:
 };
 extern CTeamspeak TSServer;
 
-/*
+
 enum ChannelTypes {
 	CHANNEL_TYPE_PERMANENT = 1,
 	CHANNEL_TYPE_SEMI_PERMANENT,
 	CHANNEL_TYPE_TEMPORARY
 };
-*/
 
 enum KickTypes {
 	KICK_TYPE_CHANNEL = 1,
