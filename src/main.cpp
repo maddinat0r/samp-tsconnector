@@ -111,6 +111,8 @@ const AMX_NATIVE_INFO NativesList[] = {
 	{"TSC_RemoveClientFromServerGroup",	native_TSC_RemoveClientFromServerGroup},
 	{"TSC_ToggleClientTalkAbility",		native_TSC_ToggleClientTalkAbility},
 
+	{"TSC_PokeClient",					native_TSC_PokeClient},
+
 
 	{NULL, NULL}
 };

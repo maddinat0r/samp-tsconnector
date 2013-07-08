@@ -33,6 +33,9 @@ cell AMX_NATIVE_CALL native_TSC_AddClientToServerGroup(AMX* amx, cell* params);
 cell AMX_NATIVE_CALL native_TSC_RemoveClientFromServerGroup(AMX* amx, cell* params);
 cell AMX_NATIVE_CALL native_TSC_ToggleClientTalkAbility(AMX* amx, cell* params);
 
+cell AMX_NATIVE_CALL native_TSC_PokeClient(AMX* amx, cell* params);
+
+
 
 
 #endif

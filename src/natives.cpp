@@ -485,3 +485,32 @@ cell AMX_NATIVE_CALL native_TSC_ToggleClientTalkAbility(AMX* amx, cell* params) 
 }
 
 
+//native TSC_PokeClient(uid[], msg[]);
+cell AMX_NATIVE_CALL native_TSC_PokeClient(AMX* amx, cell* params) {
+	char *TmpParam = NULL;
+
+	amx_StrParam(amx, params[1], TmpParam);
+	string UID(TmpParam);
+	TSServer.EscapeString(UID);
+
+	amx_StrParam(amx, params[2], TmpParam);
+	string Msg(TmpParam);
+	TSServer.EscapeString(Msg);
+
+
+	CommandList *cmds = new CommandList;
+
+	CCommand *cmd1 = new CCommand("clientlist -uid", "clid");
+	cmd1->MFind = "client_unique_identifier=";
+	cmd1->MFind.append(UID);
+	cmds->push(cmd1);
+
+	char FormatTmp[256];
+	sprintf(FormatTmp, "clientpoke msg=%s clid=<1>", Msg.c_str());
+	cmds->push(new CCommand(FormatTmp, "cid"));
+
+	TSServer.AddCommandListToQueue(cmds);
+	return 1;
+}
+
+
