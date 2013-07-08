@@ -66,6 +66,7 @@ void * SocketThread(void *lpParam)
 						TSServer.AddCommandListToQueue(Commands);
 						break;
 					}
+
 					int ErrorID = 0;
 					while( (ErrorID = TSServer.Recv(&RecvStrTmp)) != SOCKET_ERROR && ErrorID != -2) {
 						RecvStr.append(RecvStrTmp);
@@ -94,10 +95,8 @@ void * SocketThread(void *lpParam)
 						}
 					}
 					if(Cmd->ValName.length() > 0) {
-						//stringstream RxValBuf;
-						//RxValBuf << Cmd->ValName << "=([^ ]+)";
 						string RxValBuf(Cmd->ValName);
-						RxValBuf.append("=([^ ]+)");
+						RxValBuf.append("=([^ \n\r]+)");
 
 						boost::regex rx(RxValBuf);
 						boost::match_results<std::string::const_iterator> rxRes;
