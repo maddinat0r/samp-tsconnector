@@ -109,6 +109,8 @@ const AMX_NATIVE_INFO NativesList[] = {
 	{"TSC_SetClientChannelGroup",		native_TSC_SetClientChannelGroup},
 	{"TSC_AddClientToServerGroup",		native_TSC_AddClientToServerGroup},
 	{"TSC_RemoveClientFromServerGroup",	native_TSC_RemoveClientFromServerGroup},
+	{"TSC_ToggleClientTalkAbility",		native_TSC_ToggleClientTalkAbility},
+
 
 	{NULL, NULL}
 };

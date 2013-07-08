@@ -460,3 +460,28 @@ cell AMX_NATIVE_CALL native_TSC_MoveClient(AMX* amx, cell* params) {
 	TSServer.AddCommandListToQueue(cmds);
 	return 1;
 }
+
+//native TSC_ToggleClientTalkAbility(uid[], bool:toggle);
+cell AMX_NATIVE_CALL native_TSC_ToggleClientTalkAbility(AMX* amx, cell* params) {
+	char *TmpParam = NULL;
+	amx_StrParam(amx, params[1], TmpParam);
+	string UID(TmpParam);
+	TSServer.EscapeString(UID);
+
+
+	CommandList *cmds = new CommandList;
+
+	CCommand *cmd1 = new CCommand("clientlist -uid", "clid");
+	cmd1->MFind = "client_unique_identifier=";
+	cmd1->MFind.append(UID);
+	cmds->push(cmd1);
+
+	char FormatTmp[128];
+	sprintf(FormatTmp, "clientedit clid=<1> client_is_talker=%d", (int)params[2]);
+	cmds->push(new CCommand(FormatTmp, "cid"));
+
+	TSServer.AddCommandListToQueue(cmds);
+	return 1;
+}
+
+
