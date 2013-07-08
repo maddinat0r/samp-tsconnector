@@ -189,7 +189,6 @@ int CTeamspeak::Recv(string *dest) {
 		bool WouldBlock = (SocketErrorID == EWOULDBLOCK);
 		bool TimedOut = (SocketErrorID == ETIMEDOUT);
 	#endif
-		//printf("SocketErrorID: %d\n", SocketErrorID);
 		if(!TimedOut && !WouldBlock) {
 			logprintf("[ERROR] TSConnector encountered an error at \"Recv\": %d", SocketErrorID);
 
@@ -251,6 +250,18 @@ bool CTeamspeak::EscapeString(string &str) {
 		else if(Char == '\v')
 			str.replace(s, 1, "\\v"), s++;
 		
+		else if(Char == 'ä')
+			str.replace(s, 1, "\xc3\xa4"), s++;
+		else if(Char == 'ö')
+			str.replace(s, 1, "\xc3\xb6"), s++;
+		else if(Char == 'ü')
+			str.replace(s, 1, "\xc3\xbc"), s++;
+		else if(Char == 'Ä')
+			str.replace(s, 1, "\xc3\x84"), s++;
+		else if(Char == 'Ö')
+			str.replace(s, 1, "\xc3\x96"), s++;
+		else if(Char == 'Ü')
+			str.replace(s, 1, "\xc3\x9c"), s++;
 	}
 	return true;
 }
@@ -290,6 +301,19 @@ bool CTeamspeak::UnEscapeString(string &str) {
 
 	while( (FoundPos = str.find("\\v")) != -1)
 		str.replace(FoundPos, 2, "\v");
-	
+
+
+	while( (FoundPos = str.find("\xc3\xa4")) != -1)
+		str.replace(FoundPos, 2, "ä");
+	while( (FoundPos = str.find("\xc3\xb6")) != -1)
+		str.replace(FoundPos, 2, "ö");
+	while( (FoundPos = str.find("\xc3\xbc")) != -1)
+		str.replace(FoundPos, 2, "ü");
+	while( (FoundPos = str.find("\xc3\x84")) != -1)
+		str.replace(FoundPos, 2, "Ä");
+	while( (FoundPos = str.find("\xc3\x96")) != -1)
+		str.replace(FoundPos, 2, "Ö");
+	while( (FoundPos = str.find("\xc3\x9c")) != -1)
+		str.replace(FoundPos, 2, "Ü");
 	return true;
 }
