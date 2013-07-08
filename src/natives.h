@@ -36,6 +36,10 @@ cell AMX_NATIVE_CALL native_TSC_ToggleClientTalkAbility(AMX* amx, cell* params);
 cell AMX_NATIVE_CALL native_TSC_PokeClient(AMX* amx, cell* params);
 
 
+//messaging
+cell AMX_NATIVE_CALL native_TSC_SendClientMessage(AMX* amx, cell* params);
+cell AMX_NATIVE_CALL native_TSC_SendChannelMessage(AMX* amx, cell* params);
+cell AMX_NATIVE_CALL native_TSC_SendServerMessage(AMX* amx, cell* params);
 
 
 #endif

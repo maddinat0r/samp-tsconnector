@@ -514,3 +514,80 @@ cell AMX_NATIVE_CALL native_TSC_PokeClient(AMX* amx, cell* params) {
 }
 
 
+//native TSC_SendClientMessage(uid[], msg[]);
+cell AMX_NATIVE_CALL native_TSC_SendClientMessage(AMX* amx, cell* params) {
+	char *TmpParam = NULL;
+
+	amx_StrParam(amx, params[1], TmpParam);
+	string UID(TmpParam);
+	TSServer.EscapeString(UID);
+
+	amx_StrParam(amx, params[2], TmpParam);
+	string Msg(TmpParam);
+	TSServer.EscapeString(Msg);
+
+
+	CommandList *cmds = new CommandList;
+
+	CCommand *cmd1 = new CCommand("clientlist -uid", "clid");
+	cmd1->MFind = "client_unique_identifier=";
+	cmd1->MFind.append(UID);
+	cmds->push(cmd1);
+
+	char FormatTmp[256];
+	sprintf(FormatTmp, "sendtextmessage targetmode=1 target=<1> msg=%s", Msg.c_str());
+	cmds->push(new CCommand(FormatTmp, "cid"));
+
+	TSServer.AddCommandListToQueue(cmds);
+	return 1;
+}
+
+//native TSC_SendChannelMessage(channelname[], msg[]);
+cell AMX_NATIVE_CALL native_TSC_SendChannelMessage(AMX* amx, cell* params) {
+	char *TmpParam = NULL;
+
+	amx_StrParam(amx, params[1], TmpParam);
+	string ChannelName(TmpParam);
+	TSServer.EscapeString(ChannelName);
+
+	amx_StrParam(amx, params[2], TmpParam);
+	string Msg(TmpParam);
+	TSServer.EscapeString(Msg);
+
+
+	CommandList *cmds = new CommandList;
+
+	string CmdStr("channelfind pattern=");
+	CmdStr.append(ChannelName);
+	cmds->push(new CCommand(CmdStr, "cid"));
+
+	char FormatTmp[256];
+	sprintf(FormatTmp, "sendtextmessage targetmode=2 target=<1> msg=%s", Msg.c_str());
+	cmds->push(new CCommand(FormatTmp));
+
+	TSServer.AddCommandListToQueue(cmds);
+	return 1;
+}
+
+//native TSC_SendServerMessage(msg[]);
+cell AMX_NATIVE_CALL native_TSC_SendServerMessage(AMX* amx, cell* params) {
+	char *TmpParam = NULL;
+	amx_StrParam(amx, params[1], TmpParam);
+	string Msg(TmpParam);
+	TSServer.EscapeString(Msg);
+
+
+	CommandList *cmds = new CommandList;
+
+	string CmdStr("serveridgetbyport virtualserver_port=");
+	CmdStr.append(TSServer.GetPort());
+	cmds->push(new CCommand(CmdStr, "server_id"));
+
+	char FormatTmp[256];
+	sprintf(FormatTmp, "sendtextmessage targetmode=3 target=<1> msg=%s", Msg.c_str());
+	cmds->push(new CCommand(FormatTmp));
+
+	TSServer.AddCommandListToQueue(cmds);
+	return 1;
+}
+

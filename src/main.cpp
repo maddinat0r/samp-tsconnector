@@ -114,6 +114,10 @@ const AMX_NATIVE_INFO NativesList[] = {
 	{"TSC_PokeClient",					native_TSC_PokeClient},
 
 
+	{"TSC_SendClientMessage",			native_TSC_SendClientMessage},
+	{"TSC_SendChannelMessage",			native_TSC_SendChannelMessage},
+	{"TSC_SendServerMessage",			native_TSC_SendServerMessage},
+
 	{NULL, NULL}
 };
 
