@@ -8,9 +8,6 @@ cell AMX_NATIVE_CALL native_TSC_Connect(AMX* amx, cell* params);
 cell AMX_NATIVE_CALL native_TSC_Disconnect(AMX* amx, cell* params);
 cell AMX_NATIVE_CALL native_TSC_Login(AMX* amx, cell* params);
 
-//server natives
-cell AMX_NATIVE_CALL native_TSC_SetTimeoutTime(AMX* amx, cell* params);
-
 
 //channel natives
 cell AMX_NATIVE_CALL native_TSC_CreateChannel(AMX* amx, cell* params);

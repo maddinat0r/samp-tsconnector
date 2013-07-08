@@ -88,8 +88,6 @@ const AMX_NATIVE_INFO NativesList[] = {
 	{"TSC_Disconnect",					native_TSC_Disconnect},
 	{"TSC_Login",						native_TSC_Login},
 
-	{"TSC_SetTimeoutTime",				native_TSC_SetTimeoutTime},
-
 
 	{"TSC_CreateChannel",				native_TSC_CreateChannel},
 	{"TSC_DeleteChannel",				native_TSC_DeleteChannel},

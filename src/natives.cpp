@@ -27,15 +27,6 @@ cell AMX_NATIVE_CALL native_TSC_Login(AMX* amx, cell* params) {
 	return TSServer.Login(Login, Pass, Nick);
 }
 
-
-cell AMX_NATIVE_CALL native_TSC_SetTimeoutTime(AMX* amx, cell* params) {
-	if(params[1] <= 0)
-		return -1;
-
-	return (cell)TSServer.SetTimeoutTime(params[1]);
-}
-
-
 //native TSC_CreateChannel(channelname[]);
 cell AMX_NATIVE_CALL native_TSC_CreateChannel(AMX* amx, cell* params) {
 	char *ChannelNameTmp = NULL;
