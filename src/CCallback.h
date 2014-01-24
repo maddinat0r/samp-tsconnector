@@ -3,29 +3,49 @@
 #ifndef INC_CCALLBACK_H
 #define INC_CCALLBACK_H
 
-#include "thread.h"
+
+#include "main.h"
 
 #include <string>
 #include <stack>
-#include <queue>
+#include <boost/unordered_set.hpp>
+#include <boost/lockfree/spsc_queue.hpp>
 
 using std::string;
 using std::stack;
-using std::queue;
+using boost::unordered_set;
 
-class CCallback {
+
+class CCallback 
+{
 private:
-	static CMutex CallbackMutex;
-	static queue<CCallback*> CallbackQueue;
+	static boost::lockfree::spsc_queue<
+		CCallback *,
+		boost::lockfree::fixed_sized<true>,
+		boost::lockfree::capacity<32678>
+	> m_CallbackQueue;
+
+	static unordered_set<AMX *> m_AmxList;
 	
 public:
-	static void AddCallbackToQueue(CCallback *cb);
-	static CCallback *GetNextCallback();
-	static bool IsQueueEmpty();
+	static inline void Queue(CCallback *cb)
+	{
+		m_CallbackQueue.push(cb);
+	}
+	static inline void AddAmxInstance(AMX *amx)
+	{
+		m_AmxList.insert(amx);
+	}
+	static inline void RemoveAmxInstance(AMX *amx)
+	{
+		m_AmxList.erase(amx);
+	}
+
+	static void Process();
 
 	string Name;
 	stack<string> Params;
 };
 
 
-#endif
+#endif // INC_CCALLBACK_H

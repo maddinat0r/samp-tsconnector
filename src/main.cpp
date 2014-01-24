@@ -13,30 +13,10 @@ void **ppPluginData;
 extern void *pAMXFunctions;
 logprintf_t logprintf;
 
-PLUGIN_EXPORT void PLUGIN_CALL ProcessTick() {
-	while(!CCallback::IsQueueEmpty()) {
-		CCallback *Callback = CCallback::GetNextCallback();
 
-		int CB_IDX;
-		for (list<AMX*>::iterator amx = AmxList.begin(), end = AmxList.end(); amx != end; ++amx) {
-			if (amx_FindPublic( (*amx), Callback->Name.c_str(), &CB_IDX) == AMX_ERR_NONE) {
-				cell AmxAddress = -1;
-				while(!Callback->Params.empty()) {
-					cell tmpAddress;
-					amx_PushString( (*amx), &tmpAddress, NULL, Callback->Params.top().c_str(), 0, 0);
-					Callback->Params.pop();
-					if(AmxAddress == -1)
-						AmxAddress = tmpAddress;
-				}
-
-				amx_Exec( (*amx), NULL, CB_IDX);
-				if(AmxAddress >= NULL)
-					amx_Release( (*amx), AmxAddress);
-			}
-		}
-
-		delete Callback;
-	}
+PLUGIN_EXPORT void PLUGIN_CALL ProcessTick() 
+{
+	CCallback::Process();
 }
 
 PLUGIN_EXPORT unsigned int PLUGIN_CALL Supports() {
@@ -122,18 +102,15 @@ const AMX_NATIVE_INFO NativesList[] = {
 };
 
 
-PLUGIN_EXPORT int PLUGIN_CALL AmxLoad(AMX *amx) {
-	AmxList.push_back(amx);
+PLUGIN_EXPORT int PLUGIN_CALL AmxLoad(AMX *amx) 
+{
+	CCallback::AddAmxInstance(amx);
 	return amx_Register(amx, NativesList, -1);
 }
 
-PLUGIN_EXPORT int PLUGIN_CALL AmxUnload(AMX *amx) {
-	for(list<AMX*>::iterator i = AmxList.begin(), max = AmxList.end(); i != max; ++i) {
-		if( (*i) == amx) {
-			AmxList.erase(i);
-			break;
-		}
-	}
+PLUGIN_EXPORT int PLUGIN_CALL AmxUnload(AMX *amx) 
+{
+	CCallback::RemoveAmxInstance(amx);
 	return AMX_ERR_NONE;
 }
 
