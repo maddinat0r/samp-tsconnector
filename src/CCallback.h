@@ -1,5 +1,4 @@
 #pragma once
-
 #ifndef INC_CCALLBACK_H
 #define INC_CCALLBACK_H
 

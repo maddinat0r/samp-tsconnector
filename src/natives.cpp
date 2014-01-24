@@ -1,593 +1,881 @@
 #include "main.h"
+#include "natives.h"
 
 #include "CTeamspeak.h"
 
-cell AMX_NATIVE_CALL native_TSC_Connect(AMX* amx, cell* params) {
-	char 
-		*IP = NULL,
-		*VPort = NULL;
-	amx_StrParam(amx, params[1], IP);
-	amx_StrParam(amx, params[2], VPort);
-	return TSServer.Connect(IP, VPort);
-}
 
-cell AMX_NATIVE_CALL native_TSC_Disconnect(AMX* amx, cell* params) {
-	TSServer.Disconnect();
+//native TSC_Connect(ip[], port[]);
+AMX_DECLARE_NATIVE(Native::TSC_Connect)
+{
+	char 
+		*ip = NULL,
+		*port = NULL;
+
+	amx_StrParam(amx, params[1], ip);
+	amx_StrParam(amx, params[2], port);
+
+	if (ip == NULL || port == NULL)
+		return 0;
+
+	CTeamspeak::Get()->Connect(ip, port);
 	return 1;
 }
 
-cell AMX_NATIVE_CALL native_TSC_Login(AMX* amx, cell* params) {
+//native TSC_Disconnect();
+AMX_DECLARE_NATIVE(Native::TSC_Disconnect)
+{
+	CTeamspeak::Get()->Disconnect();
+	return 1;
+}
+
+//native TSC_Login(user[], pass[], nickname[]);
+AMX_DECLARE_NATIVE(Native::TSC_Login)
+{
 	char
-		*Login = NULL,
-		*Pass = NULL,
-		*Nick = NULL;
-	amx_StrParam(amx, params[1], Login);
-	amx_StrParam(amx, params[2], Pass);
-	amx_StrParam(amx, params[3], Nick);
-	return TSServer.Login(Login, Pass, Nick);
+		*login_tmp = NULL,
+		*pass_tmp = NULL,
+		*nick_tmp = NULL;
+
+	amx_StrParam(amx, params[1], login_tmp);
+	amx_StrParam(amx, params[2], pass_tmp);
+	amx_StrParam(amx, params[3], nick_tmp);
+
+	if (login_tmp == NULL || pass_tmp == NULL || nick_tmp == NULL)
+		return 0;
+
+	string
+		login(login_tmp),
+		pass(pass_tmp),
+		nickname(nick_tmp);
+
+	CTeamspeak::Get()->EscapeString(login);
+	CTeamspeak::Get()->EscapeString(pass);
+	CTeamspeak::Get()->EscapeString(nickname);
+
+
+	CommandList *cmd_list = new CommandList;
+
+	string login_cmd;
+	karma::generate(std::back_insert_iterator<string>(login_cmd),
+		lit("login client_login_name=") << karma::string(login) << lit(" client_login_password=") << karma::string(pass) << lit("\n") <<
+		lit("clientupdate client_nickname=") << karma::string(nickname)
+	);
+	cmd_list->push(new CCommand(login_cmd));
+	
+	CTeamspeak::Get()->PushCommandList(cmd_list);
+	return 1;
+}
+
+//native TSC_ChangeNickname(nickname[]);
+AMX_DECLARE_NATIVE(Native::TSC_ChangeNickname)
+{
+	char *nick_tmp = NULL;
+	amx_StrParam(amx, params[1], nick_tmp);
+
+	if (nick_tmp == NULL)
+		return 0;
+
+	string nickname(nick_tmp);
+	CTeamspeak::Get()->EscapeString(nickname);
+
+
+	CommandList *cmd_list = new CommandList;
+
+	string nick_cmd;
+	karma::generate(std::back_insert_iterator<string>(nick_cmd),
+		lit("clientupdate client_nickname=") << karma::string(nickname)
+	);
+	cmd_list->push(new CCommand(nick_cmd));
+	
+	CTeamspeak::Get()->PushCommandList(cmd_list);
+	return 1;
 }
 
 //native TSC_CreateChannel(channelname[]);
-cell AMX_NATIVE_CALL native_TSC_CreateChannel(AMX* amx, cell* params) {
-	char *ChannelNameTmp = NULL;
-	amx_StrParam(amx, params[1], ChannelNameTmp);
+AMX_DECLARE_NATIVE(Native::TSC_CreateChannel)
+{
+	char *channelname_tmp = NULL;
+	amx_StrParam(amx, params[1], channelname_tmp);
 
-	string ChannelName(ChannelNameTmp);
-	TSServer.EscapeString(ChannelName);
+	if (channelname_tmp == NULL)
+		return 0;
+
+	string channelname(channelname_tmp);
+	CTeamspeak::Get()->EscapeString(channelname);
 
 
-	CommandList *cmds = new CommandList;
+	CommandList *cmd_list = new CommandList;
 
-	string CmdStr("channelcreate channel_name=");
-	CmdStr.append(ChannelName);
-	cmds->push(new CCommand(CmdStr));
+	string chcreate_cmd;
+	karma::generate(std::back_insert_iterator<string>(chcreate_cmd),
+		lit("channelcreate channel_name=") << karma::string(channelname)
+	);
+	cmd_list->push(new CCommand(chcreate_cmd));
 
-	TSServer.AddCommandListToQueue(cmds);
+	CTeamspeak::Get()->PushCommandList(cmd_list);
 	return 1;
 }
 
 //native TSC_DeleteChannel(channelname[]);
-cell AMX_NATIVE_CALL native_TSC_DeleteChannel(AMX* amx, cell* params) {
-	char *ChannelNameTmp = NULL;
-	amx_StrParam(amx, params[1], ChannelNameTmp);
+AMX_DECLARE_NATIVE(Native::TSC_DeleteChannel)
+{
+	char *channelname_tmp = NULL;
+	amx_StrParam(amx, params[1], channelname_tmp);
 
-	string ChannelName(ChannelNameTmp);
-	TSServer.EscapeString(ChannelName);
+	if (channelname_tmp == NULL)
+		return 0;
+
+	string channelname(channelname_tmp);
+	CTeamspeak::Get()->EscapeString(channelname);
 	
 
-	CommandList *cmds = new CommandList;
+	CommandList *cmd_list = new CommandList;
+	
+	string chfind_cmd;
+	karma::generate(std::back_insert_iterator<string>(chfind_cmd),
+		lit("channelfind pattern=") << karma::string(channelname)
+	);
+	cmd_list->push(new CCommand(chfind_cmd, "cid"));
+	cmd_list->push(new CCommand("channeldelete cid=<1> force=1"));
 
-	string CmdStr("channelfind pattern=");
-	CmdStr.append(ChannelName);
-	cmds->push(new CCommand(CmdStr, "cid"));
-
-	cmds->push(new CCommand("channeldelete cid=<1> force=1"));
-
-	TSServer.AddCommandListToQueue(cmds);
+	CTeamspeak::Get()->PushCommandList(cmd_list);
 	return 1;
 }
 
 //native TSC_SetChannelName(channelname[], newname[]);
-cell AMX_NATIVE_CALL native_TSC_SetChannelName(AMX* amx, cell* params) {
-	char *TmpParam = NULL;
+AMX_DECLARE_NATIVE(Native::TSC_SetChannelName)
+{
+	char
+		*channelname_tmp = NULL,
+		*newname_tmp = NULL;
+	amx_StrParam(amx, params[1], channelname_tmp);
+	amx_StrParam(amx, params[2], newname_tmp);
 
-	amx_StrParam(amx, params[1], TmpParam);
-	string ChannelName(TmpParam);
-	TSServer.EscapeString(ChannelName);
+	if (channelname_tmp == NULL || newname_tmp == NULL)
+		return 0;
 
-	amx_StrParam(amx, params[2], TmpParam);
-	string NewChannelName(TmpParam);
-	TSServer.EscapeString(NewChannelName);
+	string 
+		channelname(channelname_tmp),
+		new_channelname(newname_tmp);
+	
+	CTeamspeak::Get()->EscapeString(channelname);
+	CTeamspeak::Get()->EscapeString(new_channelname);
 
 
-	CommandList *cmds = new CommandList;
+	CommandList *cmd_list = new CommandList;
 
-	string CmdStr("channelfind pattern=");
-	CmdStr.append(ChannelName);
-	cmds->push(new CCommand(CmdStr, "cid"));
+	string chfind_cmd;
+	karma::generate(std::back_insert_iterator<string>(chfind_cmd),
+		lit("channelfind pattern=") << karma::string(channelname)
+	);
+	cmd_list->push(new CCommand(chfind_cmd, "cid"));
 
-	CmdStr.assign("channeledit cid=<1> channel_name=");
-	CmdStr.append(NewChannelName);
-	cmds->push(new CCommand(CmdStr));
+	string chedit_cmd;
+	karma::generate(std::back_insert_iterator<string>(chedit_cmd),
+		lit("channeledit cid=<1> channel_name=") << karma::string(new_channelname)
+	);
+	cmd_list->push(new CCommand(chedit_cmd));
 
-	TSServer.AddCommandListToQueue(cmds);
+	CTeamspeak::Get()->PushCommandList(cmd_list);
 	return 1;
 }
 
 //native TSC_SetChannelDescription(channelname[], desc[]);
-cell AMX_NATIVE_CALL native_TSC_SetChannelDescription(AMX* amx, cell* params) {
-	char *TmpParam = NULL;
+AMX_DECLARE_NATIVE(Native::TSC_SetChannelDescription)
+{
+	char
+		*channelname_tmp = NULL,
+		*channeldesc_tmp = NULL;
 
-	amx_StrParam(amx, params[1], TmpParam);
-	string ChannelName(TmpParam);
-	TSServer.EscapeString(ChannelName);
+	amx_StrParam(amx, params[1], channelname_tmp);
+	amx_StrParam(amx, params[2], channeldesc_tmp);
 
-	amx_StrParam(amx, params[2], TmpParam);
-	string Desc(TmpParam);
-	TSServer.EscapeString(Desc);
+	if (channelname_tmp == NULL)
+		return 0;
 
+	string
+		channelname(channelname_tmp),
+		channeldesc(channeldesc_tmp == NULL ? string() : channeldesc_tmp);
 
-	CommandList *cmds = new CommandList;
+	CTeamspeak::Get()->EscapeString(channelname);
+	CTeamspeak::Get()->EscapeString(channeldesc);
+	
 
-	string CmdStr("channelfind pattern=");
-	CmdStr.append(ChannelName);
-	cmds->push(new CCommand(CmdStr, "cid"));
+	CommandList *cmd_list = new CommandList;
 
-	CmdStr.assign("channeledit cid=<1> channel_description=");
-	CmdStr.append(Desc);
-	cmds->push(new CCommand(CmdStr));
+	string chfind_cmd;
+	karma::generate(std::back_insert_iterator<string>(chfind_cmd),
+		lit("channelfind pattern=") << karma::string(channelname)
+	);
+	cmd_list->push(new CCommand(chfind_cmd, "cid"));
 
-	TSServer.AddCommandListToQueue(cmds);
+	string chedit_cmd;
+	karma::generate(std::back_insert_iterator<string>(chedit_cmd),
+		lit("channeledit cid=<1> channel_description=") << karma::string(channeldesc)
+	);
+	cmd_list->push(new CCommand(chedit_cmd));
+
+	CTeamspeak::Get()->PushCommandList(cmd_list);
 	return 1;
 }
 
 //native TSC_SetChannelType(channelname[], type);
-cell AMX_NATIVE_CALL native_TSC_SetChannelType(AMX* amx, cell* params) {
-	char *TmpParam = NULL;
+AMX_DECLARE_NATIVE(Native::TSC_SetChannelType)
+{
+	char *channelname_tmp = NULL;
+	amx_StrParam(amx, params[1], channelname_tmp);
 
-	amx_StrParam(amx, params[1], TmpParam);
+	if (channelname_tmp == NULL)
+		return 0;
+
 	string 
-		ChannelName(TmpParam),
-		ChannelType;
-	TSServer.EscapeString(ChannelName);
+		channelname(channelname_tmp),
+		channeltype;
+
+	CTeamspeak::Get()->EscapeString(channelname);
 
 	switch(params[2]) {
-	case CHANNEL_TYPE_PERMANENT:
-		ChannelType = "channel_flag_permanent";
-		break;
-	case CHANNEL_TYPE_SEMI_PERMANENT:
-		ChannelType = "channel_flag_semi_permanent";
-		break;
+		case CHANNEL_TYPE_PERMANENT:
+			channeltype = "channel_flag_permanent";
+			break;
 
-	case CHANNEL_TYPE_TEMPORARY:
-		ChannelType = "channel_flag_temporary";
-		break;
+		case CHANNEL_TYPE_SEMI_PERMANENT:
+			channeltype = "channel_flag_semi_permanent";
+			break;
 
-	default:
-		return 0;
+		case CHANNEL_TYPE_TEMPORARY:
+			channeltype = "channel_flag_temporary";
+			break;
+
+		default:
+			return 0;
 	}
 
-	CommandList *cmds = new CommandList;
 
-	char CmdStr[64];
-	sprintf(CmdStr, "channelfind pattern=%s", ChannelName.c_str());
-	cmds->push(new CCommand(CmdStr, "cid"));
+	CommandList *cmd_list = new CommandList;
 
-	sprintf(CmdStr, "channeledit cid=<1>  %s=1", ChannelType.c_str());
-	cmds->push(new CCommand(CmdStr));
+	string chfind_cmd;
+	karma::generate(std::back_insert_iterator<string>(chfind_cmd),
+		lit("channelfind pattern=") << karma::string(channelname)
+	);
+	cmd_list->push(new CCommand(chfind_cmd, "cid"));
 
-	TSServer.AddCommandListToQueue(cmds);
+	string chedit_cmd;
+	karma::generate(std::back_insert_iterator<string>(chedit_cmd),
+		lit("channeledit cid=<1>  ") << karma::string(channeltype) << lit("= 1")
+	);
+	cmd_list->push(new CCommand(chedit_cmd));
+
+	CTeamspeak::Get()->PushCommandList(cmd_list);
 	return 1;
 }
 
 //native TSC_SetChannelPassword(channelname[], password[]);
-cell AMX_NATIVE_CALL native_TSC_SetChannelPassword(AMX* amx, cell* params) {
-	char *TmpParam = NULL;
+AMX_DECLARE_NATIVE(Native::TSC_SetChannelPassword)
+{
+	char
+		*channelname_tmp = NULL,
+		*channelpwd_tmp = NULL;
 
-	amx_StrParam(amx, params[1], TmpParam);
-	string ChannelName(TmpParam);
-	TSServer.EscapeString(ChannelName);
+	amx_StrParam(amx, params[1], channelname_tmp);
+	amx_StrParam(amx, params[2], channelpwd_tmp);
 
-	amx_StrParam(amx, params[2], TmpParam);
-	string ChannelPasswd(TmpParam);
-	TSServer.EscapeString(ChannelPasswd);
+	if (channelname_tmp == NULL)
+		return 0;
+
+	string 
+		channelname(channelname_tmp),
+		channelpwd(channelpwd_tmp == NULL ? string() : channelpwd_tmp);
+
+	CTeamspeak::Get()->EscapeString(channelname);
+	CTeamspeak::Get()->EscapeString(channelpwd);
 
 
-	CommandList *cmds = new CommandList;
+	CommandList *cmd_list = new CommandList;
 
-	string CmdStr("channelfind pattern=");
-	CmdStr.append(ChannelName);
-	cmds->push(new CCommand(CmdStr, "cid"));
+	string chfind_cmd;
+	karma::generate(std::back_insert_iterator<string>(chfind_cmd),
+		lit("channelfind pattern=") << karma::string(channelname)
+	);
+	cmd_list->push(new CCommand(chfind_cmd, "cid"));
 
-	CmdStr.assign("channeledit cid=<1> channel_password=");
-	CmdStr.append(ChannelPasswd);
-	cmds->push(new CCommand(CmdStr));
+	string chedit_cmd;
+	karma::generate(std::back_insert_iterator<string>(chedit_cmd),
+		lit("channeledit cid=<1> channel_password=") << karma::string(channelpwd)
+	);
+	cmd_list->push(new CCommand(chedit_cmd));
 
-	TSServer.AddCommandListToQueue(cmds);
+	CTeamspeak::Get()->PushCommandList(cmd_list);
 	return 1;
 }
 
 //native TSC_SetChannelTalkPower(channelname[], talkpower);
-cell AMX_NATIVE_CALL native_TSC_SetChannelTalkPower(AMX* amx, cell* params) {
-	char *TmpParam = NULL;
-	amx_StrParam(amx, params[1], TmpParam);
-	string ChannelName(TmpParam);
-	TSServer.EscapeString(ChannelName);
+AMX_DECLARE_NATIVE(Native::TSC_SetChannelTalkPower)
+{
+	char *channelname_tmp = NULL;
+	int talkpower = static_cast<int>(params[2]);
+
+	amx_StrParam(amx, params[1], channelname_tmp);
+
+	if (channelname_tmp == NULL)
+		return 0;
+
+	string channelname(channelname_tmp);
+	CTeamspeak::Get()->EscapeString(channelname);
 
 
-	CommandList *cmds = new CommandList;
+	CommandList *cmd_list = new CommandList;
 
-	string CmdStr("channelfind pattern=");
-	CmdStr.append(ChannelName);
-	cmds->push(new CCommand(CmdStr, "cid"));
+	string chfind_cmd;
+	karma::generate(std::back_insert_iterator<string>(chfind_cmd),
+		lit("channelfind pattern=") << karma::string(channelname)
+	);
+	cmd_list->push(new CCommand(chfind_cmd, "cid"));
 
-	char FormatTmp[64];
-	sprintf(FormatTmp, "channeledit cid=<1> channel_needed_talk_power=%d", (int)params[2]);
-	cmds->push(new CCommand(FormatTmp));
+	string chedit_cmd;
+	karma::generate(std::back_insert_iterator<string>(chedit_cmd),
+		lit("channeledit cid=<1> channel_needed_talk_power=") << karma::int_(talkpower)
+	);
+	cmd_list->push(new CCommand(chedit_cmd));
 
-	TSServer.AddCommandListToQueue(cmds);
+	CTeamspeak::Get()->PushCommandList(cmd_list);
 	return 1;
 }
 
 //native TSC_SetChannelUserLimit(channelname[], maxuser);
-cell AMX_NATIVE_CALL native_TSC_SetChannelUserLimit(AMX* amx, cell* params) {
-	if(params[2] < 0)
-		params[2] = 0;
+AMX_DECLARE_NATIVE(Native::TSC_SetChannelUserLimit)
+{
+	char *channelname_tmp = NULL;
+	unsigned int maxusers = static_cast<unsigned int>(params[2] < 0 ? 0 : params[2]);
 
-	char *TmpParam = NULL;
-	amx_StrParam(amx, params[1], TmpParam);
-	string ChannelName(TmpParam);
-	TSServer.EscapeString(ChannelName);
+	amx_StrParam(amx, params[1], channelname_tmp);
+
+	if (channelname_tmp == NULL)
+		return 0;
+
+	string channelname(channelname_tmp);
+	CTeamspeak::Get()->EscapeString(channelname);
 
 
-	CommandList *cmds = new CommandList;
+	CommandList *cmd_list = new CommandList;
 
-	string CmdStr("channelfind pattern=");
-	CmdStr.append(ChannelName);
-	cmds->push(new CCommand(CmdStr, "cid"));
+	string chfind_cmd;
+	karma::generate(std::back_insert_iterator<string>(chfind_cmd),
+		lit("channelfind pattern=") << karma::string(channelname)
+	);
+	cmd_list->push(new CCommand(chfind_cmd, "cid"));
 
-	char FormatTmp[64];
-	sprintf(FormatTmp, "channeledit cid=<1> channel_maxclients=%d", (int)params[2]);
-	cmds->push(new CCommand(FormatTmp));
+	string chedit_cmd;
+	karma::generate(std::back_insert_iterator<string>(chedit_cmd),
+		lit("channeledit cid=<1> channel_maxclients=") << karma::uint_(maxusers)
+	);
+	cmd_list->push(new CCommand(chedit_cmd));
 
-	TSServer.AddCommandListToQueue(cmds);
+	CTeamspeak::Get()->PushCommandList(cmd_list);
 	return 1;
 }
 
 //native TSC_SetChannelSubChannel(channelname[], parentchannelname[]);
-cell AMX_NATIVE_CALL native_TSC_SetChannelSubChannel(AMX* amx, cell* params) {
-	char *TmpParam = NULL;
+AMX_DECLARE_NATIVE(Native::TSC_SetChannelSubChannel)
+{
+	char
+		*channelname_tmp = NULL,
+		*parent_channelname_tmp = NULL;
 
-	amx_StrParam(amx, params[1], TmpParam);
-	string ChannelName(TmpParam);
-	TSServer.EscapeString(ChannelName);
+	amx_StrParam(amx, params[1], channelname_tmp);
+	amx_StrParam(amx, params[2], parent_channelname_tmp);
 
-	amx_StrParam(amx, params[2], TmpParam);
-	string ParentChannelName(TmpParam);
-	TSServer.EscapeString(ParentChannelName);
+	if (channelname_tmp == NULL || parent_channelname_tmp == NULL)
+		return 0;
+
+	string
+		channelname(channelname_tmp),
+		parent_channelname(parent_channelname_tmp);
+
+	CTeamspeak::Get()->EscapeString(channelname);
+	CTeamspeak::Get()->EscapeString(parent_channelname);
 
 	
-	CommandList *cmds = new CommandList;
+	CommandList *cmd_list = new CommandList;
 
-	string CmdStr("channelfind pattern=");
-	CmdStr.append(ChannelName);
-	cmds->push(new CCommand(CmdStr, "cid"));
+	string chfind_cmd;
+	karma::generate(std::back_insert_iterator<string>(chfind_cmd),
+		lit("channelfind pattern=") << karma::string(channelname)
+	);
+	cmd_list->push(new CCommand(chfind_cmd, "cid"));
 
-	CmdStr.assign("channelfind pattern=");
-	CmdStr.append(ParentChannelName);
-	cmds->push(new CCommand(CmdStr, "cid"));
-	
-	cmds->push(new CCommand("channelmove cid=<1> cpid=<2>"));
+	string chfind2_cmd;
+	karma::generate(std::back_insert_iterator<string>(chfind2_cmd),
+		lit("channelfind pattern=") << karma::string(parent_channelname)
+	);
+	cmd_list->push(new CCommand(chfind2_cmd, "cid"));
 
-	TSServer.AddCommandListToQueue(cmds);
+	cmd_list->push(new CCommand("channelmove cid=<1> cpid=<2>"));
+
+	CTeamspeak::Get()->PushCommandList(cmd_list);
 	return 1;
 }
 
 //native TSC_MoveChannelBelowChannel(channelname[], parentchannelname[]);
-cell AMX_NATIVE_CALL native_TSC_MoveChannelBelowChannel(AMX* amx, cell* params) {
-	char *TmpParam = NULL;
+AMX_DECLARE_NATIVE(Native::TSC_MoveChannelBelowChannel)
+{
+	char
+		*channelname_tmp = NULL,
+		*parent_channelname_tmp = NULL;
 
-	amx_StrParam(amx, params[1], TmpParam);
-	string ChannelName(TmpParam);
-	TSServer.EscapeString(ChannelName);
+	amx_StrParam(amx, params[1], channelname_tmp);
+	amx_StrParam(amx, params[2], parent_channelname_tmp);
 
-	amx_StrParam(amx, params[2], TmpParam);
-	string ParentChannelName(TmpParam);
-	TSServer.EscapeString(ParentChannelName);
+	if (channelname_tmp == NULL || parent_channelname_tmp == NULL)
+		return 0;
+
+	string
+		channelname(channelname_tmp),
+		parent_channelname(parent_channelname_tmp);
+
+	CTeamspeak::Get()->EscapeString(channelname);
+	CTeamspeak::Get()->EscapeString(parent_channelname);
 
 	
-	CommandList *cmds = new CommandList;
+	CommandList *cmd_list = new CommandList;
 
-	string CmdStr("channelfind pattern=");
-	CmdStr.append(ChannelName);
-	cmds->push(new CCommand(CmdStr, "cid"));
+	string chfind_cmd;
+	karma::generate(std::back_insert_iterator<string>(chfind_cmd),
+		lit("channelfind pattern=") << karma::string(channelname)
+	);
+	cmd_list->push(new CCommand(chfind_cmd, "cid"));
 
-	CmdStr.assign("channelfind pattern=");
-	CmdStr.append(ParentChannelName);
-	cmds->push(new CCommand(CmdStr, "cid"));
+	string chfind2_cmd;
+	karma::generate(std::back_insert_iterator<string>(chfind2_cmd),
+		lit("channelfind pattern=") << karma::string(parent_channelname)
+	);
+	cmd_list->push(new CCommand(chfind2_cmd, "cid"));
 
-	cmds->push(new CCommand("channeledit cid=<1> channel_order=<2>"));
+	cmd_list->push(new CCommand("channeledit cid=<1> channel_order=<2>"));
 
-	TSServer.AddCommandListToQueue(cmds);
+	CTeamspeak::Get()->PushCommandList(cmd_list);
 	return 1;
 }
 
 //native TSC_SetClientChannelGroup(uid[], groupid, channelname[]);
-cell AMX_NATIVE_CALL native_TSC_SetClientChannelGroup(AMX* amx, cell* params) {
-	char *TmpParam = NULL;
+AMX_DECLARE_NATIVE(Native::TSC_SetClientChannelGroup)
+{
+	char
+		*uid_tmp = NULL,
+		*channelname_tmp = NULL;
 
-	amx_StrParam(amx, params[1], TmpParam);
-	string UID(TmpParam);
-	TSServer.EscapeString(UID);
+	amx_StrParam(amx, params[1], uid_tmp);
+	int groupid = static_cast<int>(params[2]);
+	amx_StrParam(amx, params[3], channelname_tmp);
+	
+	if (uid_tmp == NULL || channelname_tmp == NULL)
+		return 0;
 
-	amx_StrParam(amx, params[3], TmpParam);
-	string ChannelName(TmpParam);
-	TSServer.EscapeString(ChannelName);
+	string 
+		uid(uid_tmp),
+		channelname(channelname_tmp);
+
+	CTeamspeak::Get()->EscapeString(uid);
+	CTeamspeak::Get()->EscapeString(channelname);
 	
 	
-	CommandList *cmds = new CommandList;
+	CommandList *cmd_list = new CommandList;
 
-	string CmdStr("channelfind pattern=");
-	CmdStr.append(ChannelName);
-	cmds->push(new CCommand(CmdStr, "cid"));
+	string chfind_cmd;
+	karma::generate(std::back_insert_iterator<string>(chfind_cmd),
+		lit("channelfind pattern=") << karma::string(channelname)
+	);
+	cmd_list->push(new CCommand(chfind_cmd, "cid"));
 
-	char FormatTmp[256];
-	sprintf(FormatTmp, "clientdbfind pattern=%s -uid", UID.c_str());
-	cmds->push(new CCommand(FormatTmp, "cldbid"));
+	string cldbfind_cmd;
+	karma::generate(std::back_insert_iterator<string>(cldbfind_cmd),
+		lit("clientdbfind pattern=") << karma::string(uid) << lit(" -uid")
+	);
+	cmd_list->push(new CCommand(cldbfind_cmd, "cldbid"));
 
-	sprintf(FormatTmp, "setclientchannelgroup cgid=%d cid=<1> cldbid=<2>", (int)params[2]);
-	cmds->push(new CCommand(FormatTmp));
+	string clchgrp_cmd;
+	karma::generate(std::back_insert_iterator<string>(clchgrp_cmd),
+		lit("setclientchannelgroup cgid=") << karma::int_(groupid) << lit(" cid=<1> cldbid=<2>")
+	);
+	cmd_list->push(new CCommand(clchgrp_cmd));
 
-	TSServer.AddCommandListToQueue(cmds);
+	CTeamspeak::Get()->PushCommandList(cmd_list);
 	return 1;
 }
 
 //native TSC_AddClientToServerGroup(uid[], groupid);
-cell AMX_NATIVE_CALL native_TSC_AddClientToServerGroup(AMX* amx, cell* params) {
-	char *TmpParam = NULL;
-	amx_StrParam(amx, params[1], TmpParam);
-	string UID(TmpParam);
-	TSServer.EscapeString(UID);
+AMX_DECLARE_NATIVE(Native::TSC_AddClientToServerGroup)
+{
+	char *uid_tmp = NULL;
+
+	amx_StrParam(amx, params[1], uid_tmp);
+	int groupid = static_cast<int>(params[2]);
+
+	if (uid_tmp == NULL)
+		return 0;
+
+	string uid(uid_tmp);
+	CTeamspeak::Get()->EscapeString(uid);
 	
 
-	CommandList *cmds = new CommandList;
+	CommandList *cmd_list = new CommandList;
 
-	char FormatTmp[256];
-	sprintf(FormatTmp, "clientdbfind pattern=%s -uid", UID.c_str());
-	cmds->push(new CCommand(FormatTmp, "cldbid"));
+	string cldbfind_cmd;
+	karma::generate(std::back_insert_iterator<string>(cldbfind_cmd),
+		lit("clientdbfind pattern=") << karma::string(uid) << lit(" -uid")
+	);
+	cmd_list->push(new CCommand(cldbfind_cmd, "cldbid"));
 
-	sprintf(FormatTmp, "servergroupaddclient sgid=%d cldbid=<1>", (int)params[2]);
-	cmds->push(new CCommand(FormatTmp));
+	string srvgrpcl_cmd;
+	karma::generate(std::back_insert_iterator<string>(srvgrpcl_cmd),
+		lit("servergroupaddclient sgid=") << karma::int_(groupid) << lit(" cldbid=<1>")
+	);
+	cmd_list->push(new CCommand(srvgrpcl_cmd));
 
-	TSServer.AddCommandListToQueue(cmds);
+	CTeamspeak::Get()->PushCommandList(cmd_list);
 	return 1;
 }
 
 //native TSC_RemoveClientFromServerGroup(uid[], groupid);
-cell AMX_NATIVE_CALL native_TSC_RemoveClientFromServerGroup(AMX* amx, cell* params) {
-	char *TmpParam = NULL;
-	amx_StrParam(amx, params[1], TmpParam);
-	string UID(TmpParam);
-	TSServer.EscapeString(UID);
+AMX_DECLARE_NATIVE(Native::TSC_RemoveClientFromServerGroup)
+{
+	char *uid_tmp = NULL;
+
+	amx_StrParam(amx, params[1], uid_tmp);
+	int groupid = static_cast<int>(params[2]);
+
+	if (uid_tmp == NULL)
+		return 0;
+
+	string uid(uid_tmp);
+	CTeamspeak::Get()->EscapeString(uid);
 
 	
-	CommandList *cmds = new CommandList;
+	CommandList *cmd_list = new CommandList;
 
-	char FormatTmp[256];
-	sprintf(FormatTmp, "clientdbfind pattern=%s -uid", UID.c_str());
-	cmds->push(new CCommand(FormatTmp, "cldbid"));
+	string cldbfind_cmd;
+	karma::generate(std::back_insert_iterator<string>(cldbfind_cmd),
+		lit("clientdbfind pattern=") << karma::string(uid) << lit(" -uid")
+	);
+	cmd_list->push(new CCommand(cldbfind_cmd, "cldbid"));
 
-	sprintf(FormatTmp, "servergroupdelclient sgid=%d cldbid=<1>", (int)params[2]);
-	cmds->push(new CCommand(FormatTmp));
+	string srvgrpcl_cmd;
+	karma::generate(std::back_insert_iterator<string>(srvgrpcl_cmd),
+		lit("servergroupdelclient sgid=") << karma::int_(groupid) << lit(" cldbid=<1>")
+	);
+	cmd_list->push(new CCommand(srvgrpcl_cmd));
 
-	TSServer.AddCommandListToQueue(cmds);
+	CTeamspeak::Get()->PushCommandList(cmd_list);
 	return 1;
 }
 
 
 //native TSC_KickClient(uid[], kicktype, reason[]);
-cell AMX_NATIVE_CALL native_TSC_KickClient(AMX* amx, cell* params) {
-	if(params[2] != 1 && params[2] != 2)
-		return -1;
+AMX_DECLARE_NATIVE(Native::TSC_KickClient)
+{
+	char
+		*uid_tmp = NULL,
+		*reason_msg_tmp = NULL;
 
-	int KickReasonID;
-	switch(params[2]) {
-	case KICK_TYPE_CHANNEL:
-		KickReasonID = 4;
-		break;
-	case KICK_TYPE_SERVER:
-		KickReasonID = 5;
-		break;
-	default:
+	amx_StrParam(amx, params[1], uid_tmp);
+	int kicktype = static_cast<int>(params[2]);
+	amx_StrParam(amx, params[3], reason_msg_tmp);
+
+	if (uid_tmp == NULL)
 		return 0;
+
+	string
+		uid(uid_tmp),
+		reason_msg(reason_msg_tmp == NULL ? string() : reason_msg_tmp);
+	int kickreason_id;
+
+	switch (kicktype) {
+		case KICK_TYPE_CHANNEL:
+			kickreason_id = 4;
+			break;
+		case KICK_TYPE_SERVER:
+			kickreason_id = 5;
+			break;
+		default:
+			return 0;
 	}
 
-	char *TmpParam = NULL;
+	CTeamspeak::Get()->EscapeString(uid);
+	CTeamspeak::Get()->EscapeString(reason_msg);
 
-	amx_StrParam(amx, params[1], TmpParam);
-	string UID(TmpParam);
-	TSServer.EscapeString(UID);
 
-	amx_StrParam(amx, params[3], TmpParam);
-	string ReasonMsg(TmpParam);
-	TSServer.EscapeString(ReasonMsg);
+	CommandList *cmd_list = new CommandList;
 	
+	CCommand *cmd = new CCommand("clientlist -uid", "clid");
+	karma::generate(std::back_insert_iterator<string>(cmd->MFind),
+		lit("client_unique_identifier=") << karma::string(uid)
+	);
+	cmd_list->push(cmd);
 
-	CommandList *cmds = new CommandList;
-	
-	CCommand *cmd1 = new CCommand("clientlist -uid", "clid");
-	cmd1->MFind = "client_unique_identifier=";
-	cmd1->MFind.append(UID);
-	cmds->push(cmd1);
+	string clkick_cmd;
+	karma::generate(std::back_insert_iterator<string>(clkick_cmd),
+		lit("clientkick clid=<1> reasonid=") << karma::int_(kickreason_id) << lit(" reasonmsg=") << karma::string(reason_msg)
+	);
+	cmd_list->push(new CCommand(clkick_cmd));
 
-	char FormatTmp[256];
-	sprintf(FormatTmp, "clientkick clid=<1> reasonid=%d reasonmsg=%s", KickReasonID, ReasonMsg.c_str());
-	cmds->push(new CCommand(FormatTmp));
-
-	TSServer.AddCommandListToQueue(cmds);
+	CTeamspeak::Get()->PushCommandList(cmd_list);
 	return 1;
 }
 
 //native TSC_BanClient(uid[], seconds, reason[]);
-cell AMX_NATIVE_CALL native_TSC_BanClient(AMX* amx, cell* params) {
-	char *TmpParam = NULL;
+AMX_DECLARE_NATIVE(Native::TSC_BanClient)
+{
+	char
+		*uid_tmp = NULL,
+		*reason_msg_tmp = NULL;
 
-	amx_StrParam(amx, params[1], TmpParam);
-	string UID(TmpParam);
-	TSServer.EscapeString(UID);
+	amx_StrParam(amx, params[1], uid_tmp);
+	unsigned int seconds = static_cast<unsigned int>(params[2] < 0 ? 0 : params[2]);
+	amx_StrParam(amx, params[3], reason_msg_tmp);
 
-	amx_StrParam(amx, params[3], TmpParam);
-	string ReasonMsg(TmpParam);
-	TSServer.EscapeString(ReasonMsg);
+	if (uid_tmp == NULL)
+		return 0;
+
+	string
+		uid(uid_tmp),
+		reason_msg(reason_msg_tmp == NULL ? string() : reason_msg_tmp);
+
+	CTeamspeak::Get()->EscapeString(uid);
+	CTeamspeak::Get()->EscapeString(reason_msg);
 	
 
-	CommandList *cmds = new CommandList;
+	CommandList *cmd_list = new CommandList;
 	
-	char FormatTmp[256];
-	sprintf(FormatTmp, "banadd uid=%s time=%d banreason=%s", UID.c_str(), (int)params[2], ReasonMsg.c_str());
-	cmds->push(new CCommand(FormatTmp));
+	string clban_cmd;
+	karma::generate(std::back_insert_iterator<string>(clban_cmd),
+		lit("banadd uid=") << karma::string(uid) << lit(" time=") << karma::uint_(seconds) << lit(" banreason=") << karma::string(reason_msg)
+	);
+	cmd_list->push(new CCommand(clban_cmd));
 
-	TSServer.AddCommandListToQueue(cmds);
+	CTeamspeak::Get()->PushCommandList(cmd_list);
 	return 1;
 }
 
 //native TSC_MoveClient(uid[], channelname[]);
-cell AMX_NATIVE_CALL native_TSC_MoveClient(AMX* amx, cell* params) {
-	char *TmpParam = NULL;
+AMX_DECLARE_NATIVE(Native::TSC_MoveClient)
+{
+	char
+		*uid_tmp = NULL,
+		*channelname_tmp = NULL;
 
-	amx_StrParam(amx, params[1], TmpParam);
-	string UID(TmpParam);
-	TSServer.EscapeString(UID);
+	amx_StrParam(amx, params[1], uid_tmp);
+	amx_StrParam(amx, params[2], channelname_tmp);
 
-	amx_StrParam(amx, params[2], TmpParam);
-	string ChannelName(TmpParam);
-	TSServer.EscapeString(ChannelName);
+	if (uid_tmp == NULL || channelname_tmp == NULL)
+		return 0;
+
+	string
+		uid(uid_tmp),
+		channelname(channelname_tmp);
+
+	CTeamspeak::Get()->EscapeString(uid);
+	CTeamspeak::Get()->EscapeString(channelname);
 	
 
-	CommandList *cmds = new CommandList;
+	CommandList *cmd_list = new CommandList;
 	
-	CCommand *cmd1 = new CCommand("clientlist -uid", "clid");
-	cmd1->MFind = "client_unique_identifier=";
-	cmd1->MFind.append(UID);
-	cmds->push(cmd1);
+	CCommand *cmd = new CCommand("clientlist -uid", "clid");
+	karma::generate(std::back_insert_iterator<string>(cmd->MFind),
+		lit("client_unique_identifier=") << karma::string(uid)
+	);
+	cmd_list->push(cmd);
 
-	char FormatTmp[128];
-	sprintf(FormatTmp, "channelfind pattern=%s", ChannelName.c_str());
-	cmds->push(new CCommand(FormatTmp, "cid"));
+	string chfind_cmd;
+	karma::generate(std::back_insert_iterator<string>(chfind_cmd),
+		lit("channelfind pattern=") << karma::string(channelname)
+	);
+	cmd_list->push(new CCommand(chfind_cmd, "cid"));
 
-	cmds->push(new CCommand("clientmove clid=<1> cid=<2>"));
+	cmd_list->push(new CCommand("clientmove clid=<1> cid=<2>"));
 
-	TSServer.AddCommandListToQueue(cmds);
+	CTeamspeak::Get()->PushCommandList(cmd_list);
 	return 1;
 }
 
 //native TSC_ToggleClientTalkAbility(uid[], bool:toggle);
-cell AMX_NATIVE_CALL native_TSC_ToggleClientTalkAbility(AMX* amx, cell* params) {
-	char *TmpParam = NULL;
-	amx_StrParam(amx, params[1], TmpParam);
-	string UID(TmpParam);
-	TSServer.EscapeString(UID);
+AMX_DECLARE_NATIVE(Native::TSC_ToggleClientTalkAbility)
+{
+	char *uid_tmp = NULL;
+
+	amx_StrParam(amx, params[1], uid_tmp);
+	bool toggle = (params[2] != 0);
+
+	if (uid_tmp == NULL)
+		return 0;
+
+	string uid(uid_tmp);
+	CTeamspeak::Get()->EscapeString(uid);
 
 
-	CommandList *cmds = new CommandList;
+	CommandList *cmd_list = new CommandList;
 
-	CCommand *cmd1 = new CCommand("clientlist -uid", "clid");
-	cmd1->MFind = "client_unique_identifier=";
-	cmd1->MFind.append(UID);
-	cmds->push(cmd1);
+	CCommand *cmd = new CCommand("clientlist -uid", "clid");
+	karma::generate(std::back_insert_iterator<string>(cmd->MFind),
+		lit("client_unique_identifier=") << karma::string(uid)
+	);
+	cmd_list->push(cmd);
 
-	char FormatTmp[128];
-	sprintf(FormatTmp, "clientedit clid=<1> client_is_talker=%d", (int)params[2]);
-	cmds->push(new CCommand(FormatTmp, "cid"));
+	string cledit_cmd;
+	karma::generate(std::back_insert_iterator<string>(cledit_cmd),
+		lit("clientedit clid=<1> client_is_talker=") << karma::int_(toggle = true ? 1 : 0)
+	);
+	cmd_list->push(new CCommand(cledit_cmd));
 
-	TSServer.AddCommandListToQueue(cmds);
+	CTeamspeak::Get()->PushCommandList(cmd_list);
 	return 1;
 }
 
 
 //native TSC_PokeClient(uid[], msg[]);
-cell AMX_NATIVE_CALL native_TSC_PokeClient(AMX* amx, cell* params) {
-	char *TmpParam = NULL;
+AMX_DECLARE_NATIVE(Native::TSC_PokeClient)
+{
+	char
+		*uid_tmp = NULL,
+		*msg_tmp = NULL;
 
-	amx_StrParam(amx, params[1], TmpParam);
-	string UID(TmpParam);
-	TSServer.EscapeString(UID);
+	amx_StrParam(amx, params[1], uid_tmp);
+	amx_StrParam(amx, params[2], msg_tmp);
 
-	amx_StrParam(amx, params[2], TmpParam);
-	string Msg(TmpParam);
-	TSServer.EscapeString(Msg);
+	if (uid_tmp == NULL || msg_tmp == NULL)
+		return 0;
+
+	string
+		uid(uid_tmp),
+		msg(msg_tmp);
+
+	CTeamspeak::Get()->EscapeString(uid);
+	CTeamspeak::Get()->EscapeString(msg);
 
 
-	CommandList *cmds = new CommandList;
+	CommandList *cmd_list = new CommandList;
 
-	CCommand *cmd1 = new CCommand("clientlist -uid", "clid");
-	cmd1->MFind = "client_unique_identifier=";
-	cmd1->MFind.append(UID);
-	cmds->push(cmd1);
+	CCommand *cmd = new CCommand("clientlist -uid", "clid");
+	karma::generate(std::back_insert_iterator<string>(cmd->MFind),
+		lit("client_unique_identifier=") << karma::string(uid)
+	);
+	cmd_list->push(cmd);
 
-	char FormatTmp[256];
-	sprintf(FormatTmp, "clientpoke msg=%s clid=<1>", Msg.c_str());
-	cmds->push(new CCommand(FormatTmp, "cid"));
+	string clpoke_cmd;
+	karma::generate(std::back_insert_iterator<string>(clpoke_cmd),
+		lit("clientpoke msg=") << karma::string(msg) << lit(" clid=<1>")
+	);
+	cmd_list->push(new CCommand(clpoke_cmd));
 
-	TSServer.AddCommandListToQueue(cmds);
+	CTeamspeak::Get()->PushCommandList(cmd_list);
 	return 1;
 }
 
 
 //native TSC_SendClientMessage(uid[], msg[]);
-cell AMX_NATIVE_CALL native_TSC_SendClientMessage(AMX* amx, cell* params) {
-	char *TmpParam = NULL;
+AMX_DECLARE_NATIVE(Native::TSC_SendClientMessage)
+{
+	char
+		*uid_tmp = NULL,
+		*msg_tmp = NULL;
 
-	amx_StrParam(amx, params[1], TmpParam);
-	string UID(TmpParam);
-	TSServer.EscapeString(UID);
+	amx_StrParam(amx, params[1], uid_tmp);
+	amx_StrParam(amx, params[2], msg_tmp);
 
-	amx_StrParam(amx, params[2], TmpParam);
-	string Msg(TmpParam);
-	TSServer.EscapeString(Msg);
+	if (uid_tmp == NULL || msg_tmp == NULL)
+		return 0;
+
+	string
+		uid(uid_tmp),
+		msg(msg_tmp);
+
+	CTeamspeak::Get()->EscapeString(uid);
+	CTeamspeak::Get()->EscapeString(msg);
 
 
-	CommandList *cmds = new CommandList;
+	CommandList *cmd_list = new CommandList;
 
-	CCommand *cmd1 = new CCommand("clientlist -uid", "clid");
-	cmd1->MFind = "client_unique_identifier=";
-	cmd1->MFind.append(UID);
-	cmds->push(cmd1);
+	CCommand *cmd = new CCommand("clientlist -uid", "clid");
+	karma::generate(std::back_insert_iterator<string>(cmd->MFind),
+		lit("client_unique_identifier=") << karma::string(uid)
+	);
+	cmd_list->push(cmd);
 
-	char FormatTmp[256];
-	sprintf(FormatTmp, "sendtextmessage targetmode=1 target=<1> msg=%s", Msg.c_str());
-	cmds->push(new CCommand(FormatTmp, "cid"));
+	string msg_cmd;
+	karma::generate(std::back_insert_iterator<string>(msg_cmd),
+		lit("sendtextmessage targetmode=1 target=<1> msg=") << karma::string(msg)
+	);
+	cmd_list->push(new CCommand(msg_cmd));
 
-	TSServer.AddCommandListToQueue(cmds);
+	CTeamspeak::Get()->PushCommandList(cmd_list);
 	return 1;
 }
 
 //native TSC_SendChannelMessage(channelname[], msg[]);
-cell AMX_NATIVE_CALL native_TSC_SendChannelMessage(AMX* amx, cell* params) {
-	char *TmpParam = NULL;
+AMX_DECLARE_NATIVE(Native::TSC_SendChannelMessage)
+{
+	char
+		*channelname_tmp = NULL,
+		*msg_tmp = NULL;
 
-	amx_StrParam(amx, params[1], TmpParam);
-	string ChannelName(TmpParam);
-	TSServer.EscapeString(ChannelName);
+	amx_StrParam(amx, params[1], channelname_tmp);
+	amx_StrParam(amx, params[2], msg_tmp);
 
-	amx_StrParam(amx, params[2], TmpParam);
-	string Msg(TmpParam);
-	TSServer.EscapeString(Msg);
+	if (channelname_tmp == NULL || msg_tmp == NULL)
+		return 0;
+
+	string
+		channelname(channelname_tmp),
+		msg(msg_tmp);
+
+	CTeamspeak::Get()->EscapeString(channelname);
+	CTeamspeak::Get()->EscapeString(msg);
 
 
-	CommandList *cmds = new CommandList;
+	CommandList *cmd_list = new CommandList;
 
-	string CmdStr("channelfind pattern=");
-	CmdStr.append(ChannelName);
-	cmds->push(new CCommand(CmdStr, "cid"));
+	string chfind_cmd;
+	karma::generate(std::back_insert_iterator<string>(chfind_cmd),
+		lit("channelfind pattern=") << karma::string(channelname)
+	);
+	cmd_list->push(new CCommand(chfind_cmd, "cid"));
 
-	char FormatTmp[256];
-	sprintf(FormatTmp, "sendtextmessage targetmode=2 target=<1> msg=%s", Msg.c_str());
-	cmds->push(new CCommand(FormatTmp));
+	string msg_cmd;
+	karma::generate(std::back_insert_iterator<string>(msg_cmd),
+		lit("sendtextmessage targetmode=2 target=<1> msg=") << karma::string(msg)
+	);
+	cmd_list->push(new CCommand(msg_cmd));
 
-	TSServer.AddCommandListToQueue(cmds);
+	CTeamspeak::Get()->PushCommandList(cmd_list);
 	return 1;
 }
 
 //native TSC_SendServerMessage(msg[]);
-cell AMX_NATIVE_CALL native_TSC_SendServerMessage(AMX* amx, cell* params) {
-	char *TmpParam = NULL;
-	amx_StrParam(amx, params[1], TmpParam);
-	string Msg(TmpParam);
-	TSServer.EscapeString(Msg);
+AMX_DECLARE_NATIVE(Native::TSC_SendServerMessage)
+{
+	char *msg_tmp = NULL;
+	amx_StrParam(amx, params[1], msg_tmp);
+
+	if (msg_tmp == NULL)
+		return 0;
+
+	string msg(msg_tmp);
+	CTeamspeak::Get()->EscapeString(msg);
 
 
-	CommandList *cmds = new CommandList;
+	CommandList *cmd_list = new CommandList;
 
-	string CmdStr("serveridgetbyport virtualserver_port=");
-	CmdStr.append(TSServer.GetPort());
-	cmds->push(new CCommand(CmdStr, "server_id"));
+	string getid_cmd;
+	karma::generate(std::back_inserter(getid_cmd),
+		lit("serveridgetbyport virtualserver_port=") << karma::string(CTeamspeak::Get()->GetPort())
+	);
+	cmd_list->push(new CCommand(getid_cmd, "server_id"));
 
-	char FormatTmp[256];
-	sprintf(FormatTmp, "sendtextmessage targetmode=3 target=<1> msg=%s", Msg.c_str());
-	cmds->push(new CCommand(FormatTmp));
+	string msg_cmd;
+	karma::generate(std::back_insert_iterator<string>(msg_cmd),
+		lit("sendtextmessage targetmode=3 target=<1> msg=") << karma::string(msg)
+	);
+	cmd_list->push(new CCommand(msg_cmd));
 
-	TSServer.AddCommandListToQueue(cmds);
+	CTeamspeak::Get()->PushCommandList(cmd_list);
 	return 1;
 }
-

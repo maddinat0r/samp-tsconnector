@@ -1,45 +1,56 @@
 #pragma once
-
 #ifndef INC_NATIVES_H
 #define INC_NATIVES_H
 
-//system natives
-cell AMX_NATIVE_CALL native_TSC_Connect(AMX* amx, cell* params);
-cell AMX_NATIVE_CALL native_TSC_Disconnect(AMX* amx, cell* params);
-cell AMX_NATIVE_CALL native_TSC_Login(AMX* amx, cell* params);
+
+#define AMX_DECLARE_NATIVE(native) \
+	cell AMX_NATIVE_CALL native(AMX *amx, cell *params)
+
+#define AMX_DEFINE_NATIVE(native) \
+	{#native, Native::native},
 
 
-//channel natives
-cell AMX_NATIVE_CALL native_TSC_CreateChannel(AMX* amx, cell* params);
-cell AMX_NATIVE_CALL native_TSC_DeleteChannel(AMX* amx, cell* params);
-
-cell AMX_NATIVE_CALL native_TSC_SetChannelName(AMX* amx, cell* params);
-cell AMX_NATIVE_CALL native_TSC_SetChannelDescription(AMX* amx, cell* params);
-cell AMX_NATIVE_CALL native_TSC_SetChannelType(AMX* amx, cell* params);
-cell AMX_NATIVE_CALL native_TSC_SetChannelPassword(AMX* amx, cell* params);
-cell AMX_NATIVE_CALL native_TSC_SetChannelTalkPower(AMX* amx, cell* params);
-cell AMX_NATIVE_CALL native_TSC_SetChannelUserLimit(AMX* amx, cell* params);
-cell AMX_NATIVE_CALL native_TSC_SetChannelSubChannel(AMX* amx, cell* params);
-cell AMX_NATIVE_CALL native_TSC_MoveChannelBelowChannel(AMX* amx, cell* params);
+namespace Native
+{
+	//system natives
+	AMX_DECLARE_NATIVE(TSC_Connect);
+	AMX_DECLARE_NATIVE(TSC_Disconnect);
+	AMX_DECLARE_NATIVE(TSC_Login);
+	AMX_DECLARE_NATIVE(TSC_ChangeNickname);
 
 
-//client natives
-cell AMX_NATIVE_CALL native_TSC_KickClient(AMX* amx, cell* params);
-cell AMX_NATIVE_CALL native_TSC_BanClient(AMX* amx, cell* params);
-cell AMX_NATIVE_CALL native_TSC_MoveClient(AMX* amx, cell* params);
-
-cell AMX_NATIVE_CALL native_TSC_SetClientChannelGroup(AMX* amx, cell* params);
-cell AMX_NATIVE_CALL native_TSC_AddClientToServerGroup(AMX* amx, cell* params);
-cell AMX_NATIVE_CALL native_TSC_RemoveClientFromServerGroup(AMX* amx, cell* params);
-cell AMX_NATIVE_CALL native_TSC_ToggleClientTalkAbility(AMX* amx, cell* params);
-
-cell AMX_NATIVE_CALL native_TSC_PokeClient(AMX* amx, cell* params);
-
-
-//messaging
-cell AMX_NATIVE_CALL native_TSC_SendClientMessage(AMX* amx, cell* params);
-cell AMX_NATIVE_CALL native_TSC_SendChannelMessage(AMX* amx, cell* params);
-cell AMX_NATIVE_CALL native_TSC_SendServerMessage(AMX* amx, cell* params);
+	//channel natives
+	AMX_DECLARE_NATIVE(TSC_CreateChannel);
+	AMX_DECLARE_NATIVE(TSC_DeleteChannel);
+	AMX_DECLARE_NATIVE(TSC_SetChannelName);
+	AMX_DECLARE_NATIVE(TSC_SetChannelDescription);
+	AMX_DECLARE_NATIVE(TSC_SetChannelType);
+	AMX_DECLARE_NATIVE(TSC_SetChannelPassword);
+	AMX_DECLARE_NATIVE(TSC_SetChannelTalkPower);
+	AMX_DECLARE_NATIVE(TSC_SetChannelUserLimit);
+	AMX_DECLARE_NATIVE(TSC_SetChannelSubChannel);
+	AMX_DECLARE_NATIVE(TSC_MoveChannelBelowChannel);
 
 
-#endif
+	//client natives
+	AMX_DECLARE_NATIVE(TSC_KickClient);
+	AMX_DECLARE_NATIVE(TSC_BanClient);
+	AMX_DECLARE_NATIVE(TSC_MoveClient);
+
+
+	AMX_DECLARE_NATIVE(TSC_SetClientChannelGroup);
+	AMX_DECLARE_NATIVE(TSC_AddClientToServerGroup);
+	AMX_DECLARE_NATIVE(TSC_RemoveClientFromServerGroup);
+	AMX_DECLARE_NATIVE(TSC_ToggleClientTalkAbility);
+
+	AMX_DECLARE_NATIVE(TSC_PokeClient);
+
+
+	//messaging
+	AMX_DECLARE_NATIVE(TSC_SendClientMessage);
+	AMX_DECLARE_NATIVE(TSC_SendChannelMessage);
+	AMX_DECLARE_NATIVE(TSC_SendServerMessage);
+}
+
+
+#endif // INC_NATIVES_H

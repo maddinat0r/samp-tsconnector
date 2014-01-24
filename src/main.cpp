@@ -1,15 +1,9 @@
-#pragma once
-
 #include "main.h"
 #include "natives.h"
-#include "thread.h"
-
 #include "CTeamspeak.h"
 #include "CCallback.h"
 
 
-list<AMX*> AmxList;
-void **ppPluginData;
 extern void *pAMXFunctions;
 logprintf_t logprintf;
 
@@ -19,84 +13,66 @@ PLUGIN_EXPORT void PLUGIN_CALL ProcessTick()
 	CCallback::Process();
 }
 
-PLUGIN_EXPORT unsigned int PLUGIN_CALL Supports() {
+PLUGIN_EXPORT unsigned int PLUGIN_CALL Supports() 
+{
 	return SUPPORTS_VERSION | SUPPORTS_AMX_NATIVES | SUPPORTS_PROCESS_TICK; 
 }
 
-PLUGIN_EXPORT bool PLUGIN_CALL Load(void **ppData) {
+PLUGIN_EXPORT bool PLUGIN_CALL Load(void **ppData) 
+{
 	pAMXFunctions = ppData[PLUGIN_DATA_AMX_EXPORTS];
-	logprintf = (logprintf_t)ppData[PLUGIN_DATA_LOGPRINTF];
+	logprintf = reinterpret_cast<logprintf_t>(ppData[PLUGIN_DATA_LOGPRINTF]);
 	
-#ifdef _WIN32
-	WSAData wsa_unused;
-	if(WSAStartup(MAKEWORD(2,0), &wsa_unused) != 0)
-		return 0;
-#endif
 
-
-#ifdef WIN32
-	DWORD ThreadID = 0;
-	HANDLE ThreadHandle = CreateThread(NULL, 0, &SocketThread, NULL, 0, &ThreadID);
-	CloseHandle(ThreadHandle);
-#else
-	pthread_t threadHandle;
-	pthread_attr_t attr;
-	pthread_attr_init(&attr);
-	pthread_attr_setdetachstate(&attr, PTHREAD_CREATE_DETACHED);
-	pthread_create(&threadHandle, &attr, &SocketThread, NULL);
-#endif
-
-
-	logprintf("TSConnector v0.5 loaded.");
+	logprintf(" >> plugin.TSConnector: v1.0 loaded.");
 	return 1;
 }
 
-PLUGIN_EXPORT void PLUGIN_CALL Unload() {
-#ifdef _WIN32
-	WSACleanup();	
-#endif
-	ThreadAlive = false;
-	logprintf("TSConnector unloaded.");
+PLUGIN_EXPORT void PLUGIN_CALL Unload() 
+{
+	CTeamspeak::Get()->Destroy();
+
+	logprintf("plugin.TSConnector: Plugin unloaded.");
 }
 
 
-#if defined __cplusplus
 extern "C"
-#endif
-const AMX_NATIVE_INFO NativesList[] = {
-	{"TSC_Connect",						native_TSC_Connect},
-	{"TSC_Disconnect",					native_TSC_Disconnect},
-	{"TSC_Login",						native_TSC_Login},
+const AMX_NATIVE_INFO NativesList[] = 
+{
+	AMX_DEFINE_NATIVE(TSC_Connect)
+	AMX_DEFINE_NATIVE(TSC_Disconnect)
+	AMX_DEFINE_NATIVE(TSC_Login)
+	AMX_DEFINE_NATIVE(TSC_ChangeNickname)
 
 
-	{"TSC_CreateChannel",				native_TSC_CreateChannel},
-	{"TSC_DeleteChannel",				native_TSC_DeleteChannel},
-
-	{"TSC_SetChannelName",				native_TSC_SetChannelName},
-	{"TSC_SetChannelDescription",		native_TSC_SetChannelDescription},
-	{"TSC_SetChannelType",				native_TSC_SetChannelType},
-	{"TSC_SetChannelPassword",			native_TSC_SetChannelPassword},
-	{"TSC_SetChannelTalkPower",			native_TSC_SetChannelTalkPower},
-	{"TSC_SetChannelUserLimit",			native_TSC_SetChannelUserLimit},
-	{"TSC_SetChannelSubChannel",		native_TSC_SetChannelSubChannel},
-	{"TSC_MoveChannelBelowChannel",		native_TSC_MoveChannelBelowChannel},
-
-	
-	{"TSC_KickClient",					native_TSC_KickClient},
-	{"TSC_BanClient",					native_TSC_BanClient},
-	{"TSC_MoveClient",					native_TSC_MoveClient},
-	
-	{"TSC_SetClientChannelGroup",		native_TSC_SetClientChannelGroup},
-	{"TSC_AddClientToServerGroup",		native_TSC_AddClientToServerGroup},
-	{"TSC_RemoveClientFromServerGroup",	native_TSC_RemoveClientFromServerGroup},
-	{"TSC_ToggleClientTalkAbility",		native_TSC_ToggleClientTalkAbility},
-
-	{"TSC_PokeClient",					native_TSC_PokeClient},
+	AMX_DEFINE_NATIVE(TSC_CreateChannel)
+	AMX_DEFINE_NATIVE(TSC_DeleteChannel)
+	AMX_DEFINE_NATIVE(TSC_SetChannelName)
+	AMX_DEFINE_NATIVE(TSC_SetChannelDescription)
+	AMX_DEFINE_NATIVE(TSC_SetChannelType)
+	AMX_DEFINE_NATIVE(TSC_SetChannelPassword)
+	AMX_DEFINE_NATIVE(TSC_SetChannelTalkPower)
+	AMX_DEFINE_NATIVE(TSC_SetChannelUserLimit)
+	AMX_DEFINE_NATIVE(TSC_SetChannelSubChannel)
+	AMX_DEFINE_NATIVE(TSC_MoveChannelBelowChannel)
 
 
-	{"TSC_SendClientMessage",			native_TSC_SendClientMessage},
-	{"TSC_SendChannelMessage",			native_TSC_SendChannelMessage},
-	{"TSC_SendServerMessage",			native_TSC_SendServerMessage},
+	AMX_DEFINE_NATIVE(TSC_KickClient)
+	AMX_DEFINE_NATIVE(TSC_BanClient)
+	AMX_DEFINE_NATIVE(TSC_MoveClient)
+
+
+	AMX_DEFINE_NATIVE(TSC_SetClientChannelGroup)
+	AMX_DEFINE_NATIVE(TSC_AddClientToServerGroup)
+	AMX_DEFINE_NATIVE(TSC_RemoveClientFromServerGroup)
+	AMX_DEFINE_NATIVE(TSC_ToggleClientTalkAbility)
+
+	AMX_DEFINE_NATIVE(TSC_PokeClient)
+
+
+	AMX_DEFINE_NATIVE(TSC_SendClientMessage)
+	AMX_DEFINE_NATIVE(TSC_SendChannelMessage)
+	AMX_DEFINE_NATIVE(TSC_SendServerMessage)
 
 	{NULL, NULL}
 };
@@ -112,12 +88,4 @@ PLUGIN_EXPORT int PLUGIN_CALL AmxUnload(AMX *amx)
 {
 	CCallback::RemoveAmxInstance(amx);
 	return AMX_ERR_NONE;
-}
-
-
-int AMX_SetString(AMX* amx, cell param, const char *str) {
-	cell *Dest;
-	amx_GetAddr(amx, param, &Dest);
-	amx_SetString(Dest, str, 0, 0, strlen(str) + 1);
-	return 1;
 }
