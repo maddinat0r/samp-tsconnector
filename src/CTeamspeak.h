@@ -139,7 +139,7 @@ private: //functions
 		cmd.push_back('\n');
 		asio::write(m_Socket, asio::buffer(cmd), m_Error);
 		//create a delay to give the Teamspeak server some time for a response
-		this_thread::sleep_for(chrono::milliseconds(70));
+		this_thread::sleep_for(chrono::milliseconds(200));
 		return (m_Error.value() == 0);
 	}
 	inline bool Read()
