@@ -262,7 +262,7 @@ AMX_DECLARE_NATIVE(Native::TSC_SetChannelType)
 
 	string chedit_cmd;
 	karma::generate(std::back_insert_iterator<string>(chedit_cmd),
-		lit("channeledit cid=<1>  ") << karma::string(channeltype) << lit("= 1")
+		lit("channeledit cid=<1> ") << karma::string(channeltype) << lit("=1")
 	);
 	cmd_list->push(new CCommand(chedit_cmd));
 

@@ -4,10 +4,17 @@
 #define TSConnector_included
 
 
-enum 
+enum E_KICK_TYPE
 {
 	KICK_TYPE_CHANNEL = 1,
 	KICK_TYPE_SERVER
+};
+
+enum E_CHANNEL_TYPE 
+{
+	CHANNEL_TYPE_PERMANENT = 1,
+	CHANNEL_TYPE_SEMI_PERMANENT,
+	CHANNEL_TYPE_TEMPORARY
 };
 
 
@@ -20,13 +27,14 @@ native TSC_CreateChannel(channelname[]);
 native TSC_DeleteChannel(channelname[]);
 native TSC_SetChannelName(channelname[], newchannelname[]);
 native TSC_SetChannelDescription(channelname[], channeldesc[]);
+native TSC_SetChannelType(channelname[], E_CHANNEL_TYPE:type);
 native TSC_SetChannelPassword(channelname[], channelpasswd[]);
 native TSC_SetChannelTalkPower(channelname[], talkpower);
 native TSC_SetChannelSubChannel(channelname[], parentchannelname[]);
 native TSC_MoveChannelBelowChannel(channelname[], parentchannelname[]);
 	
 
-native TSC_KickClient(uid[], kicktype, reason[]);
+native TSC_KickClient(uid[], E_KICK_TYPE:kicktype, reason[]);
 native TSC_BanClient(uid[], seconds, reason[]);
 native TSC_MoveClient(uid[], channelname[]);
 

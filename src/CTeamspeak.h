@@ -170,13 +170,15 @@ public: //functions
 };
 
 
-enum ChannelTypes {
+enum E_CHANNEL_TYPES
+{
 	CHANNEL_TYPE_PERMANENT = 1,
 	CHANNEL_TYPE_SEMI_PERMANENT,
 	CHANNEL_TYPE_TEMPORARY
 };
 
-enum KickTypes {
+enum E_KICK_TYPES 
+{
 	KICK_TYPE_CHANNEL = 1,
 	KICK_TYPE_SERVER
 };
