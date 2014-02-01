@@ -24,7 +24,7 @@ PLUGIN_EXPORT bool PLUGIN_CALL Load(void **ppData)
 	logprintf = reinterpret_cast<logprintf_t>(ppData[PLUGIN_DATA_LOGPRINTF]);
 	
 
-	logprintf(" >> plugin.TSConnector: v0.6 loaded.");
+	logprintf(" >> plugin.TSConnector: v0.6.1 loaded.");
 	return 1;
 }
 
