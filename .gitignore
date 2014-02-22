@@ -1,4 +1,3 @@
-boost/
 ipch/
 *.user
 *.sdf
@@ -6,3 +5,4 @@ ipch/
 *.opensdf
 *.vsp
 *.psess
+*.old
