@@ -36,8 +36,7 @@ PLUGIN_EXPORT void PLUGIN_CALL Unload()
 }
 
 
-extern "C"
-const AMX_NATIVE_INFO NativesList[] = 
+extern "C" const AMX_NATIVE_INFO native_list[] = 
 {
 	AMX_DEFINE_NATIVE(TSC_Connect)
 	AMX_DEFINE_NATIVE(TSC_Disconnect)
@@ -81,7 +80,7 @@ const AMX_NATIVE_INFO NativesList[] =
 PLUGIN_EXPORT int PLUGIN_CALL AmxLoad(AMX *amx) 
 {
 	CCallback::AddAmxInstance(amx);
-	return amx_Register(amx, NativesList, -1);
+	return amx_Register(amx, native_list, -1);
 }
 
 PLUGIN_EXPORT int PLUGIN_CALL AmxUnload(AMX *amx) 
