@@ -83,6 +83,8 @@ private: //variables
 	boost::array<char, 4096U> m_ReadBuf;
 	boost::system::error_code m_Error;
 
+	chrono::milliseconds m_Ping;
+
 	thread *m_NetThread;
 	atomic<bool> m_NetThreadRunning;
 
@@ -110,6 +112,8 @@ private: //functions
 		m_NetService(),
 		m_Socket(m_NetService),
 
+		m_Ping(500),
+
 		m_NetThread(NULL),
 		m_NetThreadRunning(true),
 
@@ -133,22 +137,10 @@ private: //functions
 	void OnClientChannelMove(int clientid, int channelid);
 
 
-	inline bool Write(string &cmd)
-	{
-		m_Error.clear();
-		cmd.push_back('\n');
-		asio::write(m_Socket, asio::buffer(cmd), m_Error);
-		//create a delay to give the Teamspeak server some time for a response
-		this_thread::sleep_for(chrono::milliseconds(200));
-		return (m_Error.value() == 0);
-	}
-	inline bool Read()
-	{
-		m_Error.clear();
-		m_ReadBuf.fill('\0');
-		asio::read(m_Socket, asio::buffer(m_ReadBuf), m_Error);
-		return (m_Error.value() == 0);
-	}
+	bool Write(string &cmd);
+	bool Read();
+
+	void PingTest();
 
 public: //functions
 

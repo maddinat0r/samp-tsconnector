@@ -20,6 +20,8 @@ void CTeamspeak::Connect(char *ip, char *port)
 	asio::socket_base::non_blocking_io option(true);
 	m_Socket.io_control(option);
 
+	PingTest();
+
 	m_NetThread = new thread(boost::bind(&CTeamspeak::NetThreadFunc, this));
 
 
@@ -53,6 +55,52 @@ void CTeamspeak::Disconnect()
 		delete m_NetThread;
 		m_NetThread = NULL;
 	}
+}
+
+void CTeamspeak::PingTest()
+{
+	asio::streambuf tmp_sbuf;
+	do
+	{
+		this_thread::sleep_for(m_Ping);
+		asio::read(m_Socket, tmp_sbuf, m_Error);
+	} while (m_Error != asio::error::would_block);
+	tmp_sbuf.consume(tmp_sbuf.size());
+	
+
+	asio::socket_base::non_blocking_io option_disable(false);
+	m_Socket.io_control(option_disable);
+
+
+	string cmd("whoami\n");
+	chrono::steady_clock::time_point m_PingTimePoint(chrono::steady_clock::now());
+
+	asio::write(m_Socket, asio::buffer(cmd), m_Error);
+	asio::read_until(m_Socket, tmp_sbuf, "msg=ok", m_Error);
+
+	m_Ping = chrono::duration_cast<chrono::milliseconds>(chrono::steady_clock::now() - m_PingTimePoint) + chrono::milliseconds(200);
+
+
+	asio::socket_base::non_blocking_io option_enable(true);
+	m_Socket.io_control(option_enable);
+}
+
+bool CTeamspeak::Write(string &cmd)
+{
+	m_Error.clear();
+	cmd.push_back('\n');
+	asio::write(m_Socket, asio::buffer(cmd), m_Error);
+	//create a delay to give the Teamspeak server some time for a response
+	this_thread::sleep_for(m_Ping);
+	return (m_Error.value() == 0);
+}
+
+bool CTeamspeak::Read()
+{
+	m_Error.clear();
+	m_ReadBuf.fill('\0');
+	asio::read(m_Socket, asio::buffer(m_ReadBuf), m_Error);
+	return (m_Error.value() == 0);
 }
 
 
