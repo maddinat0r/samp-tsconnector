@@ -1,6 +1,4 @@
 boost/
-Debug/
-Release/
 ipch/
 *.user
 *.sdf
