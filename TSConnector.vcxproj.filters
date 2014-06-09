@@ -13,6 +13,7 @@
     <ClCompile Include="src\CCallback.cpp" />
     <ClCompile Include="src\CTeamspeak.cpp" />
     <ClCompile Include="src\main.cpp" />
+    <ClCompile Include="src\format.cc" />
     <ClCompile Include="src\natives.cpp" />
     <ClCompile Include="src\thread.cpp" />
   </ItemGroup>
@@ -21,6 +22,7 @@
     <ClInclude Include="src\CTeamspeak.h" />
     <ClInclude Include="src\main.h" />
     <ClInclude Include="src\natives.h" />
+    <ClInclude Include="src\format.h" />
     <ClInclude Include="src\CSingleton.h" />
   </ItemGroup>
 </Project>

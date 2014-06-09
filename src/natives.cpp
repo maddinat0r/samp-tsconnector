@@ -1,6 +1,8 @@
 #include "main.h"
 #include "natives.h"
 
+#include "format.h"
+
 #include "CTeamspeak.h"
 
 

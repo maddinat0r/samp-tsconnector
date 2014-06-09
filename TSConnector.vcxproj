@@ -94,6 +94,7 @@
   <ItemGroup>
     <ClCompile Include="src\CCallback.cpp" />
     <ClCompile Include="src\CTeamspeak.cpp" />
+    <ClCompile Include="src\format.cc" />
     <ClCompile Include="src\main.cpp" />
     <ClCompile Include="src\natives.cpp" />
     <ClCompile Include="src\SDK\amxplugin.cpp" />
@@ -103,6 +104,7 @@
     <ClInclude Include="src\CCallback.h" />
     <ClInclude Include="src\CSingleton.h" />
     <ClInclude Include="src\CTeamspeak.h" />
+    <ClInclude Include="src\format.h" />
     <ClInclude Include="src\main.h" />
     <ClInclude Include="src\natives.h" />
   </ItemGroup>
