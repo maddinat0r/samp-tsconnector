@@ -1,106 +1,122 @@
 #include "main.h"
 #include "CTeamspeak.h"
 
+#include <istream>
 
-CTeamspeak *CTeamspeak::m_Instance = NULL;
+#include <boost/regex.hpp>
+#include "format.h"
 
 
-void CTeamspeak::Connect(char *ip, char *port) 
+void CTeamspeak::Connect(char *ip, char *port)
 {
-	if (m_Connected == true)
-		Disconnect();
-
-	m_Socket.connect(tcp::endpoint(asio::ip::address::from_string(ip), 10011), m_Error);
-	if (m_Error.value() != 0)
-	{
-		logprintf("plugin.TSConnector: Error while connecting to server: \"%s\"", m_Error.message().c_str());
-		return ;
-	}
-
-	asio::socket_base::non_blocking_io option(true);
-	m_Socket.io_control(option);
-
-	PingTest();
-
-	m_NetThread = new thread(boost::bind(&CTeamspeak::NetThreadFunc, this));
+	m_Socket.async_connect(tcp::endpoint(asio::ip::address::from_string(ip), 10011), boost::bind(&CTeamspeak::OnConnect, this, _1, string(port)));
+	m_IoThread = new thread(boost::bind(&asio::io_service::run, boost::ref(m_IoService)));
 
 
-	CommandList *cmdlist = new CommandList; 
-
-	string port_cmd;
-	karma::generate(std::back_insert_iterator<string>(port_cmd), 
-		lit("use port=") << karma::string(port)
-	);
-	cmdlist->push(new CCommand(port_cmd));
-
-	PushCommandList(cmdlist);
-	
-
-	m_Connected = true;
-
-	m_Ip.assign(ip);
-	m_Port.assign(port);
+	CommandList *cmds = new CommandList;
+	cmds->push(new CCommand(str(fmt::Writer() << "use port=" << port)));
+	Execute(cmds);
 }
 
-void CTeamspeak::Disconnect() 
+void CTeamspeak::Disconnect()
 {
-	m_Connected = false;
-
 	m_Socket.close();
+	m_IoService.stop();
 
-	if (m_NetThread != NULL)
+	m_IoThread->join();
+	delete m_IoThread;
+}
+
+void CTeamspeak::AsyncRead()
+{
+	asio::async_read_until(m_Socket, m_ReadStreamBuf, '\r', boost::bind(&CTeamspeak::OnRead, this, _1));
+}
+
+void CTeamspeak::AsyncWrite(string &data)
+{
+	m_CmdWriteBuffer = data;
+	if (data.at(data.length()-1) != '\n')
+		m_CmdWriteBuffer.push_back('\n');
+
+	m_Socket.async_send(asio::buffer(m_CmdWriteBuffer), boost::bind(&CTeamspeak::OnWrite, this, _1));
+}
+
+void CTeamspeak::OnConnect(const boost::system::error_code &error_code, string port)
+{
+	if (error_code.value() == 0)
 	{
-		m_NetThreadRunning = false;
-		m_NetThread->join();
-		delete m_NetThread;
-		m_NetThread = NULL;
+		AsyncRead();
+	}
+	else
+	{
+		logprintf("plugin.TSConnector: Error while connecting to server: \"%s\"", error_code.message().c_str());
+		Disconnect();
 	}
 }
 
-void CTeamspeak::PingTest()
+void CTeamspeak::OnRead(const boost::system::error_code &error_code)
 {
-	asio::streambuf tmp_sbuf;
-	do
+	if (error_code.value() == 0)
 	{
-		this_thread::sleep_for(m_Ping);
-		asio::read(m_Socket, tmp_sbuf, m_Error);
-	} while (m_Error != asio::error::would_block);
-	tmp_sbuf.consume(tmp_sbuf.size());
+		std::istream tmp_stream(&m_ReadStreamBuf);
+		string read_data;
+		std::getline(tmp_stream, read_data, '\r');
+
+		//TODO: process data 'read_data'
+
+		//regex: parse error
+		static const boost::regex error_rx("error id=([0-9]+) msg=([^ \n]+)");
+		boost::cmatch error_rx_result;
+		if (boost::regex_search(read_data.c_str(), error_rx_result, error_rx))
+		{
+			boost::lock_guard<boost::mutex> queue_lock_guard(m_CmdQueueMutex);
+			if (error_rx_result[1].str() == "0")
+			{
+				if (m_CmdQueue.empty() == false)
+				{
+					CommandList *cmd_list = m_CmdQueue.front();
+					if (cmd_list->empty() == false)
+					{
+						cmd_list->pop();
+						if (cmd_list->empty() == false)
+							AsyncWrite(cmd_list->front()->Command);
+						else
+						{
+							delete cmd_list;
+							m_CmdQueue.pop();
+
+							if (m_CmdQueue.empty() == false)
+								AsyncWrite(m_CmdQueue.front()->front()->Command);
+						}
+					}
+				}
+			}
+			else
+			{
+				string error_str(error_rx_result[2].str());
+				UnEscapeString(error_str);
+
+				logprintf(">> plugin.TSConnector: Error while executing \"%s\": %s (#%s)", m_CmdQueue.front()->front()->Command.c_str(), error_str.c_str(), error_rx_result[1].str().c_str());
+			}
+		}
+	}
+	else
+		logprintf(">> plugin.TSConnector: Error while reading: %s (#%d)", error_code.message().c_str(), error_code.value());
 	
-
-	asio::socket_base::non_blocking_io option_disable(false);
-	m_Socket.io_control(option_disable);
-
-
-	string cmd("whoami\n");
-	chrono::steady_clock::time_point m_PingTimePoint(chrono::steady_clock::now());
-
-	asio::write(m_Socket, asio::buffer(cmd), m_Error);
-	asio::read_until(m_Socket, tmp_sbuf, "msg=ok", m_Error);
-
-	m_Ping = chrono::duration_cast<chrono::milliseconds>(chrono::steady_clock::now() - m_PingTimePoint) + chrono::milliseconds(200);
-
-
-	asio::socket_base::non_blocking_io option_enable(true);
-	m_Socket.io_control(option_enable);
+	AsyncRead();
 }
 
-bool CTeamspeak::Write(string &cmd)
+void CTeamspeak::OnWrite(const boost::system::error_code &error_code)
 {
-	m_Error.clear();
-	cmd.push_back('\n');
-	asio::write(m_Socket, asio::buffer(cmd), m_Error);
-	//create a delay to give the Teamspeak server some time for a response
-	this_thread::sleep_for(m_Ping);
-	return (m_Error.value() == 0);
+	m_CmdWriteBuffer.clear();
 }
 
-bool CTeamspeak::Read()
+void CTeamspeak::Execute(CommandList *cmds)
 {
-	m_Error.clear();
-	m_ReadBuf.fill('\0');
-	asio::read(m_Socket, asio::buffer(m_ReadBuf), m_Error);
-	return (m_Error.value() == 0);
+	boost::lock_guard<boost::mutex> queue_lock_guard(m_CmdQueueMutex);
+	m_CmdQueue.push(cmds);
+	if (m_CmdQueue.size() == 1)
+		AsyncWrite(cmds->front()->Command);
 }
 
 

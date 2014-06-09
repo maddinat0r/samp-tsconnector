@@ -30,7 +30,7 @@ PLUGIN_EXPORT bool PLUGIN_CALL Load(void **ppData)
 
 PLUGIN_EXPORT void PLUGIN_CALL Unload() 
 {
-	CTeamspeak::Get()->Destroy();
+	CTeamspeak::Destroy();
 
 	logprintf("plugin.TSConnector: Plugin unloaded.");
 }

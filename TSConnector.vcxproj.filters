@@ -21,5 +21,6 @@
     <ClInclude Include="src\CTeamspeak.h" />
     <ClInclude Include="src\main.h" />
     <ClInclude Include="src\natives.h" />
+    <ClInclude Include="src\CSingleton.h" />
   </ItemGroup>
 </Project>

@@ -101,6 +101,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\CCallback.h" />
+    <ClInclude Include="src\CSingleton.h" />
     <ClInclude Include="src\CTeamspeak.h" />
     <ClInclude Include="src\main.h" />
     <ClInclude Include="src\natives.h" />
