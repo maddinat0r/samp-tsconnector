@@ -3,30 +3,31 @@
 
 #include "format.h"
 
-#include "CTeamspeak.h"
+#include "CNetwork.h"
 
 
-//native TSC_Connect(ip[], port[]);
+//TODO: merge TSC_Connect and TSC_Login
+//native TSC_Connect(ip[], port = 9987, serverquery_port = 10011);
 AMX_DECLARE_NATIVE(Native::TSC_Connect)
 {
-	char 
-		*ip = NULL,
-		*port = NULL;
+	char *ip = NULL;
+	unsigned short
+		server_port = static_cast<unsigned short>(params[2]),
+		query_port = static_cast<unsigned short>(params[3]);
 
 	amx_StrParam(amx, params[1], ip);
-	amx_StrParam(amx, params[2], port);
 
-	if (ip == NULL || port == NULL)
+	if (ip == NULL || server_port == 0 || query_port == 0)
 		return 0;
 
-	CTeamspeak::Get()->Connect(ip, port);
+	CNetwork::Get()->Connect(ip, server_port, query_port);
 	return 1;
 }
 
 //native TSC_Disconnect();
 AMX_DECLARE_NATIVE(Native::TSC_Disconnect)
 {
-	CTeamspeak::Get()->Disconnect();
+	CNetwork::Get()->Disconnect();
 	return 1;
 }
 

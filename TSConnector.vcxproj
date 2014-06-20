@@ -93,7 +93,8 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="src\CCallback.cpp" />
-    <ClCompile Include="src\CTeamspeak.cpp" />
+    <ClCompile Include="src\CNetwork.cpp" />
+    <ClCompile Include="src\CServer.cpp" />
     <ClCompile Include="src\format.cc" />
     <ClCompile Include="src\main.cpp" />
     <ClCompile Include="src\natives.cpp" />
@@ -102,8 +103,9 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\CCallback.h" />
+    <ClInclude Include="src\CServer.h" />
     <ClInclude Include="src\CSingleton.h" />
-    <ClInclude Include="src\CTeamspeak.h" />
+    <ClInclude Include="src\CNetwork.h" />
     <ClInclude Include="src\format.h" />
     <ClInclude Include="src\main.h" />
     <ClInclude Include="src\natives.h" />

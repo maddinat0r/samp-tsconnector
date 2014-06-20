@@ -1,6 +1,6 @@
 #include "main.h"
 #include "natives.h"
-#include "CTeamspeak.h"
+#include "CNetwork.h"
 #include "CCallback.h"
 
 
@@ -30,7 +30,7 @@ PLUGIN_EXPORT bool PLUGIN_CALL Load(void **ppData)
 
 PLUGIN_EXPORT void PLUGIN_CALL Unload() 
 {
-	CTeamspeak::Destroy();
+	CNetwork::Destroy();
 
 	logprintf("plugin.TSConnector: Plugin unloaded.");
 }
