@@ -4,8 +4,8 @@
 
 
 #include <malloc.h>
-#include "SDK/amx/amx.h"
-#include "SDK/plugincommon.h"
+#include <sdk/amx/amx.h>
+#include <sdk/plugincommon.h>
 
 typedef void (*logprintf_t)(char* format, ...);
 extern logprintf_t logprintf;

@@ -7,9 +7,6 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="src\SDK\amxplugin.cpp">
-      <Filter>SDK</Filter>
-    </ClCompile>
     <ClCompile Include="src\CCallback.cpp" />
     <ClCompile Include="src\main.cpp" />
     <ClCompile Include="src\format.cc" />
@@ -17,6 +14,12 @@
     <ClCompile Include="src\thread.cpp" />
     <ClCompile Include="src\CNetwork.cpp" />
     <ClCompile Include="src\CServer.cpp" />
+    <ClCompile Include="lib\sdk\amxplugin.cpp">
+      <Filter>SDK</Filter>
+    </ClCompile>
+    <ClCompile Include="lib\sdk\amxplugin2.cpp">
+      <Filter>SDK</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\CCallback.h" />

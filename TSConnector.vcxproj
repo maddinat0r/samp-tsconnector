@@ -41,15 +41,15 @@
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <LinkIncremental>true</LinkIncremental>
-    <IncludePath>D:\boost_1_55_0;$(IncludePath)</IncludePath>
     <LibraryPath>D:\boost_1_55_0\lib32-msvc-11.0;$(LibraryPath)</LibraryPath>
+    <IncludePath>D:\boost_1_55_0;lib;$(IncludePath)</IncludePath>
     <OutDir>bin\$(Configuration)\</OutDir>
     <IntDir>bin\$(Configuration)\obj\</IntDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <LinkIncremental>false</LinkIncremental>
-    <IncludePath>D:\boost_1_55_0;$(IncludePath)</IncludePath>
     <LibraryPath>D:\boost_1_55_0\lib32-msvc-11.0;$(LibraryPath)</LibraryPath>
+    <IncludePath>D:\boost_1_55_0;lib;$(IncludePath)</IncludePath>
     <OutDir>bin\$(Configuration)\</OutDir>
     <IntDir>bin\$(Configuration)\obj\</IntDir>
   </PropertyGroup>
@@ -59,7 +59,7 @@
       </PrecompiledHeader>
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
-      <PreprocessorDefinitions>_WIN32_WINNT=0x0501;WIN32;_DEBUG;_WINDOWS;_USRDLL;TSCONNECTOR_EXPORTS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>HAVE_STDINT_H;_WIN32_WINNT=0x0501;WIN32;_DEBUG;_WINDOWS;_USRDLL;TSCONNECTOR_EXPORTS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -78,7 +78,7 @@
       <Optimization>MaxSpeed</Optimization>
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
-      <PreprocessorDefinitions>_WIN32_WINNT=0x0501;WIN32;NDEBUG;_WINDOWS;_USRDLL;TSCONNECTOR_EXPORTS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>HAVE_STDINT_H;_WIN32_WINNT=0x0501;WIN32;NDEBUG;_WINDOWS;_USRDLL;TSCONNECTOR_EXPORTS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -93,12 +93,13 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="src\CCallback.cpp" />
+    <ClCompile Include="lib\sdk\amxplugin.cpp" />
+    <ClCompile Include="lib\sdk\amxplugin2.cpp" />
     <ClCompile Include="src\CNetwork.cpp" />
     <ClCompile Include="src\CServer.cpp" />
     <ClCompile Include="src\format.cc" />
     <ClCompile Include="src\main.cpp" />
     <ClCompile Include="src\natives.cpp" />
-    <ClCompile Include="src\SDK\amxplugin.cpp" />
     <ClCompile Include="src\thread.cpp" />
   </ItemGroup>
   <ItemGroup>
