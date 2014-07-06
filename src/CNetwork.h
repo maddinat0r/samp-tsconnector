@@ -11,6 +11,7 @@
 #include <boost/asio.hpp>
 #include <boost/function.hpp>
 #include <boost/tuple/tuple.hpp>
+#include <boost/regex.hpp>
 
 #include "format.h"
 
@@ -35,6 +36,9 @@ public: //definitions
 	typedef boost::function<void(ResultSet_t &)> ReadCallback_t;
 	typedef tuple<string, ReadCallback_t> CmdTuple_t;
 
+	typedef boost::function<void(boost::smatch &result)> EventCallback_t;
+	typedef tuple<boost::regex, EventCallback_t> EventTuple_t;
+
 private: //variables
 	asio::io_service m_IoService;
 	thread *m_IoThread;
@@ -43,19 +47,26 @@ private: //variables
 	tcp::endpoint m_SocketDest;
 	unsigned short m_ServerPort;
 
+	asio::deadline_timer m_AliveTimer;
+
 	asio::streambuf m_ReadStreamBuf;
 	string m_CmdWriteBuffer;
 
 	boost::mutex m_CmdQueueMutex;
 	queue<CmdTuple_t> m_CmdQueue;
 
+	vector<EventTuple_t> m_EventList;
+
 
 private: //constructor / deconstructor
 	CNetwork() :
 		m_IoThread(NULL),
 
-		m_Socket(m_IoService)
-	{}
+		m_Socket(m_IoService),
+		m_AliveTimer(m_IoService)
+	{
+		NetAlive(boost::system::error_code(), false);
+	}
 
 	~CNetwork()
 	{
@@ -67,10 +78,10 @@ public: //functions
 	void Connect(char *ip, unsigned short port, unsigned short query_port = 10011);
 	void Disconnect();
 
-	void EscapeString(string &str);
-	void UnEscapeString(string &str);
 
-	void Execute(fmt::Writer &cmd_writer, ReadCallback_t callback = ReadCallback_t());
+	void Execute(string cmd, ReadCallback_t callback = ReadCallback_t());
+
+	void RegisterEvent(boost::regex &event_rx, EventCallback_t callback);
 
 
 private: //handlers
@@ -78,6 +89,7 @@ private: //handlers
 	void OnRead(const boost::system::error_code &error_code);
 	void OnWrite(const boost::system::error_code &error_code);
 
+	void NetAlive(const boost::system::error_code &error_code, bool from_write);
 
 private: //functions
 	void AsyncRead();

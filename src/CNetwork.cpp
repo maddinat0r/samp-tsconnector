@@ -1,11 +1,27 @@
 #include "main.h"
 #include "CNetwork.h"
 #include "CServer.h"
+#include "CUtils.h"
 
 #include <istream>
+#include <boost/date_time/posix_time/posix_time.hpp>
 
-#include <boost/regex.hpp>
 #include "format.h"
+
+
+void CNetwork::NetAlive(const boost::system::error_code &error_code, bool from_write)
+{
+	if (from_write == false)
+	{
+		if (m_Socket.is_open())
+		{
+			static string empty_data("\n");
+			m_Socket.async_send(asio::buffer(empty_data), boost::bind(&CNetwork::NetAlive, this, boost::asio::placeholders::error, true));
+		}
+		m_AliveTimer.expires_from_now(boost::posix_time::seconds(60));
+		m_AliveTimer.async_wait(boost::bind(&CNetwork::NetAlive, this, boost::asio::placeholders::error, false));
+	}
+}
 
 
 void CNetwork::Connect(char *ip, unsigned short port, unsigned short query_port)
@@ -14,6 +30,8 @@ void CNetwork::Connect(char *ip, unsigned short port, unsigned short query_port)
 	m_ServerPort = port;
 	AsyncConnect();
 	m_IoThread = new thread(boost::bind(&asio::io_service::run, boost::ref(m_IoService)));
+
+	Execute(str(fmt::Writer() << "use port=" << m_ServerPort));
 }
 
 void CNetwork::Disconnect()
@@ -52,16 +70,10 @@ void CNetwork::OnConnect(const boost::system::error_code &error_code)
 	if (error_code.value() == 0)
 	{
 		AsyncRead();
-
-		/*CCommands *cmds = CCommands::Create();
-		cmds->AddCommand(fmt::Writer() << "use port=" << m_ServerPort);
-		Execute(cmds);*/
-		Execute(fmt::Writer() << "use port=" << m_ServerPort, 
-			boost::bind(&CServer::OnPortSet, CServer::Get(), _1));
 	}
 	else
 	{
-		logprintf("plugin.TSConnector: Error while connecting to server: \"%s\"", error_code.message().c_str());
+		logprintf(">> plugin.TSConnector: Error while connecting to server: \"%s\"", error_code.message().c_str());
 		Disconnect();
 	}
 }
@@ -81,17 +93,16 @@ void CNetwork::OnRead(const boost::system::error_code &error_code)
 		string read_data;
 		std::getline(tmp_stream, read_data, '\r');
 
-		logprintf(">>> %s", read_data.c_str());
 
 		//regex: parse error
 		//if this is an error message, it means that no other result data will come
 		static const boost::regex error_rx("error id=([0-9]+) msg=([^ \n]+)");
 		boost::smatch error_rx_result;
-		if (boost::regex_match(read_data, error_rx_result, error_rx))
+		if (boost::regex_search(read_data, error_rx_result, error_rx))
 		{
 			if (error_rx_result[1].str() == "0")
 			{
-				for (vector<string>::iterator i, end = captured_data.end(); i != end; ++i)
+				for (vector<string>::iterator i = captured_data.begin(); i != captured_data.end(); ++i)
 				{
 					string &data = *i;
 					if (data.find('|') != string::npos) //multiple data rows with '|' as delimiter
@@ -100,35 +111,55 @@ void CNetwork::OnRead(const boost::system::error_code &error_code)
 						size_t delim_pos = 0;
 						do
 						{
-							string row = data.substr(delim_pos, (delim_pos = data.find('|', delim_pos)));
+							size_t old_delim_pos = delim_pos;
+							delim_pos = data.find('|', delim_pos);
+							string row = data.substr(old_delim_pos, delim_pos - old_delim_pos);
 							result_set.push_back(row);
-						} while (delim_pos != string::npos);
+						} while (delim_pos != string::npos && ++delim_pos);
 
-						captured_data.insert(i, result_set.begin(), result_set.end());
+						i = captured_data.insert(captured_data.erase(i), result_set.begin(), result_set.end());
 					}
 				}
 				
 				//call callback and send next command
-				boost::lock_guard<boost::mutex> queue_lock_guard(m_CmdQueueMutex);
+				m_CmdQueueMutex.lock();
 				if (m_CmdQueue.empty() == false)
 				{
-					m_CmdQueue.front().get<1>()(captured_data); //calls the callback
+					ReadCallback_t &callback = m_CmdQueue.front().get<1>();
+					m_CmdQueueMutex.unlock();
+					if (callback.empty() == false)
+						callback(captured_data); //calls the callback
+					m_CmdQueueMutex.lock();
 					m_CmdQueue.pop();
 
 					if (m_CmdQueue.empty() == false)
 						AsyncWrite(m_CmdQueue.front().get<0>());
 				}
+				m_CmdQueueMutex.unlock();
 			}
 			else
 			{
 				string error_str(error_rx_result[2].str());
-				UnEscapeString(error_str);
+				CUtils::Get()->UnEscapeString(error_str);
 
-				//TODO: print sent command in error message
-				logprintf(">> plugin.TSConnector: Error while executing \"%%s\": %s (#%s)", /*m_CmdQueue.front()->Front()->Command.c_str(),*/ error_str.c_str(), error_rx_result[1].str().c_str());
+				logprintf(">> plugin.TSConnector: Error while executing \"%s\": %s (#%s)", m_CmdQueue.front().get<0>().c_str(), error_str.c_str(), error_rx_result[1].str().c_str());
+				m_CmdQueue.pop();
 			}
 
 			captured_data.clear();
+		}
+		else if (read_data.find("notify") == 0)
+		{
+			//notify event
+			boost::smatch event_result;
+			for (vector<EventTuple_t>::iterator i = m_EventList.begin(); i != m_EventList.end(); ++i)
+			{
+				if (boost::regex_search(read_data, event_result, i->get<0>()))
+				{
+					i->get<1>()(event_result);
+					break;
+				}
+			}
 		}
 		else
 		{
@@ -148,71 +179,20 @@ void CNetwork::OnRead(const boost::system::error_code &error_code)
 
 void CNetwork::OnWrite(const boost::system::error_code &error_code)
 {
-	logprintf("<<< %s", m_CmdWriteBuffer.c_str());
 	m_CmdWriteBuffer.clear();
 	if (error_code.value() != 0)
 		logprintf(">> plugin.TSConnector: Error while writing: %s (#%d)", error_code.message().c_str(), error_code.value());
 }
 
-void CNetwork::Execute(fmt::Writer &cmd_writer, ReadCallback_t callback)
+void CNetwork::Execute(string cmd, ReadCallback_t callback)
 {
 	boost::lock_guard<boost::mutex> queue_lock_guard(m_CmdQueueMutex);
-	m_CmdQueue.push(boost::make_tuple(fmt::str(cmd_writer), boost::move(callback)));
+	m_CmdQueue.push(boost::make_tuple(boost::move(cmd), boost::move(callback)));
 	if (m_CmdQueue.size() == 1)
 		AsyncWrite(m_CmdQueue.front().get<0>());
 }
 
-
-static const char CharEscapeTable[][2][5] = 
+void CNetwork::RegisterEvent(boost::regex &event_rx, EventCallback_t callback)
 {
-	{ " ", "\\s" },
-	{ "\\", "\\\\" },
-	{ "/", "\\/" },
-	{ "|", "\\p" },
-	{ "\a", "\\a" },
-	{ "\b", "\\b" },
-	{ "\f", "\\f" },
-	{ "\n", "\\n" },
-	{ "\r", "\\r" },
-	{ "\t", "\\t" },
-	{ "\v", "\\v" },
-
-	{ "ä", "\xc3\xa4" },
-	{ "ö", "\xc3\xb6" },
-	{ "ü", "\xc3\xbc" },
-	{ "Ä", "\xc3\x84" },
-	{ "Ö", "\xc3\x96" },
-	{ "Ü", "\xc3\x9c" }
-};
-
-void CNetwork::EscapeString(string &str) 
-{
-	if (str.length())
-	{
-		for(size_t i = 0; i < str.length(); ++i)
-		{
-			const char char_val = str.at(i);
-			for (size_t ci = 0; ci < 17; ++ci)
-			{
-				if (CharEscapeTable[ci][0][0] == char_val)
-				{
-					str.replace(i++, 1, CharEscapeTable[ci][1], 2);
-					break;
-				}
-			}
-		}
-	}
-}
-
-void CNetwork::UnEscapeString(string &str) 
-{
-	if (str.length() >= 2)
-	{
-		for (size_t ci = 0; ci < 17; ++ci)
-		{
-			size_t find_pos = 0;
-			while ((find_pos = str.find(CharEscapeTable[ci][1])) != string::npos)
-				str.replace(find_pos, 2, CharEscapeTable[ci][0]);
-		}
-	}
+	m_EventList.push_back(boost::make_tuple(event_rx, boost::move(callback)));
 }
