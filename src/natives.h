@@ -15,7 +15,6 @@ namespace Native
 	//system natives
 	AMX_DECLARE_NATIVE(TSC_Connect);
 	AMX_DECLARE_NATIVE(TSC_Disconnect);
-	AMX_DECLARE_NATIVE(TSC_Login);
 	AMX_DECLARE_NATIVE(TSC_ChangeNickname);
 
 

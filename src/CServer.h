@@ -95,7 +95,7 @@ private: //constructor / deconstructor
 public: //functions
 	void Initialize();
 
-	void Login(string login, string pass, string nickname);
+	bool Login(string login, string pass);
 
 	void CreateChannel(string name);
 

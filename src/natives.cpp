@@ -4,24 +4,33 @@
 #include "format.h"
 
 #include "CNetwork.h"
+#include "CServer.h"
 
 
-//TODO: merge TSC_Connect and TSC_Login
-//native TSC_Connect(ip[], port = 9987, serverquery_port = 10011);
+//native TSC_Connect(user[], pass[], ip[], port = 9987, serverquery_port = 10011);
 AMX_DECLARE_NATIVE(Native::TSC_Connect)
 {
-	char *ip = NULL;
+	char
+		*login_tmp = NULL,
+		*pass_tmp = NULL,
+		*ip_tmp = NULL;
+
+	amx_StrParam(amx, params[1], login_tmp);
+	amx_StrParam(amx, params[2], pass_tmp);
+	amx_StrParam(amx, params[3], ip_tmp);
+	
 	unsigned short
-		server_port = static_cast<unsigned short>(params[2]),
-		query_port = static_cast<unsigned short>(params[3]);
+		server_port = static_cast<unsigned short>(params[4]),
+		query_port = static_cast<unsigned short>(params[5]);
 
-	amx_StrParam(amx, params[1], ip);
 
-	if (ip == NULL || server_port == 0 || query_port == 0)
+	if (login_tmp == NULL || pass_tmp == NULL || ip_tmp == NULL || server_port == 0 || query_port == 0)
 		return 0;
 
-	CNetwork::Get()->Connect(ip, server_port, query_port);
-	return 1;
+
+	CNetwork::Get()->Connect(ip_tmp, server_port, query_port);
+	
+	return CServer::Get()->Login(login_tmp, pass_tmp);
 }
 
 //native TSC_Disconnect();
@@ -31,43 +40,6 @@ AMX_DECLARE_NATIVE(Native::TSC_Disconnect)
 	return 1;
 }
 
-//native TSC_Login(user[], pass[], nickname[]);
-AMX_DECLARE_NATIVE(Native::TSC_Login)
-{
-	char
-		*login_tmp = NULL,
-		*pass_tmp = NULL,
-		*nick_tmp = NULL;
-
-	amx_StrParam(amx, params[1], login_tmp);
-	amx_StrParam(amx, params[2], pass_tmp);
-	amx_StrParam(amx, params[3], nick_tmp);
-
-	if (login_tmp == NULL || pass_tmp == NULL || nick_tmp == NULL)
-		return 0;
-
-	string
-		login(login_tmp),
-		pass(pass_tmp),
-		nickname(nick_tmp);
-
-	CTeamspeak::Get()->EscapeString(login);
-	CTeamspeak::Get()->EscapeString(pass);
-	CTeamspeak::Get()->EscapeString(nickname);
-
-
-	CommandList *cmd_list = new CommandList;
-
-	string login_cmd;
-	karma::generate(std::back_insert_iterator<string>(login_cmd),
-		lit("login client_login_name=") << karma::string(login) << lit(" client_login_password=") << karma::string(pass) << lit("\n") <<
-		lit("clientupdate client_nickname=") << karma::string(nickname)
-	);
-	cmd_list->push(new CCommand(login_cmd));
-	
-	CTeamspeak::Get()->PushCommandList(cmd_list);
-	return 1;
-}
 
 //native TSC_ChangeNickname(nickname[]);
 AMX_DECLARE_NATIVE(Native::TSC_ChangeNickname)

@@ -22,15 +22,14 @@ void CServer::Initialize()
 		boost::bind(&CServer::OnChannelList, this, _1));
 }
 
-void CServer::Login(string login, string pass, string nickname)
+bool CServer::Login(string login, string pass)
 {
 	CUtils::Get()->EscapeString(login);
 	CUtils::Get()->EscapeString(pass);
-	CUtils::Get()->EscapeString(nickname);
 	
-	CNetwork::Get()->Execute(str(fmt::Format("login client_login_name={} client_login_password={}", login, pass)));
-	CNetwork::Get()->Execute(str(fmt::Format("clientupdate client_nickname={}", nickname)),
+	CNetwork::Get()->Execute(str(fmt::Format("login client_login_name={} client_login_password={}", login, pass)),
 		boost::bind(&CServer::OnLogin, this, _1));
+	return true;
 }
 
 void CServer::CreateChannel(string name)
