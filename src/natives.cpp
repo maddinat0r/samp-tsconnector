@@ -50,20 +50,8 @@ AMX_DECLARE_NATIVE(Native::TSC_ChangeNickname)
 	if (nick_tmp == NULL)
 		return 0;
 
-	string nickname(nick_tmp);
-	CTeamspeak::Get()->EscapeString(nickname);
-
-
-	CommandList *cmd_list = new CommandList;
-
-	string nick_cmd;
-	karma::generate(std::back_insert_iterator<string>(nick_cmd),
-		lit("clientupdate client_nickname=") << karma::string(nickname)
-	);
-	cmd_list->push(new CCommand(nick_cmd));
 	
-	CTeamspeak::Get()->PushCommandList(cmd_list);
-	return 1;
+	return CServer::Get()->ChangeNickname(nick_tmp);
 }
 
 //native TSC_CreateChannel(channelname[]);
@@ -75,123 +63,38 @@ AMX_DECLARE_NATIVE(Native::TSC_CreateChannel)
 	if (channelname_tmp == NULL)
 		return 0;
 
-	string channelname(channelname_tmp);
-	CTeamspeak::Get()->EscapeString(channelname);
 
-
-	CommandList *cmd_list = new CommandList;
-
-	string chcreate_cmd;
-	karma::generate(std::back_insert_iterator<string>(chcreate_cmd),
-		lit("channelcreate channel_name=") << karma::string(channelname)
-	);
-	cmd_list->push(new CCommand(chcreate_cmd));
-
-	CTeamspeak::Get()->PushCommandList(cmd_list);
+	CServer::Get()->CreateChannel(channelname_tmp);
 	return 1;
 }
 
-//native TSC_DeleteChannel(channelname[]);
+//native TSC_DeleteChannel(channelid);
 AMX_DECLARE_NATIVE(Native::TSC_DeleteChannel)
 {
-	char *channelname_tmp = NULL;
-	amx_StrParam(amx, params[1], channelname_tmp);
-
-	if (channelname_tmp == NULL)
-		return 0;
-
-	string channelname(channelname_tmp);
-	CTeamspeak::Get()->EscapeString(channelname);
-	
-
-	CommandList *cmd_list = new CommandList;
-	
-	string chfind_cmd;
-	karma::generate(std::back_insert_iterator<string>(chfind_cmd),
-		lit("channelfind pattern=") << karma::string(channelname)
-	);
-	cmd_list->push(new CCommand(chfind_cmd, "cid"));
-	cmd_list->push(new CCommand("channeldelete cid=<1> force=1"));
-
-	CTeamspeak::Get()->PushCommandList(cmd_list);
-	return 1;
+	return CServer::Get()->DeleteChannel(static_cast<Channel::Id_t>(params[1]));
 }
 
-//native TSC_SetChannelName(channelname[], newname[]);
+//native TSC_SetChannelName(channelid, channelname[]);
 AMX_DECLARE_NATIVE(Native::TSC_SetChannelName)
 {
-	char
-		*channelname_tmp = NULL,
-		*newname_tmp = NULL;
-	amx_StrParam(amx, params[1], channelname_tmp);
-	amx_StrParam(amx, params[2], newname_tmp);
-
-	if (channelname_tmp == NULL || newname_tmp == NULL)
-		return 0;
-
-	string 
-		channelname(channelname_tmp),
-		new_channelname(newname_tmp);
-	
-	CTeamspeak::Get()->EscapeString(channelname);
-	CTeamspeak::Get()->EscapeString(new_channelname);
-
-
-	CommandList *cmd_list = new CommandList;
-
-	string chfind_cmd;
-	karma::generate(std::back_insert_iterator<string>(chfind_cmd),
-		lit("channelfind pattern=") << karma::string(channelname)
-	);
-	cmd_list->push(new CCommand(chfind_cmd, "cid"));
-
-	string chedit_cmd;
-	karma::generate(std::back_insert_iterator<string>(chedit_cmd),
-		lit("channeledit cid=<1> channel_name=") << karma::string(new_channelname)
-	);
-	cmd_list->push(new CCommand(chedit_cmd));
-
-	CTeamspeak::Get()->PushCommandList(cmd_list);
-	return 1;
-}
-
-//native TSC_SetChannelDescription(channelname[], desc[]);
-AMX_DECLARE_NATIVE(Native::TSC_SetChannelDescription)
-{
-	char
-		*channelname_tmp = NULL,
-		*channeldesc_tmp = NULL;
-
-	amx_StrParam(amx, params[1], channelname_tmp);
-	amx_StrParam(amx, params[2], channeldesc_tmp);
+	char *channelname_tmp = NULL;
+	amx_StrParam(amx, params[2], channelname_tmp);
 
 	if (channelname_tmp == NULL)
 		return 0;
 
-	string
-		channelname(channelname_tmp),
-		channeldesc(channeldesc_tmp == NULL ? string() : channeldesc_tmp);
 
-	CTeamspeak::Get()->EscapeString(channelname);
-	CTeamspeak::Get()->EscapeString(channeldesc);
-	
+	return CServer::Get()->SetChannelName(static_cast<Channel::Id_t>(params[1]), channelname_tmp);
+}
 
-	CommandList *cmd_list = new CommandList;
+//native TSC_SetChannelDescription(channelid, desc[]);
+AMX_DECLARE_NATIVE(Native::TSC_SetChannelDescription)
+{
+	char *channeldesc_tmp = NULL;
+	amx_StrParam(amx, params[2], channeldesc_tmp);
 
-	string chfind_cmd;
-	karma::generate(std::back_insert_iterator<string>(chfind_cmd),
-		lit("channelfind pattern=") << karma::string(channelname)
-	);
-	cmd_list->push(new CCommand(chfind_cmd, "cid"));
-
-	string chedit_cmd;
-	karma::generate(std::back_insert_iterator<string>(chedit_cmd),
-		lit("channeledit cid=<1> channel_description=") << karma::string(channeldesc)
-	);
-	cmd_list->push(new CCommand(chedit_cmd));
-
-	CTeamspeak::Get()->PushCommandList(cmd_list);
-	return 1;
+	return CServer::Get()->SetChannelDescription(static_cast<Channel::Id_t>(params[1]), 
+		channeldesc_tmp == NULL ? string() : channeldesc_tmp);
 }
 
 //native TSC_SetChannelType(channelname[], type);

@@ -95,12 +95,26 @@ private: //constructor / deconstructor
 	~CServer() {}
 
 
+private: //functions (internal)
+	inline bool IsValidChannel(Channel::Id_t cid) const
+	{
+		return (m_Channels.find(cid) != m_Channels.end());
+	}
+
 public: //functions
 	void Initialize();
 
 	bool Login(string login, string pass);
+	bool ChangeNickname(string nickname);
 
-	void CreateChannel(string name);
+	bool CreateChannel(string name);
+	bool DeleteChannel(Channel::Id_t cid);
+	bool SetChannelName(Channel::Id_t cid, string name);
+	inline string GetChannelName(Channel::Id_t cid) const
+	{
+		return IsValidChannel(cid) ? m_Channels.at(cid)->Name : string();
+	}
+	bool SetChannelDescription(Channel::Id_t cid, string desc);
 
 
 public: //network callbacks
@@ -110,6 +124,7 @@ public: //network callbacks
 
 public: //event callbacks
 	void OnChannelCreated(boost::smatch &result);
+	void OnChannelDeleted(boost::smatch &result);
 };
 
 

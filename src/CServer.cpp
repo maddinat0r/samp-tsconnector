@@ -13,6 +13,11 @@ void CServer::Initialize()
 		boost::bind(&CServer::OnChannelCreated, this, _1));
 
 
+
+	CNetwork::Get()->RegisterEvent(
+		boost::regex("notifychanneldeleted invokerid=([0-9]+) invokername=([^ ]+) invokeruid=([^ ]+) cid=([0-9]+)"),
+		boost::bind(&CServer::OnChannelDeleted, this, _1));
+	
 	CNetwork::Get()->Execute("servernotifyregister event=server");
 	CNetwork::Get()->Execute("servernotifyregister event=channel id=0");
 
@@ -36,11 +41,84 @@ bool CServer::Login(string login, string pass)
 	return true;
 }
 
-void CServer::CreateChannel(string name)
+bool CServer::ChangeNickname(string nickname)
 {
-	CUtils::Get()->EscapeString(name);
+	if (m_IsLoggedIn == false)
+		return false;
 
+
+	CUtils::Get()->EscapeString(nickname);
+	CNetwork::Get()->Execute(str(fmt::Format("clientupdate client_nickname={}", nickname)));
+	return true;
+}
+
+
+
+
+bool CServer::CreateChannel(string name)
+{
+	if (m_IsLoggedIn == false)
+		return false;
+
+	if (name.empty())
+		return false;
+
+
+	CUtils::Get()->EscapeString(name);
 	CNetwork::Get()->Execute(str(fmt::Writer() << "channelcreate channel_name=" << name));
+	return true;
+}
+
+bool CServer::DeleteChannel(Channel::Id_t cid)
+{
+	if (m_IsLoggedIn == false)
+		return false;
+
+	if (IsValidChannel(cid) == false)
+		return false;
+
+
+	delete m_Channels.at(cid);
+	m_Channels.erase(cid);
+
+	CNetwork::Get()->Execute(str(fmt::Format("channeldelete cid={} force=1", cid)));
+	return true;
+}
+
+bool CServer::SetChannelName(Channel::Id_t cid, string name)
+{
+	if (m_IsLoggedIn == false)
+		return false;
+
+	if (IsValidChannel(cid) == false)
+		return false;
+
+	if (name.empty())
+		return false;
+
+
+	m_Channels.at(cid)->Name = name;
+
+	CUtils::Get()->EscapeString(name);
+	CNetwork::Get()->Execute(str(fmt::Format("channeledit cid={} channel_name={}", cid, name)));
+	return true;
+}
+
+bool CServer::SetChannelDescription(Channel::Id_t cid, string desc)
+{
+	if (m_IsLoggedIn == false)
+		return false;
+
+	if (IsValidChannel(cid) == false)
+		return false;
+
+	//TODO: check if empty desc is OK
+	//if (desc.empty())
+	//	return false;
+
+
+	CNetwork::Get()->Execute(str(fmt::Format("channeledit cid={} channel_description={}", cid, desc)));
+	return true;
 }
 
 
@@ -158,4 +236,20 @@ void CServer::OnChannelCreated(boost::smatch &result)
 	if (extra_flag_str.find("default") != string::npos)
 		m_DefaultChannel = id;
 	m_Channels.insert(unordered_map<unsigned int, Channel *>::value_type(id, chan));
+}
+
+void CServer::OnChannelDeleted(boost::smatch &result)
+{
+	/*unsigned int invoker_id = 0;
+	string
+		invoker_name,
+		invoker_uid;*/
+	unsigned int cid = 0;
+
+	//CUtils::Get()->ConvertStringToInt(result[1].str(), invoker_id);
+	//invoker_name = result[2].str();
+	//invoker_uid = result[3].str();
+	CUtils::Get()->ConvertStringToInt(result[4].str(), cid);
+
+	m_Channels.erase(cid);
 }
