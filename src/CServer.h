@@ -8,6 +8,7 @@
 #include <vector>
 #include <boost/unordered_map.hpp>
 #include <boost/regex.hpp>
+#include <boost/atomic.hpp>
 
 #include "CSingleton.h"
 
@@ -84,9 +85,12 @@ private: //variables
 
 	unordered_map<unsigned int, Client *> m_Clients;
 
+	boost::atomic<bool> m_IsLoggedIn;
+
 private: //constructor / deconstructor
 	CServer() :
 		m_DefaultChannel(NULL),
+		m_IsLoggedIn(false)
 	{}
 	~CServer() {}
 

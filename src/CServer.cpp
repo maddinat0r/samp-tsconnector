@@ -24,6 +24,10 @@ void CServer::Initialize()
 
 bool CServer::Login(string login, string pass)
 {
+	if (m_IsLoggedIn == false)
+		return false;
+	
+
 	CUtils::Get()->EscapeString(login);
 	CUtils::Get()->EscapeString(pass);
 	
@@ -41,9 +45,11 @@ void CServer::CreateChannel(string name)
 
 
 
+
 void CServer::OnLogin(vector<string> &res)
 {
 	Initialize();
+	m_IsLoggedIn = true;
 }
 
 void CServer::OnChannelList(vector<string> &res)
