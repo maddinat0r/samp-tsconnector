@@ -101,7 +101,6 @@
     <ClCompile Include="src\format.cc" />
     <ClCompile Include="src\main.cpp" />
     <ClCompile Include="src\natives.cpp" />
-    <ClCompile Include="src\thread.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\CCallback.h" />

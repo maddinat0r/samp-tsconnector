@@ -11,7 +11,6 @@
     <ClCompile Include="src\main.cpp" />
     <ClCompile Include="src\format.cc" />
     <ClCompile Include="src\natives.cpp" />
-    <ClCompile Include="src\thread.cpp" />
     <ClCompile Include="src\CNetwork.cpp" />
     <ClCompile Include="src\CServer.cpp" />
     <ClCompile Include="src\CUtils.cpp" />
