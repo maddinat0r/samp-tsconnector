@@ -35,12 +35,10 @@ enum E_KICK_TYPES
 
 struct Client
 {
-	Client() :
-		Id(0)
-	{}
-	
-	unsigned int Id;
+	typedef unsigned int Id_t;
 
+	Client() {}
+	
 	string
 		Uid,
 		Nickname;
@@ -52,8 +50,9 @@ struct Client
 
 struct Channel
 {
+	typedef unsigned int Id_t;
+	
 	Channel() :
-		Id(0),
 		ParentId(0),
 		OrderId(0),
 
@@ -63,8 +62,7 @@ struct Channel
 		MaxClients(-1)
 	{}
 	
-	unsigned int
-		Id,
+	Id_t
 		ParentId,
 		OrderId;
 
@@ -83,6 +81,7 @@ class CServer : public CSingleton <CServer>
 private: //variables
 	unordered_map<unsigned int, Channel *> m_Channels;
 	unsigned int m_DefaultChannel;
+
 	unordered_map<unsigned int, Client *> m_Clients;
 
 private: //constructor / deconstructor
