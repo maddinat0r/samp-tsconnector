@@ -8,15 +8,14 @@
 void CServer::Initialize()
 {
 	//register notify events
-	//TODO: check notifychannelcreated for haspassword and isdefault
 	CNetwork::Get()->RegisterEvent(
-		boost::regex("notifychannelcreated cid=([0-9]+) cpid=([0-9]+) channel_name=([^ ]+) .* channel_order=([0-9]+) (?:(channel_flag_semi_permanent|channel_flag_permanent)=1)?.*invokerid=([0-9]+) invokername=([^ ]+) invokeruid=([^ \n\r]+)"),
+		boost::regex("notifychannelcreated cid=([0-9]+) cpid=([0-9]+) channel_name=([^ ]+) .* channel_order=([0-9]+)(?: channel_flag_([^=]+)=1)?(?: channel_flag_([^=]+)=1)? .*invokerid=([0-9]+) invokername=([^ ]+) invokeruid=([^ \n\r]+)"),
 		boost::bind(&CServer::OnChannelCreated, this, _1));
 
 
 	CNetwork::Get()->Execute("servernotifyregister event=server");
 	CNetwork::Get()->Execute("servernotifyregister event=channel id=0");
-	
+
 
 	//fill up cache
 	CNetwork::Get()->Execute(str(fmt::Writer() << "channellist -flags -limit"),
@@ -85,7 +84,6 @@ void CServer::OnChannelList(vector<string> &res)
 		chan->ParentId = pid;
 		chan->OrderId = order;
 		chan->Name = name;
-		chan->IsDefault = is_default != 0;
 		chan->HasPassword = has_password != 0;
 		if (is_permanent != 0)
 			chan->Type = CHANNEL_TYPE_PERMANENT;
@@ -95,6 +93,8 @@ void CServer::OnChannelList(vector<string> &res)
 			chan->Type = CHANNEL_TYPE_TEMPORARY;
 		chan->MaxClients = max_clients;
 
+		if (is_default != 0)
+			m_DefaultChannel = cid;
 		m_Channels.insert(unordered_map<unsigned int, Channel *>::value_type(cid, chan));
 	}
 }
@@ -119,16 +119,17 @@ void CServer::OnChannelCreated(boost::smatch &result)
 	CUtils::Get()->ConvertStringToInt(result[2].str(), parent_id);
 	name = result[3].str();
 	CUtils::Get()->ConvertStringToInt(result[4].str(), order_id);
-	string type_flag_str = result[5].str();
+	string type_flag_str(result[5].str());
 	if (type_flag_str.find("channel_flag_permanent") != string::npos)
 		type = CHANNEL_TYPE_PERMANENT;
 	else if (type_flag_str.find("channel_flag_semi_permanent") != string::npos)
 		type = CHANNEL_TYPE_SEMI_PERMANENT;
 	else
 		type = CHANNEL_TYPE_TEMPORARY;
-	//CUtils::Get()->ConvertStringToInt(result[6].str(), creator_id);
-	//creator_name = result[7].str();
-	//creator_uid = result[8].str();
+	string extra_flag_str(result[6].str());
+	//CUtils::Get()->ConvertStringToInt(result[7].str(), creator_id);
+	//creator_name = result[8].str();
+	//creator_uid = result[9].str();
 
 
 	Channel *chan = new Channel;
@@ -137,6 +138,9 @@ void CServer::OnChannelCreated(boost::smatch &result)
 	chan->OrderId = order_id;
 	chan->Name = name;
 	chan->Type = type;
+	chan->HasPassword = (extra_flag_str.find("password") != string::npos);
 
+	if (extra_flag_str.find("default") != string::npos)
+		m_DefaultChannel = id;
 	m_Channels.insert(unordered_map<unsigned int, Channel *>::value_type(id, chan));
 }

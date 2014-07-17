@@ -58,7 +58,6 @@ struct Channel
 		OrderId(0),
 
 		Type(CHANNEL_TYPE_INVALID),
-		IsDefault(false),
 		HasPassword(false),
 
 		MaxClients(-1)
@@ -71,9 +70,7 @@ struct Channel
 
 	string Name;
 	unsigned int Type; //temporary, permanent, semi-permanent
-	bool
-		IsDefault,
-		HasPassword;
+	bool HasPassword;
 
 	list<unsigned int> Clients;
 	int MaxClients;
@@ -85,10 +82,13 @@ class CServer : public CSingleton <CServer>
 	friend class CSingleton <CServer>;
 private: //variables
 	unordered_map<unsigned int, Channel *> m_Channels;
+	unsigned int m_DefaultChannel;
 	unordered_map<unsigned int, Client *> m_Clients;
 
 private: //constructor / deconstructor
-	CServer() {}
+	CServer() :
+		m_DefaultChannel(NULL),
+	{}
 	~CServer() {}
 
 
