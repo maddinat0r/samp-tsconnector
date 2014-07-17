@@ -150,16 +150,22 @@ void CNetwork::OnRead(const boost::system::error_code &error_code)
 		}
 		else if (read_data.find("notify") == 0)
 		{
-			//notify event
-			boost::smatch event_result;
-			for (vector<EventTuple_t>::iterator i = m_EventList.begin(); i != m_EventList.end(); ++i)
+			static string last_notify_data;
+			//check if notify is duplicate
+			if (last_notify_data != read_data)
 			{
-				if (boost::regex_search(read_data, event_result, i->get<0>()))
+				//notify event
+				boost::smatch event_result;
+				for (vector<EventTuple_t>::iterator i = m_EventList.begin(); i != m_EventList.end(); ++i)
 				{
-					i->get<1>()(event_result);
-					break;
+					if (boost::regex_search(read_data, event_result, i->get<0>()))
+					{
+						i->get<1>()(event_result);
+						break;
+					}
 				}
 			}
+			last_notify_data = read_data;
 		}
 		else
 		{
