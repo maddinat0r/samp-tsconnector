@@ -54,6 +54,20 @@ void CServer::OnLogin(vector<string> &res)
 
 void CServer::OnChannelList(vector<string> &res)
 {
+	/*
+	data (newline = space):
+		cid=1
+		pid=0
+		channel_order=0
+		channel_name=Default\sChannel
+		channel_flag_default=1
+		channel_flag_password=0
+		channel_flag_permanent=1
+		channel_flag_semi_permanent=0
+		channel_needed_subscribe_power=0
+		....
+		channel_maxclients=-1
+	*/
 	for (vector<string>::iterator i = res.begin(), end = res.end(); i != end; ++i)
 	{
 		unsigned int
@@ -64,7 +78,6 @@ void CServer::OnChannelList(vector<string> &res)
 			has_password = 0,
 			is_permanent = 0,
 			is_semi_perm = 0;
-			//total_clients = 0;
 
 		int max_clients = -1;
 
@@ -78,14 +91,12 @@ void CServer::OnChannelList(vector<string> &res)
 		CUtils::Get()->ParseField(*i, "channel_flag_password", has_password);
 		CUtils::Get()->ParseField(*i, "channel_flag_permanent", is_permanent);
 		CUtils::Get()->ParseField(*i, "channel_flag_semi_permanent", is_semi_perm);
-		//CUtils::Get()->ParseField(*i, "total_clients", total_clients);
 		CUtils::Get()->ParseField(*i, "channel_maxclients", max_clients);
 
 		CUtils::Get()->UnEscapeString(name);
 
 
 		Channel *chan = new Channel;
-		chan->Id = cid;
 		chan->ParentId = pid;
 		chan->OrderId = order;
 		chan->Name = name;
@@ -138,7 +149,6 @@ void CServer::OnChannelCreated(boost::smatch &result)
 
 
 	Channel *chan = new Channel;
-	chan->Id = id;
 	chan->ParentId = parent_id;
 	chan->OrderId = order_id;
 	chan->Name = name;
