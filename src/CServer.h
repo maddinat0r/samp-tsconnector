@@ -92,7 +92,7 @@ private: //constructor / deconstructor
 		m_DefaultChannel(0),
 		m_IsLoggedIn(false)
 	{}
-	~CServer() {}
+	~CServer();
 
 
 private: //functions (internal)

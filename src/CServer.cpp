@@ -54,6 +54,17 @@ void CServer::Initialize()
 		boost::bind(&CServer::OnChannelList, this, _1));
 }
 
+CServer::~CServer()
+{
+	for (unordered_map<unsigned int, Channel *>::iterator i = m_Channels.begin(), end = m_Channels.end(); i != end; ++i)
+		delete i->second;
+
+	for (unordered_map<unsigned int, Client *>::iterator i = m_Clients.begin(), end = m_Clients.end(); i != end; ++i)
+		delete i->second;
+}
+
+
+
 bool CServer::Login(string login, string pass)
 {
 	if (m_IsLoggedIn == false)
@@ -78,7 +89,6 @@ bool CServer::ChangeNickname(string nickname)
 	CNetwork::Get()->Execute(str(fmt::Format("clientupdate client_nickname={}", nickname)));
 	return true;
 }
-
 
 
 
