@@ -80,10 +80,10 @@ class CServer : public CSingleton <CServer>
 {
 	friend class CSingleton <CServer>;
 private: //variables
-	unordered_map<unsigned int, Channel *> m_Channels;
-	unsigned int m_DefaultChannel;
+	unordered_map<Channel::Id_t, Channel *> m_Channels;
+	Channel::Id_t m_DefaultChannel;
 
-	unordered_map<unsigned int, Client *> m_Clients;
+	unordered_map<Client::Id_t, Client *> m_Clients;
 
 	boost::atomic<bool> m_IsLoggedIn;
 
