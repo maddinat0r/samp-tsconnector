@@ -25,12 +25,12 @@ namespace Native
 	AMX_DECLARE_NATIVE(TSC_SetChannelDescription);
 	AMX_DECLARE_NATIVE(TSC_SetChannelType);
 	AMX_DECLARE_NATIVE(TSC_SetChannelPassword);
-	AMX_DECLARE_NATIVE(TSC_SetChannelTalkPower);
+	//AMX_DECLARE_NATIVE(TSC_SetChannelTalkPower);
 	AMX_DECLARE_NATIVE(TSC_SetChannelUserLimit);
-	AMX_DECLARE_NATIVE(TSC_SetChannelSubChannel);
-	AMX_DECLARE_NATIVE(TSC_MoveChannelBelowChannel);
+	AMX_DECLARE_NATIVE(TSC_SetChannelParentId);
+	AMX_DECLARE_NATIVE(TSC_SetChannelOrderId);
 
-
+	/*
 	//client natives
 	AMX_DECLARE_NATIVE(TSC_KickClient);
 	AMX_DECLARE_NATIVE(TSC_BanClient);
@@ -49,6 +49,7 @@ namespace Native
 	AMX_DECLARE_NATIVE(TSC_SendClientMessage);
 	AMX_DECLARE_NATIVE(TSC_SendChannelMessage);
 	AMX_DECLARE_NATIVE(TSC_SendServerMessage);
+	*/
 }
 
 

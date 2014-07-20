@@ -1,20 +1,27 @@
+/* Teamspeak3 Connector
+ * Version 1.0
+ * made by maddinat0r
+ */
+
 #if defined TSConnector_included
 	#endinput
 #endif
 #define TSConnector_included
 
 
-enum E_KICK_TYPE
+enum E_CHANNEL_TYPE
 {
-	KICK_TYPE_CHANNEL = 1,
-	KICK_TYPE_SERVER
+	CHANNEL_TYPE_INVALID,
+	CHANNEL_TYPE_TEMPORARY,
+	CHANNEL_TYPE_SEMI_PERMANENT,
+	CHANNEL_TYPE_PERMANENT
 };
 
-enum E_CHANNEL_TYPE 
+enum E_KICK_TYPE
 {
-	CHANNEL_TYPE_PERMANENT = 1,
-	CHANNEL_TYPE_SEMI_PERMANENT,
-	CHANNEL_TYPE_TEMPORARY
+	KICK_TYPE_INVALID,
+	KICK_TYPE_CHANNEL,
+	KICK_TYPE_SERVER
 };
 
 
@@ -23,16 +30,17 @@ native TSC_Disconnect();
 native TSC_ChangeNickname(nickname[]);
 
 native TSC_CreateChannel(channelname[]);
-native TSC_DeleteChannel(channelname[]);
-native TSC_SetChannelName(channelname[], newchannelname[]);
-native TSC_SetChannelDescription(channelname[], channeldesc[]);
-native TSC_SetChannelType(channelname[], E_CHANNEL_TYPE:type);
-native TSC_SetChannelPassword(channelname[], channelpasswd[]);
-native TSC_SetChannelTalkPower(channelname[], talkpower);
-native TSC_SetChannelSubChannel(channelname[], parentchannelname[]);
-native TSC_MoveChannelBelowChannel(channelname[], parentchannelname[]);
+native TSC_DeleteChannel(channelid);
+native TSC_SetChannelName(channelid, channelname[]);
+native TSC_SetChannelDescription(channelid, desc[]);
+native TSC_SetChannelType(channelid, type);
+native TSC_SetChannelPassword(channelid, password[]);
+//native TSC_SetChannelTalkPower(channelname[], talkpower);
+native TSC_SetChannelUserLimit(channelid, maxusers);
+native TSC_SetChannelParentId(channelid, parentchannelid);
+native TSC_SetChannelOrderId(channelid, upperchannelid);
 	
-
+/*
 native TSC_KickClient(uid[], E_KICK_TYPE:kicktype, reason[]);
 native TSC_BanClient(uid[], seconds, reason[]);
 native TSC_MoveClient(uid[], channelname[]);
@@ -55,3 +63,4 @@ forward TSC_OnClientDisconnect(nickname[], uid[]);
 forward TSC_OnClientChannelMove(nickname[], uid[], channelname[]);
 forward TSC_OnClientChannelText(nickname[], uid[], channelname[], msg[]);
 forward TSC_OnClientServerText(nickname[], uid[], msg[]);
+*/

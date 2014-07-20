@@ -142,7 +142,8 @@ void CNetwork::OnRead(const boost::system::error_code &error_code)
 				string error_str(error_rx_result[2].str());
 				CUtils::Get()->UnEscapeString(error_str);
 
-				logprintf(">> plugin.TSConnector: Error while executing \"%s\": %s (#%s)", m_CmdQueue.front().get<0>().c_str(), error_str.c_str(), error_rx_result[1].str().c_str());
+				logprintf(">> plugin.TSConnector: Error while executing \"%s\": %s (#%s)", 
+					m_CmdQueue.front().get<0>().c_str(), error_str.c_str(), error_rx_result[1].str().c_str());
 				m_CmdQueue.pop();
 			}
 
@@ -169,7 +170,7 @@ void CNetwork::OnRead(const boost::system::error_code &error_code)
 		}
 		else
 		{
-			//stack the result data if it is not an error message
+			//stack the result data if it is not an error or notification message
 			captured_data.push_back(read_data);
 		}
 

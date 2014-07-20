@@ -34,21 +34,6 @@ enum E_KICK_TYPES
 };
 
 
-struct Client
-{
-	typedef unsigned int Id_t;
-
-	Client() {}
-	
-	string
-		Uid,
-		Nickname;
-
-	string Desc;
-
-	struct Channel *CurrentChannel;
-};
-
 struct Channel
 {
 	typedef unsigned int Id_t;
@@ -75,6 +60,21 @@ struct Channel
 	int MaxClients;
 };
 
+struct Client
+{
+	typedef unsigned int Id_t;
+
+	Client() {}
+
+	string
+		Uid,
+		Nickname;
+
+	string Desc;
+
+	Channel::Id_t CurrentChannel;
+};
+
 
 class CServer : public CSingleton <CServer>
 {
@@ -89,7 +89,7 @@ private: //variables
 
 private: //constructor / deconstructor
 	CServer() :
-		m_DefaultChannel(NULL),
+		m_DefaultChannel(0),
 		m_IsLoggedIn(false)
 	{}
 	~CServer() {}
@@ -115,6 +115,31 @@ public: //functions
 		return IsValidChannel(cid) ? m_Channels.at(cid)->Name : string();
 	}
 	bool SetChannelDescription(Channel::Id_t cid, string desc);
+	bool SetChannelType(Channel::Id_t cid, unsigned int type);
+	inline unsigned int GetChannelType(Channel::Id_t cid) const
+	{
+		return IsValidChannel(cid) ? m_Channels.at(cid)->Type : CHANNEL_TYPE_INVALID;
+	}
+	bool SetChannelPassword(Channel::Id_t cid, string password);
+	inline bool HasChannelPassword(Channel::Id_t cid) const
+	{
+		return IsValidChannel(cid) ? m_Channels.at(cid)->HasPassword : false;
+	}
+	bool SetChannelUserLimit(Channel::Id_t cid, int maxusers);
+	inline int GetChannelUserLimit(Channel::Id_t cid) const
+	{
+		return IsValidChannel(cid) ? m_Channels.at(cid)->MaxClients : 0;
+	}
+	bool SetChannelParentId(Channel::Id_t cid, Channel::Id_t pcid);
+	Channel::Id_t GetChannelParentId(Channel::Id_t cid) const
+	{
+		return IsValidChannel(cid) ? m_Channels.at(cid)->ParentId : 0;
+	}
+	bool SetChannelOrderId(Channel::Id_t cid, Channel::Id_t ocid);
+	Channel::Id_t GetChannelOrderId(Channel::Id_t cid) const
+	{
+		return IsValidChannel(cid) ? m_Channels.at(cid)->OrderId : 0;
+	}
 
 
 public: //network callbacks

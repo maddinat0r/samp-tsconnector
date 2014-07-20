@@ -7,7 +7,6 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="src\CCallback.cpp" />
     <ClCompile Include="src\main.cpp" />
     <ClCompile Include="src\format.cc" />
     <ClCompile Include="src\natives.cpp" />
@@ -22,7 +21,6 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="src\CCallback.h" />
     <ClInclude Include="src\main.h" />
     <ClInclude Include="src\natives.h" />
     <ClInclude Include="src\format.h" />
