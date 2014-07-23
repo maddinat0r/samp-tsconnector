@@ -533,15 +533,16 @@ void CServer::OnChannelPasswordChanged(boost::smatch &result)
 
 
 	Channel *channel = m_Channels.at(cid);
-	if (channel->WasPasswordToggled)
+	if (channel->WasPasswordToggled == false)
 	{
-		channel->WasPasswordToggled = false;
 		Callback *cb = new Callback("TSC_OnChannelPasswordEdited");
 		cb->Params.push(cid);
 		cb->Params.push(1); //ispassworded
 		cb->Params.push(1); //passwordchanged
 		CCallbackHandler::Get()->Push(cb);
 	}
+	else
+		channel->WasPasswordToggled = false;
 }
 
 void CServer::OnChannelTypeChanged(boost::smatch &result)
