@@ -78,3 +78,5 @@ forward TSC_OnChannelMoved(channelid, parentid, orderid);
 forward TSC_OnChannelRenamed(channelid, name[]);
 forward TSC_OnChannelPasswordEdited(channelid, bool:ispassworded, bool:passwordchanged);
 forward TSC_OnChannelTypeChanged(channelid, type);
+forward TSC_OnChannelSetDefault(channelid);
+forward TSC_OnChannelMaxClientsChanged(channelid, maxclients);
