@@ -104,12 +104,15 @@ private: //functions (internal)
 		return (m_Channels.find(cid) != m_Channels.end());
 	}
 
-public: //functions
 	void Initialize();
 
+
+public: //server functions
 	bool Login(string login, string pass);
 	bool ChangeNickname(string nickname);
 
+
+public: //channel functions
 	bool CreateChannel(string name);
 	bool DeleteChannel(Channel::Id_t cid);
 	bool SetChannelName(Channel::Id_t cid, string name);
@@ -143,6 +146,9 @@ public: //functions
 	{
 		return IsValidChannel(cid) ? m_Channels.at(cid)->OrderId : 0;
 	}
+
+
+public: //client functions
 
 
 public: //network callbacks

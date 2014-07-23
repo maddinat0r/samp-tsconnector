@@ -378,6 +378,7 @@ void CServer::OnChannelCreated(boost::smatch &result)
 	//creator_name = result[9].str();
 	//creator_uid = result[10].str();
 
+	CUtils::Get()->UnEscapeString(name);
 
 	Channel *chan = new Channel;
 	chan->ParentId = parent_id;
