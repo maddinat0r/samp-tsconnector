@@ -94,6 +94,7 @@
   <ItemGroup>
     <ClCompile Include="lib\sdk\amxplugin.cpp" />
     <ClCompile Include="lib\sdk\amxplugin2.cpp" />
+    <ClCompile Include="src\CCallback.cpp" />
     <ClCompile Include="src\CNetwork.cpp" />
     <ClCompile Include="src\CServer.cpp" />
     <ClCompile Include="src\CUtils.cpp" />
@@ -102,6 +103,7 @@
     <ClCompile Include="src\natives.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="src\CCallback.h" />
     <ClInclude Include="src\CServer.h" />
     <ClInclude Include="src\CSingleton.h" />
     <ClInclude Include="src\CNetwork.h" />

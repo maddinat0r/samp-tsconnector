@@ -19,6 +19,7 @@
     <ClCompile Include="lib\sdk\amxplugin2.cpp">
       <Filter>SDK</Filter>
     </ClCompile>
+    <ClCompile Include="src\CCallback.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\main.h" />
@@ -28,5 +29,6 @@
     <ClInclude Include="src\CNetwork.h" />
     <ClInclude Include="src\CServer.h" />
     <ClInclude Include="src\CUtils.h" />
+    <ClInclude Include="src\CCallback.h" />
   </ItemGroup>
 </Project>

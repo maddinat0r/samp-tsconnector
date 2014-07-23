@@ -10,7 +10,7 @@ logprintf_t logprintf;
 
 PLUGIN_EXPORT void PLUGIN_CALL ProcessTick() 
 {
-	//CCallback::Process();
+	CCallbackHandler::Get()->Process();
 }
 
 PLUGIN_EXPORT unsigned int PLUGIN_CALL Supports() 
@@ -83,12 +83,12 @@ extern "C" const AMX_NATIVE_INFO native_list[] =
 
 PLUGIN_EXPORT int PLUGIN_CALL AmxLoad(AMX *amx) 
 {
-	//CCallback::AddAmxInstance(amx);
+	CCallbackHandler::Get()->AddAmx(amx);
 	return amx_Register(amx, native_list, -1);
 }
 
 PLUGIN_EXPORT int PLUGIN_CALL AmxUnload(AMX *amx) 
 {
-	//CCallback::RemoveAmxInstance(amx);
+	CCallbackHandler::Get()->EraseAmx(amx);
 	return AMX_ERR_NONE;
 }

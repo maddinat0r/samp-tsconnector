@@ -7,43 +7,66 @@
 
 #include <string>
 #include <stack>
+#include <boost/variant.hpp>
 #include <boost/unordered_set.hpp>
 #include <boost/lockfree/spsc_queue.hpp>
 
 using std::string;
 using std::stack;
+using boost::variant;
 using boost::unordered_set;
 
+#include "CSingleton.h"
 
-class CCallback 
+
+struct Callback
 {
-private:
-	static boost::lockfree::spsc_queue<
-		CCallback *,
-		boost::lockfree::fixed_sized<true>,
-		boost::lockfree::capacity<32678>
-	> m_CallbackQueue;
-
-	static unordered_set<AMX *> m_AmxList;
+	typedef variant<cell, string> Param_t;
 	
-public:
-	static inline void Queue(CCallback *cb)
+	Callback(const char *name) :
+		Name(name)
+	{}
+
+	string Name;
+	stack<Param_t> Params;
+};
+
+
+class CCallbackHandler : public CSingleton<CCallbackHandler>
+{
+	friend class CSingleton<CCallbackHandler>;
+private: //constructor / deconstructor
+	CCallbackHandler() {}
+	~CCallbackHandler() {}
+
+
+private: //variables
+	boost::lockfree::spsc_queue<
+			Callback *,
+			boost::lockfree::fixed_sized<true>,
+			boost::lockfree::capacity<32678>
+		> m_Queue;
+
+	unordered_set<AMX *> m_AmxList;
+
+
+public: //functions
+	inline void Push(Callback *cb)
 	{
-		m_CallbackQueue.push(cb);
+		m_Queue.push(cb);
 	}
-	static inline void AddAmxInstance(AMX *amx)
+
+	inline void AddAmx(AMX *amx)
 	{
 		m_AmxList.insert(amx);
 	}
-	static inline void RemoveAmxInstance(AMX *amx)
+	inline void EraseAmx(AMX *amx)
 	{
 		m_AmxList.erase(amx);
 	}
 
-	static void Process();
 
-	string Name;
-	stack<string> Params;
+	void Process();
 };
 
 
