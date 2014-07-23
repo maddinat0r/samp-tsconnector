@@ -44,6 +44,7 @@ struct Channel
 
 		Type(CHANNEL_TYPE_INVALID),
 		HasPassword(false),
+		WasPasswordToggled(false),
 
 		MaxClients(-1)
 	{}
@@ -54,7 +55,9 @@ struct Channel
 
 	string Name;
 	unsigned int Type; //temporary, permanent, semi-permanent
-	bool HasPassword;
+	bool
+		HasPassword,
+		WasPasswordToggled;
 
 	list<unsigned int> Clients;
 	int MaxClients;
@@ -150,6 +153,14 @@ public: //network callbacks
 public: //event callbacks
 	void OnChannelCreated(boost::smatch &result);
 	void OnChannelDeleted(boost::smatch &result);
+	void OnChannelReorder(boost::smatch &result);
+	void OnChannelMoved(boost::smatch &result);
+	void OnChannelRenamed(boost::smatch &result);
+	void OnChannelPasswordToggled(boost::smatch &result);
+	void OnChannelPasswordChanged(boost::smatch &result);
+	void OnChannelTypeChanged(boost::smatch &result);
+	void OnChannelSetDefault(boost::smatch &result);
+	void OnChannelMaxClientsChanged(boost::smatch &result);
 };
 
 

@@ -16,33 +16,45 @@ void CServer::Initialize()
 		boost::regex("notifychanneldeleted invokerid=([0-9]+) invokername=([^ ]+) invokeruid=([^ ]+) cid=([0-9]+)"),
 		boost::bind(&CServer::OnChannelDeleted, this, _1));
 	
-	//onchannelreorder
-	//notifychanneledited cid=([0-9]+) reasonid=10 invokerid=[0-9]+ invokername=[^ ]+ invokeruid=[^ ]+ channel_order=([0-9]+)
+	CNetwork::Get()->RegisterEvent(
+		boost::regex("notifychanneledited cid=([0-9]+) reasonid=10 invokerid=[0-9]+ invokername=[^ ]+ invokeruid=[^ ]+ channel_order=([0-9]+)"),
+		boost::bind(&CServer::OnChannelReorder, this, _1));
 
-	//onchannelmoved
-	//notifychannelmoved cid=([0-9]+) cpid=([0-9]+) order=([0-9]+) reasonid=1 invokerid=[0-9]+ invokername=[^ ]+ invokeruid=[^ \n\r]+
+	CNetwork::Get()->RegisterEvent(
+		boost::regex("notifychannelmoved cid=([0-9]+) cpid=([0-9]+) order=([0-9]+) reasonid=1 invokerid=[0-9]+ invokername=[^ ]+ invokeruid=[^ \n\r]+"),
+		boost::bind(&CServer::OnChannelMoved, this, _1));
 
-	//onchannelrenamed
-	//notifychanneledited cid=([0-9]+) reasonid=10 invokerid=[0-9]+ invokername=[^ ]+ invokeruid=[^ ]+ channel_name=([^ \n\r]+)
+	CNetwork::Get()->RegisterEvent(
+		boost::regex("notifychanneledited cid=([0-9]+) reasonid=10 invokerid=[0-9]+ invokername=[^ ]+ invokeruid=[^ ]+ channel_name=([^ \n\r]+)"),
+		boost::bind(&CServer::OnChannelRenamed, this, _1));
 
-	//onchannelpasswordtoggled
-	//notifychanneledited cid=([0-9]+) reasonid=10 invokerid=[0-9]+ invokername=[^ ]+ invokeruid=[^ ]+ channel_flag_password=([01])
+	CNetwork::Get()->RegisterEvent(
+		boost::regex("notifychanneledited cid=([0-9]+) reasonid=10 invokerid=[0-9]+ invokername=[^ ]+ invokeruid=[^ ]+ channel_flag_password=([01])"),
+		boost::bind(&CServer::OnChannelPasswordToggled, this, _1));
 
-	//onchannelpasswordchanged
-	//notifychannelpasswordchanged cid=([0-9]+)
+	CNetwork::Get()->RegisterEvent(
+		boost::regex("notifychannelpasswordchanged cid=([0-9]+)"),
+		boost::bind(&CServer::OnChannelPasswordChanged, this, _1));
 	//NOTE: always called if something with password changed, check if channel_flag_password was changed before fireing "pass-changed" callback
 
-	//onchanneltypechanged
-	//notifychanneledited cid=([0-9]+) reasonid=10 invokerid=[0-9]+ invokername=[^ ]+ invokeruid=[^ ]+ (channel_flag_(?:permanent|semi_permanent).*)
+	CNetwork::Get()->RegisterEvent(
+		boost::regex("notifychanneledited cid=([0-9]+) reasonid=10 invokerid=[0-9]+ invokername=[^ ]+ invokeruid=[^ ]+ (?:channel_flag_(permanent|semi_permanent)=([01]))(?: channel_flag_(permanent|semi_permanent)=([01]))?.*"),
+		boost::bind(&CServer::OnChannelTypeChanged, this, _1));
 	//DATA:
 	//	1: cid
-	//	2: flags (example: "channel_flag_permanent=0 channel_flag_semi_permanent=1")
+	//	2: flag name ("permanent", "semi_permanent")
+	//	3: flag status ("0", "1")
+	//	4: second flag name (optional)
+	//	5: second flag status (optional)
 
-	//onchannelsetdefault
-	//notifychanneledited cid=([0-9]+) reasonid=10 invokerid=[0-9]+ invokername=[^ ]+ invokeruid=[^ ]+ channel_flag_default=1.*
+	CNetwork::Get()->RegisterEvent(
+		boost::regex("notifychanneledited cid=([0-9]+) reasonid=10 invokerid=[0-9]+ invokername=[^ ]+ invokeruid=[^ ]+ channel_flag_default=1.*"),
+		boost::bind(&CServer::OnChannelSetDefault, this, _1));
 
-	//onchannelmaxclientschanged
-	//notifychanneledited cid=([0-9]+) reasonid=10 invokerid=[0-9]+ invokername=[^ ]+ invokeruid=[^ ]+ channel_maxclients=([-0-9]+).*
+	CNetwork::Get()->RegisterEvent(
+		boost::regex("notifychanneledited cid=([0-9]+) reasonid=10 invokerid=[0-9]+ invokername=[^ ]+ invokeruid=[^ ]+ channel_maxclients=([-0-9]+).*"),
+		boost::bind(&CServer::OnChannelMaxClientsChanged, this, _1));
+	
 
 
 	CNetwork::Get()->Execute("servernotifyregister event=server");
@@ -393,4 +405,173 @@ void CServer::OnChannelDeleted(boost::smatch &result)
 	CUtils::Get()->ConvertStringToInt(result[4].str(), cid);
 
 	m_Channels.erase(cid);
+}
+
+void CServer::OnChannelReorder(boost::smatch &result)
+{
+	unsigned int
+		cid = 0,
+		orderid = 0;
+
+	CUtils::Get()->ConvertStringToInt(result[1].str(), cid);
+	CUtils::Get()->ConvertStringToInt(result[2].str(), orderid);
+
+	if (orderid != 0 && IsValidChannel(orderid) == false)
+		return;
+
+	if (IsValidChannel(cid) == false)
+		return;
+	
+	
+	m_Channels.at(cid)->OrderId = orderid;
+
+	//TODO: fire callback
+}
+
+void CServer::OnChannelMoved(boost::smatch &result)
+{
+	unsigned int
+		cid = 0,
+		parentid = 0,
+		orderid = 0;
+
+	CUtils::Get()->ConvertStringToInt(result[1].str(), cid);
+	CUtils::Get()->ConvertStringToInt(result[2].str(), parentid);
+	CUtils::Get()->ConvertStringToInt(result[3].str(), orderid);
+
+	if (orderid != 0 && IsValidChannel(orderid) == false)
+		return;
+
+	if (parentid != 0 && IsValidChannel(parentid) == false)
+		return;
+
+	if (IsValidChannel(cid) == false)
+		return;
+	
+
+	m_Channels.at(cid)->ParentId = parentid;
+	m_Channels.at(cid)->OrderId = orderid;
+
+	//TODO: fire callback
+}
+
+void CServer::OnChannelRenamed(boost::smatch &result)
+{
+	unsigned int cid = 0;
+	string name;
+
+	CUtils::Get()->ConvertStringToInt(result[1].str(), cid);
+	name = result[2].str();
+	CUtils::Get()->UnEscapeString(name);
+
+	if (IsValidChannel(cid) == false)
+		return;
+
+
+	m_Channels.at(cid)->Name = name;
+
+	//TODO: fire callback
+}
+
+void CServer::OnChannelPasswordToggled(boost::smatch &result)
+{
+	unsigned int
+		cid = 0,
+		toggle_password = 0;
+	
+	CUtils::Get()->ConvertStringToInt(result[1].str(), cid);
+	CUtils::Get()->ConvertStringToInt(result[2].str(), toggle_password);
+
+	if (IsValidChannel(cid) == false)
+		return;
+
+
+	Channel *channel = m_Channels.at(cid);
+	channel->HasPassword = (toggle_password != 0);
+	channel->WasPasswordToggled = true;
+
+	//TODO: fire callback
+}
+
+void CServer::OnChannelPasswordChanged(boost::smatch &result)
+{
+	unsigned int cid = 0;
+	CUtils::Get()->ConvertStringToInt(result[1].str(), cid);
+
+	if (IsValidChannel(cid) == false)
+		return;
+
+
+	Channel *channel = m_Channels.at(cid);
+	if (channel->WasPasswordToggled)
+	{
+		//TODO: fire callback
+		channel->WasPasswordToggled = false;
+	}
+}
+
+void CServer::OnChannelTypeChanged(boost::smatch &result)
+{
+	unsigned int cid = 0;
+	string
+		flag,
+		sec_flag;
+	unsigned int
+		flag_data = 0,
+		sec_flag_data = 0;
+	
+	CUtils::Get()->ConvertStringToInt(result[1].str(), cid);
+	flag = result[2].str();
+	CUtils::Get()->ConvertStringToInt(result[3].str(), flag_data);
+	sec_flag = result[4].str();
+	CUtils::Get()->ConvertStringToInt(result[5].str(), sec_flag_data);
+
+	if (IsValidChannel(cid) == false)
+		return;
+
+
+	Channel *channel = m_Channels.at(cid);
+	if (flag_data != 0)
+	{
+		channel->Type = (flag.find("semi_") == 0) ? CHANNEL_TYPE_SEMI_PERMANENT : CHANNEL_TYPE_PERMANENT;
+	}
+	else if (sec_flag_data != 0)
+	{
+		channel->Type = (sec_flag.find("semi_") == 0) ? CHANNEL_TYPE_SEMI_PERMANENT : CHANNEL_TYPE_PERMANENT;
+	}
+	else
+		channel->Type = CHANNEL_TYPE_TEMPORARY;
+
+	//TODO: fire callback
+}
+
+void CServer::OnChannelSetDefault(boost::smatch &result)
+{
+	unsigned int cid = 0;
+	CUtils::Get()->ConvertStringToInt(result[1].str(), cid);
+
+	if (IsValidChannel(cid) == false)
+		return;
+
+
+	m_DefaultChannel = cid;
+
+	//TODO: fire callback
+}
+
+void CServer::OnChannelMaxClientsChanged(boost::smatch &result)
+{
+	unsigned int cid = 0;
+	int maxclients = 0;
+
+	CUtils::Get()->ConvertStringToInt(result[1].str(), cid);
+	CUtils::Get()->ConvertStringToInt(result[2].str(), maxclients);
+
+	if (IsValidChannel(cid) == false)
+		return;
+
+
+	m_Channels.at(cid)->MaxClients = maxclients;
+
+	//TODO: fire callback
 }
