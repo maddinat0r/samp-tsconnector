@@ -1,6 +1,7 @@
 #include "CServer.h"
 #include "CNetwork.h"
 #include "CUtils.h"
+#include "CCallback.h"
 
 #include "main.h"
 
@@ -390,6 +391,11 @@ void CServer::OnChannelCreated(boost::smatch &result)
 	if (extra_flag_str.find("default") != string::npos)
 		m_DefaultChannel = id;
 	m_Channels.insert(unordered_map<unsigned int, Channel *>::value_type(id, chan));
+
+
+	Callback *cb = new Callback("TSC_OnChannelCreated");
+	cb->Params.push(id);
+	CCallbackHandler::Get()->Push(cb);
 }
 
 void CServer::OnChannelDeleted(boost::smatch &result)
@@ -406,6 +412,11 @@ void CServer::OnChannelDeleted(boost::smatch &result)
 	CUtils::Get()->ConvertStringToInt(result[4].str(), cid);
 
 	m_Channels.erase(cid);
+
+
+	Callback *cb = new Callback("TSC_OnChannelDeleted");
+	cb->Params.push(cid);
+	CCallbackHandler::Get()->Push(cb);
 }
 
 void CServer::OnChannelReorder(boost::smatch &result)
@@ -426,7 +437,11 @@ void CServer::OnChannelReorder(boost::smatch &result)
 	
 	m_Channels.at(cid)->OrderId = orderid;
 
-	//TODO: fire callback
+
+	Callback *cb = new Callback("TSC_OnChannelReorder");
+	cb->Params.push(cid);
+	cb->Params.push(orderid);
+	CCallbackHandler::Get()->Push(cb);
 }
 
 void CServer::OnChannelMoved(boost::smatch &result)
@@ -453,7 +468,12 @@ void CServer::OnChannelMoved(boost::smatch &result)
 	m_Channels.at(cid)->ParentId = parentid;
 	m_Channels.at(cid)->OrderId = orderid;
 
-	//TODO: fire callback
+	
+	Callback *cb = new Callback("TSC_OnChannelMoved");
+	cb->Params.push(cid);
+	cb->Params.push(parentid);
+	cb->Params.push(orderid);
+	CCallbackHandler::Get()->Push(cb);
 }
 
 void CServer::OnChannelRenamed(boost::smatch &result)
@@ -471,7 +491,11 @@ void CServer::OnChannelRenamed(boost::smatch &result)
 
 	m_Channels.at(cid)->Name = name;
 
-	//TODO: fire callback
+	
+	Callback *cb = new Callback("TSC_OnChannelRenamed");
+	cb->Params.push(cid);
+	cb->Params.push(name);
+	CCallbackHandler::Get()->Push(cb);
 }
 
 void CServer::OnChannelPasswordToggled(boost::smatch &result)
@@ -491,7 +515,12 @@ void CServer::OnChannelPasswordToggled(boost::smatch &result)
 	channel->HasPassword = (toggle_password != 0);
 	channel->WasPasswordToggled = true;
 
-	//TODO: fire callback
+	
+	Callback *cb = new Callback("TSC_OnChannelPasswordEdited");
+	cb->Params.push(cid);
+	cb->Params.push(toggle_password); //ispassworded
+	cb->Params.push(0); //passwordchanged
+	CCallbackHandler::Get()->Push(cb);
 }
 
 void CServer::OnChannelPasswordChanged(boost::smatch &result)
@@ -506,8 +535,12 @@ void CServer::OnChannelPasswordChanged(boost::smatch &result)
 	Channel *channel = m_Channels.at(cid);
 	if (channel->WasPasswordToggled)
 	{
-		//TODO: fire callback
 		channel->WasPasswordToggled = false;
+		Callback *cb = new Callback("TSC_OnChannelPasswordEdited");
+		cb->Params.push(cid);
+		cb->Params.push(1); //ispassworded
+		cb->Params.push(1); //passwordchanged
+		CCallbackHandler::Get()->Push(cb);
 	}
 }
 
@@ -543,7 +576,11 @@ void CServer::OnChannelTypeChanged(boost::smatch &result)
 	else
 		channel->Type = CHANNEL_TYPE_TEMPORARY;
 
-	//TODO: fire callback
+	
+	Callback *cb = new Callback("TSC_OnChannelTypeChanged");
+	cb->Params.push(cid);
+	cb->Params.push(channel->Type);
+	CCallbackHandler::Get()->Push(cb);
 }
 
 void CServer::OnChannelSetDefault(boost::smatch &result)
@@ -557,7 +594,10 @@ void CServer::OnChannelSetDefault(boost::smatch &result)
 
 	m_DefaultChannel = cid;
 
-	//TODO: fire callback
+	
+	Callback *cb = new Callback("TSC_OnChannelSetDefault");
+	cb->Params.push(cid);
+	CCallbackHandler::Get()->Push(cb);
 }
 
 void CServer::OnChannelMaxClientsChanged(boost::smatch &result)
@@ -574,5 +614,9 @@ void CServer::OnChannelMaxClientsChanged(boost::smatch &result)
 
 	m_Channels.at(cid)->MaxClients = maxclients;
 
-	//TODO: fire callback
+	
+	Callback *cb = new Callback("TSC_OnChannelMaxClientsChanged");
+	cb->Params.push(cid);
+	cb->Params.push(maxclients);
+	CCallbackHandler::Get()->Push(cb);
 }

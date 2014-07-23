@@ -70,3 +70,11 @@ forward TSC_OnClientChannelMove(nickname[], uid[], channelname[]);
 forward TSC_OnClientChannelText(nickname[], uid[], channelname[], msg[]);
 forward TSC_OnClientServerText(nickname[], uid[], msg[]);
 */
+
+forward TSC_OnChannelCreated(channelid);
+forward TSC_OnChannelDeleted(channelid);
+forward TSC_OnChannelReorder(channelid, orderid);
+forward TSC_OnChannelMoved(channelid, parentid, orderid);
+forward TSC_OnChannelRenamed(channelid, name[]);
+forward TSC_OnChannelPasswordEdited(channelid, bool:ispassworded, bool:passwordchanged);
+forward TSC_OnChannelTypeChanged(channelid, type);
