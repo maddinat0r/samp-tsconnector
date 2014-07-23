@@ -22,13 +22,19 @@ namespace Native
 	AMX_DECLARE_NATIVE(TSC_CreateChannel);
 	AMX_DECLARE_NATIVE(TSC_DeleteChannel);
 	AMX_DECLARE_NATIVE(TSC_SetChannelName);
+	AMX_DECLARE_NATIVE(TSC_GetChannelName);
 	AMX_DECLARE_NATIVE(TSC_SetChannelDescription);
 	AMX_DECLARE_NATIVE(TSC_SetChannelType);
+	AMX_DECLARE_NATIVE(TSC_GetChannelType);
 	AMX_DECLARE_NATIVE(TSC_SetChannelPassword);
+	AMX_DECLARE_NATIVE(TSC_HasChannelPassword);
 	//AMX_DECLARE_NATIVE(TSC_SetChannelTalkPower);
 	AMX_DECLARE_NATIVE(TSC_SetChannelUserLimit);
+	AMX_DECLARE_NATIVE(TSC_GetChannelUserLimit);
 	AMX_DECLARE_NATIVE(TSC_SetChannelParentId);
+	AMX_DECLARE_NATIVE(TSC_GetChannelParentId);
 	AMX_DECLARE_NATIVE(TSC_SetChannelOrderId);
+	AMX_DECLARE_NATIVE(TSC_GetChannelOrderId);
 
 	/*
 	//client natives

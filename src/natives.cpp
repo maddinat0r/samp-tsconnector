@@ -89,6 +89,15 @@ AMX_DECLARE_NATIVE(Native::TSC_SetChannelName)
 		static_cast<Channel::Id_t>(params[1]), channelname_tmp);
 }
 
+//native TSC_GetChannelName(channelid, dest[], maxlen = sizeof(dest));
+AMX_DECLARE_NATIVE(Native::TSC_GetChannelName)
+{
+	amx_SetCppString(amx, params[2],
+		CServer::Get()->GetChannelName(static_cast<Channel::Id_t>(params[1])),
+		static_cast<size_t>(params[3]));
+	return 1;
+}
+
 //native TSC_SetChannelDescription(channelid, desc[]);
 AMX_DECLARE_NATIVE(Native::TSC_SetChannelDescription)
 {
@@ -105,6 +114,12 @@ AMX_DECLARE_NATIVE(Native::TSC_SetChannelType)
 	return CServer::Get()->SetChannelType(static_cast<Channel::Id_t>(params[1]), params[2]);
 }
 
+//native TSC_GetChannelType(channelid);
+AMX_DECLARE_NATIVE(Native::TSC_GetChannelType)
+{
+	return CServer::Get()->GetChannelType(static_cast<Channel::Id_t>(params[1]));
+}
+
 //native TSC_SetChannelPassword(channelid, password[]);
 AMX_DECLARE_NATIVE(Native::TSC_SetChannelPassword)
 {
@@ -113,6 +128,12 @@ AMX_DECLARE_NATIVE(Native::TSC_SetChannelPassword)
 
 	return CServer::Get()->SetChannelPassword(
 		static_cast<Channel::Id_t>(params[1]), pwd_tmp == NULL ? string() : pwd_tmp);
+}
+
+//native TSC_HasChannelPassword(channelid);
+AMX_DECLARE_NATIVE(Native::TSC_HasChannelPassword)
+{
+	return CServer::Get()->HasChannelPassword(static_cast<Channel::Id_t>(params[1]));
 }
 
 ////native TSC_SetChannelTalkPower(channelname[], talkpower);
@@ -155,6 +176,12 @@ AMX_DECLARE_NATIVE(Native::TSC_SetChannelUserLimit)
 		static_cast<Channel::Id_t>(params[1]), params[2]);
 }
 
+//native TSC_GetChannelUserLimit(channelid);
+AMX_DECLARE_NATIVE(Native::TSC_GetChannelUserLimit)
+{
+	return CServer::Get()->GetChannelUserLimit(static_cast<Channel::Id_t>(params[1]));
+}
+
 //native TSC_SetChannelParentId(channelid, parentchannelid);
 AMX_DECLARE_NATIVE(Native::TSC_SetChannelParentId)
 {
@@ -162,11 +189,24 @@ AMX_DECLARE_NATIVE(Native::TSC_SetChannelParentId)
 		static_cast<Channel::Id_t>(params[1]), static_cast<Channel::Id_t>(params[2]));
 }
 
+//native TSC_GetChannelParentId(channelid);
+AMX_DECLARE_NATIVE(Native::TSC_GetChannelParentId)
+{
+	return CServer::Get()->GetChannelParentId(static_cast<Channel::Id_t>(params[1]));
+}
+
 //native TSC_SetChannelOrderId(channelid, upperchannelid);
 AMX_DECLARE_NATIVE(Native::TSC_SetChannelOrderId)
 {
 	return CServer::Get()->SetChannelOrderId(
 		static_cast<Channel::Id_t>(params[1]), static_cast<Channel::Id_t>(params[2]));
+	return 1;
+}
+
+//native TSC_GetChannelOrderId(channelid);
+AMX_DECLARE_NATIVE(Native::TSC_GetChannelOrderId)
+{
+	return CServer::Get()->GetChannelOrderId(static_cast<Channel::Id_t>(params[1]));
 	return 1;
 }
 //

@@ -32,13 +32,19 @@ native TSC_ChangeNickname(nickname[]);
 native TSC_CreateChannel(channelname[]);
 native TSC_DeleteChannel(channelid);
 native TSC_SetChannelName(channelid, channelname[]);
+native TSC_GetChannelName(channelid, dest[], maxlen = sizeof(dest));
 native TSC_SetChannelDescription(channelid, desc[]);
 native TSC_SetChannelType(channelid, type);
+native TSC_GetChannelType(channelid);
 native TSC_SetChannelPassword(channelid, password[]);
+native TSC_HasChannelPassword(channelid);
 //native TSC_SetChannelTalkPower(channelname[], talkpower);
 native TSC_SetChannelUserLimit(channelid, maxusers);
+native TSC_GetChannelUserLimit(channelid);
 native TSC_SetChannelParentId(channelid, parentchannelid);
+native TSC_GetChannelParentId(channelid);
 native TSC_SetChannelOrderId(channelid, upperchannelid);
+native TSC_GetChannelOrderId(channelid);
 	
 /*
 native TSC_KickClient(uid[], E_KICK_TYPE:kicktype, reason[]);

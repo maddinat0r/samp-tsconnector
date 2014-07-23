@@ -22,7 +22,6 @@ PLUGIN_EXPORT bool PLUGIN_CALL Load(void **ppData)
 {
 	pAMXFunctions = ppData[PLUGIN_DATA_AMX_EXPORTS];
 	logprintf = reinterpret_cast<logprintf_t>(ppData[PLUGIN_DATA_LOGPRINTF]);
-	
 
 	logprintf(" >> plugin.TSConnector: v1.0 loaded.");
 	return 1;
@@ -46,13 +45,19 @@ extern "C" const AMX_NATIVE_INFO native_list[] =
 	AMX_DEFINE_NATIVE(TSC_CreateChannel)
 	AMX_DEFINE_NATIVE(TSC_DeleteChannel)
 	AMX_DEFINE_NATIVE(TSC_SetChannelName)
+	AMX_DEFINE_NATIVE(TSC_GetChannelName)
 	AMX_DEFINE_NATIVE(TSC_SetChannelDescription)
 	AMX_DEFINE_NATIVE(TSC_SetChannelType)
+	AMX_DEFINE_NATIVE(TSC_GetChannelType)
 	AMX_DEFINE_NATIVE(TSC_SetChannelPassword)
+	AMX_DEFINE_NATIVE(TSC_HasChannelPassword)
 	//AMX_DEFINE_NATIVE(TSC_SetChannelTalkPower)
 	AMX_DEFINE_NATIVE(TSC_SetChannelUserLimit)
+	AMX_DEFINE_NATIVE(TSC_GetChannelUserLimit)
 	AMX_DEFINE_NATIVE(TSC_SetChannelParentId)
+	AMX_DEFINE_NATIVE(TSC_GetChannelParentId)
 	AMX_DEFINE_NATIVE(TSC_SetChannelOrderId)
+	AMX_DEFINE_NATIVE(TSC_GetChannelOrderId)
 
 	/*
 	AMX_DEFINE_NATIVE(TSC_KickClient)
