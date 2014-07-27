@@ -276,6 +276,9 @@ void CServer::OnLogin(vector<string> &res)
 {
 	Initialize();
 	m_IsLoggedIn = true;
+
+
+	CCallbackHandler::Get()->Push(new Callback("TSC_OnConnect"));
 }
 
 void CServer::OnChannelList(vector<string> &res)

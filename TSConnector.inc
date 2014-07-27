@@ -71,6 +71,8 @@ forward TSC_OnClientChannelText(nickname[], uid[], channelname[], msg[]);
 forward TSC_OnClientServerText(nickname[], uid[], msg[]);
 */
 
+forward TSC_OnConnect();
+
 forward TSC_OnChannelCreated(channelid);
 forward TSC_OnChannelDeleted(channelid);
 forward TSC_OnChannelReorder(channelid, orderid);
