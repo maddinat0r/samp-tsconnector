@@ -80,10 +80,6 @@ CServer::~CServer()
 
 bool CServer::Login(string login, string pass)
 {
-	if (m_IsLoggedIn == false)
-		return false;
-	
-
 	CUtils::Get()->EscapeString(login);
 	CUtils::Get()->EscapeString(pass);
 	
