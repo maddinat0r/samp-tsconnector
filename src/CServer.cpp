@@ -10,7 +10,7 @@ void CServer::Initialize()
 {
 	//register notify events
 	CNetwork::Get()->RegisterEvent(
-		boost::regex("notifychannelcreated cid=([0-9]+) cpid=([0-9]+) channel_name=([^ ]+) channel_codec_quality=[0-9]+(?: channel_maxclients=([0-9]+))? channel_order=([0-9]+)(?: channel_flag_([^=]+)=1)?(?: channel_flag_([^=]+)=1)? .*invokerid=([0-9]+) invokername=([^ ]+) invokeruid=([^ \n\r]+)"),
+		boost::regex("notifychannelcreated cid=([0-9]+) cpid=([0-9]+) channel_name=([^ ]+)(.+)invokerid=[0-9]+ invokername=[^ ]+ invokeruid=[^ \n\r]+"),
 		boost::bind(&CServer::OnChannelCreated, this, _1));
 
 	CNetwork::Get()->RegisterEvent(
@@ -353,27 +353,27 @@ void CServer::OnChannelCreated(boost::smatch &result)
 	unsigned int type = CHANNEL_TYPE_INVALID;
 	string name;
 
-	//unsigned int creator_id = 0;
-	//string
-	//	creator_name,
-	//	creator_uid;
-
 	CUtils::Get()->ConvertStringToInt(result[1].str(), id);
 	CUtils::Get()->ConvertStringToInt(result[2].str(), parent_id);
 	name = result[3].str();
-	CUtils::Get()->ConvertStringToInt(result[4].str(), maxclients);
-	CUtils::Get()->ConvertStringToInt(result[5].str(), order_id);
-	string type_flag_str(result[6].str());
-	if (type_flag_str.find("channel_flag_permanent") != string::npos)
+
+	string extra_data(result[4].str());
+
+	CUtils::Get()->ParseField(extra_data, "channel_order", order_id);
+	CUtils::Get()->ParseField(extra_data, "channel_maxclients", maxclients);
+
+	int
+		is_permanent = 0,
+		is_semi_perm = 0;
+	CUtils::Get()->ParseField(extra_data, "channel_flag_permanent", is_permanent);
+	CUtils::Get()->ParseField(extra_data, "channel_flag_semi_permanent", is_semi_perm);
+	if (is_permanent != 0)
 		type = CHANNEL_TYPE_PERMANENT;
-	else if (type_flag_str.find("channel_flag_semi_permanent") != string::npos)
+	else if (is_semi_perm != 0)
 		type = CHANNEL_TYPE_SEMI_PERMANENT;
 	else
 		type = CHANNEL_TYPE_TEMPORARY;
-	string extra_flag_str(result[7].str());
-	//CUtils::Get()->ConvertStringToInt(result[8].str(), creator_id);
-	//creator_name = result[9].str();
-	//creator_uid = result[10].str();
+
 
 	CUtils::Get()->UnEscapeString(name);
 
@@ -382,9 +382,9 @@ void CServer::OnChannelCreated(boost::smatch &result)
 	chan->OrderId = order_id;
 	chan->Name = name;
 	chan->Type = type;
-	chan->HasPassword = (extra_flag_str.find("password") != string::npos);
+	chan->HasPassword = (extra_data.find("channel_flag_password") != string::npos);
 
-	if (extra_flag_str.find("default") != string::npos)
+	if (extra_data.find("channel_flag_default") != string::npos)
 		m_DefaultChannel = id;
 	m_Channels.insert(unordered_map<unsigned int, Channel *>::value_type(id, chan));
 
