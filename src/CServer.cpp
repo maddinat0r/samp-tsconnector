@@ -14,7 +14,7 @@ void CServer::Initialize()
 		boost::bind(&CServer::OnChannelCreated, this, _1));
 
 	CNetwork::Get()->RegisterEvent(
-		boost::regex("notifychanneldeleted invokerid=([0-9]+) invokername=([^ ]+) invokeruid=([^ ]+) cid=([0-9]+)"),
+		boost::regex("notifychanneldeleted .+ cid=([0-9]+)"),
 		boost::bind(&CServer::OnChannelDeleted, this, _1));
 	
 	CNetwork::Get()->RegisterEvent(
@@ -399,16 +399,8 @@ void CServer::OnChannelCreated(boost::smatch &result)
 
 void CServer::OnChannelDeleted(boost::smatch &result)
 {
-	/*unsigned int invoker_id = 0;
-	string
-		invoker_name,
-		invoker_uid;*/
 	unsigned int cid = 0;
-
-	//CUtils::Get()->ConvertStringToInt(result[1].str(), invoker_id);
-	//invoker_name = result[2].str();
-	//invoker_uid = result[3].str();
-	CUtils::Get()->ConvertStringToInt(result[4].str(), cid);
+	CUtils::Get()->ConvertStringToInt(result[1].str(), cid);
 
 	m_Channels.erase(cid);
 
