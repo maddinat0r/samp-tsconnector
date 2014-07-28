@@ -7,7 +7,7 @@
 #include "CServer.h"
 
 
-//native TSC_Connect(user[], pass[], ip[], port = 9987, serverquery_port = 10011);
+//native TSC_Connect(user[], pass[], ip[], port = 9987, serverquery_port = 10011, bool:wait = true);
 AMX_DECLARE_NATIVE(Native::TSC_Connect)
 {
 	char
@@ -23,6 +23,8 @@ AMX_DECLARE_NATIVE(Native::TSC_Connect)
 		server_port = static_cast<unsigned short>(params[4]),
 		query_port = static_cast<unsigned short>(params[5]);
 
+	bool wait = (params[6] != 0);
+
 
 	if (login_tmp == NULL || pass_tmp == NULL 
 		|| ip_tmp == NULL || server_port == 0 || query_port == 0)
@@ -30,8 +32,15 @@ AMX_DECLARE_NATIVE(Native::TSC_Connect)
 
 
 	CNetwork::Get()->Connect(ip_tmp, server_port, query_port);
-	
-	return CServer::Get()->Login(login_tmp, pass_tmp);
+	cell ret_val = CServer::Get()->Login(login_tmp, pass_tmp);
+
+	if (wait)
+	{
+		while (CServer::Get()->IsLoggedIn() == false)
+			boost::this_thread::sleep(boost::posix_time::milliseconds(100));
+	}
+
+	return ret_val;
 }
 
 //native TSC_Disconnect();

@@ -110,7 +110,10 @@ private: //functions (internal)
 public: //server functions
 	bool Login(string login, string pass);
 	bool ChangeNickname(string nickname);
-
+	inline bool IsLoggedIn() const
+	{
+		return m_IsLoggedIn;
+	}
 
 public: //channel functions
 	bool CreateChannel(string name);
