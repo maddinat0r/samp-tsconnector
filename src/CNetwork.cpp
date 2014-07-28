@@ -39,8 +39,13 @@ void CNetwork::Disconnect()
 	m_Socket.close();
 	m_IoService.stop();
 	
-	m_IoThread->join();
-	delete m_IoThread;
+	if (m_IoThread != NULL)
+	{
+		if (m_IoThread->get_id() != boost::this_thread::get_id())
+			m_IoThread->join();
+		delete m_IoThread;
+		m_IoThread = NULL;
+	}
 }
 
 void CNetwork::AsyncRead()
