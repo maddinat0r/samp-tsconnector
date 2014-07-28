@@ -177,7 +177,10 @@ bool CServer::SetChannelType(Channel::Id_t cid, unsigned int type)
 		return false;
 
 
-	string type_flag_str;
+	string
+		type_flag_str,
+		old_type_flag_str;
+
 	switch(type) 
 	{
 		case CHANNEL_TYPE_PERMANENT:
@@ -196,7 +199,25 @@ bool CServer::SetChannelType(Channel::Id_t cid, unsigned int type)
 			return false;
 	}
 
-	CNetwork::Get()->Execute(str(fmt::Format("channeledit cid={} {}=1", cid, type_flag_str)));
+	switch (m_Channels.at(cid)->Type)
+	{
+	case CHANNEL_TYPE_PERMANENT:
+		old_type_flag_str = "channel_flag_permanent";
+		break;
+
+	case CHANNEL_TYPE_SEMI_PERMANENT:
+		old_type_flag_str = "channel_flag_semi_permanent";
+		break;
+
+	case CHANNEL_TYPE_TEMPORARY:
+		old_type_flag_str = "channel_flag_temporary";
+		break;
+
+	default:
+		return false;
+	}
+
+	CNetwork::Get()->Execute(str(fmt::Format("channeledit cid={} {}=1 {}=0", cid, type_flag_str, old_type_flag_str)));
 	return true;
 }
 
