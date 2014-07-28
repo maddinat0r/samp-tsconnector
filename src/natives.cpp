@@ -32,9 +32,9 @@ AMX_DECLARE_NATIVE(Native::TSC_Connect)
 
 
 	CNetwork::Get()->Connect(ip_tmp, server_port, query_port);
-	cell ret_val = CServer::Get()->Login(login_tmp, pass_tmp);
+	bool ret_val = CServer::Get()->Login(login_tmp, pass_tmp);
 
-	if (wait)
+	if (ret_val && wait)
 	{
 		while (CServer::Get()->IsLoggedIn() == false)
 			boost::this_thread::sleep(boost::posix_time::milliseconds(100));
