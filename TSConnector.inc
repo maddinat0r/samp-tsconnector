@@ -25,7 +25,7 @@ enum E_KICK_TYPE
 };
 
 
-native TSC_Connect(user[], pass[], ip[], port = 9987, serverquery_port = 10011);
+native TSC_Connect(user[], pass[], ip[], port = 9987, serverquery_port = 10011, bool:wait = true);
 native TSC_Disconnect();
 native TSC_ChangeNickname(nickname[]);
 
