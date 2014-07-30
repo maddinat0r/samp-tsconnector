@@ -216,6 +216,13 @@ AMX_DECLARE_NATIVE(Native::TSC_GetChannelOrderId)
 {
 	return CServer::Get()->GetChannelOrderId(static_cast<Channel::Id_t>(params[1]));
 }
+
+//native TSC_GetDefaultChannelId();
+AMX_DECLARE_NATIVE(Native::TSC_GetDefaultChannelId)
+{
+	return CServer::Get()->GetDefaultChannelId();
+}
+
 //
 ////native TSC_SetClientChannelGroup(uid[], groupid, channelname[]);
 //AMX_DECLARE_NATIVE(Native::TSC_SetClientChannelGroup)

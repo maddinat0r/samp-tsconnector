@@ -155,6 +155,10 @@ public: //channel functions
 	{
 		return IsValidChannel(cid) ? m_Channels.at(cid)->OrderId : 0;
 	}
+	Channel::Id_t GetDefaultChannelId() const
+	{
+		return m_DefaultChannel;
+	}
 
 
 public: //client functions
