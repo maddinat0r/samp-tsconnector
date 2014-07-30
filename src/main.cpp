@@ -30,6 +30,7 @@ PLUGIN_EXPORT bool PLUGIN_CALL Load(void **ppData)
 PLUGIN_EXPORT void PLUGIN_CALL Unload() 
 {
 	CNetwork::Destroy();
+	CServer::Destroy();
 
 	logprintf("plugin.TSConnector: Plugin unloaded.");
 }
