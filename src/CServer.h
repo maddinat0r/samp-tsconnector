@@ -90,10 +90,14 @@ private: //variables
 
 	boost::atomic<bool> m_IsLoggedIn;
 
+	unsigned int m_ServerId;
+
+
 private: //constructor / deconstructor
 	CServer() :
 		m_DefaultChannel(0),
-		m_IsLoggedIn(false)
+		m_IsLoggedIn(false),
+		m_ServerId(0)
 	{}
 	~CServer();
 
@@ -114,6 +118,8 @@ public: //server functions
 	{
 		return m_IsLoggedIn;
 	}
+
+	bool SendServerMessage(string msg);
 
 public: //channel functions
 	bool CreateChannel(string name);
@@ -157,6 +163,7 @@ public: //client functions
 public: //network callbacks
 	void OnLogin(vector<string> &res);
 	void OnChannelList(vector<string> &res);
+	void OnServerIdRetrieved(vector<string> &res);
 
 
 public: //event callbacks

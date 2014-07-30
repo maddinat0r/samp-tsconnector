@@ -78,6 +78,11 @@ public: //functions
 	void Connect(char *ip, unsigned short port, unsigned short query_port = 10011);
 	void Disconnect();
 
+	inline unsigned short GetServerPort() const
+	{
+		return m_ServerPort;
+	}
+
 
 	void Execute(string cmd, ReadCallback_t callback = ReadCallback_t());
 

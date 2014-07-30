@@ -1,6 +1,7 @@
 #include "main.h"
 #include "natives.h"
 #include "CNetwork.h"
+#include "CServer.h"
 #include "CCallback.h"
 
 
@@ -74,10 +75,10 @@ extern "C" const AMX_NATIVE_INFO native_list[] =
 	AMX_DEFINE_NATIVE(TSC_PokeClient)
 
 
-	AMX_DEFINE_NATIVE(TSC_SendClientMessage)
 	AMX_DEFINE_NATIVE(TSC_SendChannelMessage)
+	AMX_DEFINE_NATIVE(TSC_SendClientMessage)*/
 	AMX_DEFINE_NATIVE(TSC_SendServerMessage)
-*/
+	
 	{NULL, NULL}
 };
 

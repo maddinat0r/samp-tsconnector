@@ -52,10 +52,9 @@ namespace Native
 
 
 	//messaging
-	AMX_DECLARE_NATIVE(TSC_SendClientMessage);
 	AMX_DECLARE_NATIVE(TSC_SendChannelMessage);
+	AMX_DECLARE_NATIVE(TSC_SendClientMessage);*/
 	AMX_DECLARE_NATIVE(TSC_SendServerMessage);
-	*/
 }
 
 

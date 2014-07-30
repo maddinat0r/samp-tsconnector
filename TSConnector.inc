@@ -61,9 +61,10 @@ native TSC_PokeClient(uid[], msg[]);
 
 native TSC_SendClientMessage(uid[], msg[]);
 native TSC_SendChannelMessage(channelname[], msg[]);
+*/
 native TSC_SendServerMessage(msg[]);
 
-
+/*
 forward TSC_OnClientConnect(nickname[], uid[]);
 forward TSC_OnClientDisconnect(nickname[], uid[]);
 forward TSC_OnClientChannelMove(nickname[], uid[], channelname[]);

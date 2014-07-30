@@ -65,6 +65,10 @@ void CServer::Initialize()
 	//fill up cache
 	CNetwork::Get()->Execute(str(fmt::Writer() << "channellist -flags -limit"),
 		boost::bind(&CServer::OnChannelList, this, _1));
+
+	//retrieve vserver-id
+	CNetwork::Get()->Execute(str(fmt::Format("serveridgetbyport virtualserver_port={}", CNetwork::Get()->GetServerPort())),
+		boost::bind(&CServer::OnServerIdRetrieved, this, _1));
 }
 
 CServer::~CServer()
@@ -96,6 +100,23 @@ bool CServer::ChangeNickname(string nickname)
 
 	CUtils::Get()->EscapeString(nickname);
 	CNetwork::Get()->Execute(str(fmt::Format("clientupdate client_nickname={}", nickname)));
+	return true;
+}
+
+bool CServer::SendServerMessage(string msg)
+{
+	if (m_IsLoggedIn == false)
+		return false;
+
+	if (msg.empty())
+		return false;
+
+	if (m_ServerId == 0)
+		return false;
+
+
+	CUtils::Get()->EscapeString(msg);
+	CNetwork::Get()->Execute(str(fmt::Format("sendtextmessage targetmode=3 target={} msg={}", m_ServerId, msg)));
 	return true;
 }
 
@@ -363,6 +384,12 @@ void CServer::OnChannelList(vector<string> &res)
 			m_DefaultChannel = cid;
 		m_Channels.insert(unordered_map<unsigned int, Channel *>::value_type(cid, chan));
 	}
+}
+
+void CServer::OnServerIdRetrieved(vector<string> &res)
+{
+	if (res.empty() == false)
+		CUtils::Get()->ParseField(res.at(0), "server_id", m_ServerId);
 }
 
 

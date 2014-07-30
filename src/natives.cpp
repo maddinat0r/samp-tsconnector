@@ -609,33 +609,15 @@ AMX_DECLARE_NATIVE(Native::TSC_GetChannelOrderId)
 //	return 1;
 //}
 //
-////native TSC_SendServerMessage(msg[]);
-//AMX_DECLARE_NATIVE(Native::TSC_SendServerMessage)
-//{
-//	char *msg_tmp = NULL;
-//	amx_StrParam(amx, params[1], msg_tmp);
-//
-//	if (msg_tmp == NULL)
-//		return 0;
-//
-//	string msg(msg_tmp);
-//	CNetwork::Get()->EscapeString(msg);
-//
-//
-//	CommandList *cmd_list = new CommandList;
-//
-//	string getid_cmd;
-//	karma::generate(std::back_inserter(getid_cmd),
-//		lit("serveridgetbyport virtualserver_port=") << karma::string(CNetwork::Get()->GetPort())
-//	);
-//	cmd_list->push(new CCommand(getid_cmd, "server_id"));
-//
-//	string msg_cmd;
-//	karma::generate(std::back_insert_iterator<string>(msg_cmd),
-//		lit("sendtextmessage targetmode=3 target=<1> msg=") << karma::string(msg)
-//	);
-//	cmd_list->push(new CCommand(msg_cmd));
-//
-//	CNetwork::Get()->PushCommandList(cmd_list);
-//	return 1;
-//}
+//native TSC_SendServerMessage(msg[]);
+AMX_DECLARE_NATIVE(Native::TSC_SendServerMessage)
+{
+	char *msg_tmp = NULL;
+	amx_StrParam(amx, params[1], msg_tmp);
+
+	if (msg_tmp == NULL)
+		return 0;
+
+
+	return CServer::Get()->SendServerMessage(msg_tmp);
+}
