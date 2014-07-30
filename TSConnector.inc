@@ -60,7 +60,6 @@ native TSC_PokeClient(uid[], msg[]);
 
 
 native TSC_SendClientMessage(uid[], msg[]);
-native TSC_SendChannelMessage(channelname[], msg[]);
 */
 native TSC_SendServerMessage(msg[]);
 

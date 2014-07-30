@@ -570,45 +570,6 @@ AMX_DECLARE_NATIVE(Native::TSC_GetChannelOrderId)
 //	return 1;
 //}
 //
-////native TSC_SendChannelMessage(channelname[], msg[]);
-//AMX_DECLARE_NATIVE(Native::TSC_SendChannelMessage)
-//{
-//	char
-//		*channelname_tmp = NULL,
-//		*msg_tmp = NULL;
-//
-//	amx_StrParam(amx, params[1], channelname_tmp);
-//	amx_StrParam(amx, params[2], msg_tmp);
-//
-//	if (channelname_tmp == NULL || msg_tmp == NULL)
-//		return 0;
-//
-//	string
-//		channelname(channelname_tmp),
-//		msg(msg_tmp);
-//
-//	CNetwork::Get()->EscapeString(channelname);
-//	CNetwork::Get()->EscapeString(msg);
-//
-//
-//	CommandList *cmd_list = new CommandList;
-//
-//	string chfind_cmd;
-//	karma::generate(std::back_insert_iterator<string>(chfind_cmd),
-//		lit("channelfind pattern=") << karma::string(channelname)
-//	);
-//	cmd_list->push(new CCommand(chfind_cmd, "cid"));
-//
-//	string msg_cmd;
-//	karma::generate(std::back_insert_iterator<string>(msg_cmd),
-//		lit("sendtextmessage targetmode=2 target=<1> msg=") << karma::string(msg)
-//	);
-//	cmd_list->push(new CCommand(msg_cmd));
-//
-//	CNetwork::Get()->PushCommandList(cmd_list);
-//	return 1;
-//}
-//
 //native TSC_SendServerMessage(msg[]);
 AMX_DECLARE_NATIVE(Native::TSC_SendServerMessage)
 {

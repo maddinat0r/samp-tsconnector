@@ -75,7 +75,6 @@ extern "C" const AMX_NATIVE_INFO native_list[] =
 	AMX_DEFINE_NATIVE(TSC_PokeClient)
 
 
-	AMX_DEFINE_NATIVE(TSC_SendChannelMessage)
 	AMX_DEFINE_NATIVE(TSC_SendClientMessage)*/
 	AMX_DEFINE_NATIVE(TSC_SendServerMessage)
 	
