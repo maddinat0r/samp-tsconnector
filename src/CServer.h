@@ -37,6 +37,7 @@ enum E_KICK_TYPES
 struct Channel
 {
 	typedef unsigned int Id_t;
+	static const Id_t Invalid = 0;
 	
 	Channel() :
 		ParentId(0),
@@ -159,6 +160,7 @@ public: //channel functions
 	{
 		return m_DefaultChannel;
 	}
+	Channel::Id_t FindChannel(string name);
 
 
 public: //client functions

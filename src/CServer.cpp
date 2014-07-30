@@ -312,6 +312,21 @@ bool CServer::SetChannelOrderId(Channel::Id_t cid, Channel::Id_t ocid)
 	return true;
 }
 
+Channel::Id_t CServer::FindChannel(string name)
+{
+	if (name.empty() == false)
+	{
+		for (unordered_map<Channel::Id_t, Channel *>::iterator i = m_Channels.begin(),
+			end = m_Channels.end(); i != end; ++i)
+		{
+			if (i->second->Name == name)
+				return i->first;
+		}
+	}
+
+	return Channel::Invalid;
+}
+
 
 
 void CServer::OnLogin(vector<string> &res)

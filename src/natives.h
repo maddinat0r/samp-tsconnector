@@ -36,6 +36,7 @@ namespace Native
 	AMX_DECLARE_NATIVE(TSC_SetChannelOrderId);
 	AMX_DECLARE_NATIVE(TSC_GetChannelOrderId);
 	AMX_DECLARE_NATIVE(TSC_GetDefaultChannelId);
+	AMX_DECLARE_NATIVE(TSC_FindChannel);
 
 	/*
 	//client natives

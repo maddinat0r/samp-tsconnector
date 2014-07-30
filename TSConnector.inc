@@ -46,6 +46,8 @@ native TSC_GetChannelParentId(channelid);
 native TSC_SetChannelOrderId(channelid, upperchannelid);
 native TSC_GetChannelOrderId(channelid);
 native TSC_GetDefaultChannelId();
+native TSC_FindChannel(channelname[]);
+
 /*
 native TSC_KickClient(uid[], E_KICK_TYPE:kicktype, reason[]);
 native TSC_BanClient(uid[], seconds, reason[]);
