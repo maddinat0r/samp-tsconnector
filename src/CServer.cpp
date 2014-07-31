@@ -384,7 +384,9 @@ void CServer::OnChannelList(vector<string> &res)
 			is_permanent = 0,
 			is_semi_perm = 0;
 
-		int max_clients = -1;
+		int
+			max_clients = -1,
+			needed_talkpower = 0;
 
 		string name;
 
@@ -397,6 +399,7 @@ void CServer::OnChannelList(vector<string> &res)
 		CUtils::Get()->ParseField(*i, "channel_flag_permanent", is_permanent);
 		CUtils::Get()->ParseField(*i, "channel_flag_semi_permanent", is_semi_perm);
 		CUtils::Get()->ParseField(*i, "channel_maxclients", max_clients);
+		CUtils::Get()->ParseField(*i, "channel_needed_talk_power", needed_talkpower);
 
 		CUtils::Get()->UnEscapeString(name);
 
@@ -413,6 +416,7 @@ void CServer::OnChannelList(vector<string> &res)
 		else
 			chan->Type = CHANNEL_TYPE_TEMPORARY;
 		chan->MaxClients = max_clients;
+		chan->RequiredTalkPower = needed_talkpower;
 
 		if (is_default != 0)
 			m_DefaultChannel = cid;
@@ -434,8 +438,10 @@ void CServer::OnChannelCreated(boost::smatch &result)
 		id = 0,
 		parent_id = 0,
 		order_id = 0;
-	int maxclients = -1;
 	unsigned int type = CHANNEL_TYPE_INVALID;
+	int
+		maxclients = -1,
+		needed_talkpower = 0;
 	string name;
 
 	CUtils::Get()->ConvertStringToInt(result[1].str(), id);
@@ -446,6 +452,7 @@ void CServer::OnChannelCreated(boost::smatch &result)
 
 	CUtils::Get()->ParseField(extra_data, "channel_order", order_id);
 	CUtils::Get()->ParseField(extra_data, "channel_maxclients", maxclients);
+	CUtils::Get()->ParseField(extra_data, "channel_needed_talk_power", needed_talkpower);
 
 	int
 		is_permanent = 0,
@@ -468,6 +475,7 @@ void CServer::OnChannelCreated(boost::smatch &result)
 	chan->Name = name;
 	chan->Type = type;
 	chan->HasPassword = (extra_data.find("channel_flag_password") != string::npos);
+	chan->RequiredTalkPower = needed_talkpower;
 
 	if (extra_data.find("channel_flag_default") != string::npos)
 		m_DefaultChannel = id;
