@@ -475,6 +475,7 @@ void CServer::OnChannelCreated(boost::smatch &result)
 	chan->Name = name;
 	chan->Type = type;
 	chan->HasPassword = (extra_data.find("channel_flag_password") != string::npos);
+	chan->MaxClients = maxclients;
 	chan->RequiredTalkPower = needed_talkpower;
 
 	if (extra_data.find("channel_flag_default") != string::npos)
@@ -491,6 +492,10 @@ void CServer::OnChannelDeleted(boost::smatch &result)
 {
 	unsigned int cid = 0;
 	CUtils::Get()->ConvertStringToInt(result[1].str(), cid);
+
+	if (IsValidChannel(cid) == false)
+		return;
+
 
 	m_Channels.erase(cid);
 
