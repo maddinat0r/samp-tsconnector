@@ -28,7 +28,8 @@ namespace Native
 	AMX_DECLARE_NATIVE(TSC_GetChannelType);
 	AMX_DECLARE_NATIVE(TSC_SetChannelPassword);
 	AMX_DECLARE_NATIVE(TSC_HasChannelPassword);
-	//AMX_DECLARE_NATIVE(TSC_SetChannelTalkPower);
+	AMX_DECLARE_NATIVE(TSC_SetChannelRequiredTP);
+	AMX_DECLARE_NATIVE(TSC_GetChannelRequiredTP);
 	AMX_DECLARE_NATIVE(TSC_SetChannelUserLimit);
 	AMX_DECLARE_NATIVE(TSC_GetChannelUserLimit);
 	AMX_DECLARE_NATIVE(TSC_SetChannelParentId);

@@ -38,7 +38,8 @@ native TSC_SetChannelType(channelid, type);
 native TSC_GetChannelType(channelid);
 native TSC_SetChannelPassword(channelid, password[]);
 native TSC_HasChannelPassword(channelid);
-//native TSC_SetChannelTalkPower(channelname[], talkpower);
+native TSC_SetChannelRequiredTP(channelid, talkpower);
+native TSC_GetChannelRequiredTP(channelid);
 native TSC_SetChannelUserLimit(channelid, maxusers);
 native TSC_GetChannelUserLimit(channelid);
 native TSC_SetChannelParentId(channelid, parentchannelid);
@@ -84,3 +85,4 @@ forward TSC_OnChannelPasswordEdited(channelid, bool:ispassworded, bool:passwordc
 forward TSC_OnChannelTypeChanged(channelid, type);
 forward TSC_OnChannelSetDefault(channelid);
 forward TSC_OnChannelMaxClientsChanged(channelid, maxclients);
+forward TSC_OnChannelRequiredTPChanged(channelid, talkpower);

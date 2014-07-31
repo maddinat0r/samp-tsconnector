@@ -55,6 +55,10 @@ void CServer::Initialize()
 	CNetwork::Get()->RegisterEvent(
 		boost::regex("notifychanneledited cid=([0-9]+) reasonid=10 invokerid=[0-9]+ invokername=[^ ]+ invokeruid=[^ ]+ channel_maxclients=([-0-9]+).*"),
 		boost::bind(&CServer::OnChannelMaxClientsChanged, this, _1));
+
+	CNetwork::Get()->RegisterEvent(
+		boost::regex("notifychanneledited cid=([0-9]+) reasonid=10 invokerid=[0-9]+ .+ channel_needed_talk_power=([-0-9]+)"),
+		boost::bind(&CServer::OnChannelRequiredTalkPowerChanged, this, _1));
 	
 
 
@@ -255,6 +259,21 @@ bool CServer::SetChannelPassword(Channel::Id_t cid, string password)
 
 	CUtils::Get()->EscapeString(password);
 	CNetwork::Get()->Execute(str(fmt::Format("channeledit cid={} channel_password={}", cid, password)));
+	return true;
+}
+
+bool CServer::SetChannelRequiredTalkPower(Channel::Id_t cid, int talkpower)
+{
+	if (m_IsLoggedIn == false)
+		return false;
+
+	if (IsValidChannel(cid) == false)
+		return false;
+
+
+	m_Channels.at(cid)->RequiredTalkPower = talkpower;
+
+	CNetwork::Get()->Execute(str(fmt::Format("channeledit cid={} channel_needed_talk_power={}", cid, talkpower)));
 	return true;
 }
 
@@ -673,5 +692,26 @@ void CServer::OnChannelMaxClientsChanged(boost::smatch &result)
 	Callback *cb = new Callback("TSC_OnChannelMaxClientsChanged");
 	cb->Params.push(cid);
 	cb->Params.push(maxclients);
+	CCallbackHandler::Get()->Push(cb);
+}
+
+void CServer::OnChannelRequiredTalkPowerChanged(boost::smatch &result)
+{
+	unsigned int cid = 0;
+	int talkpower = 0;
+
+	CUtils::Get()->ConvertStringToInt(result[1].str(), cid);
+	CUtils::Get()->ConvertStringToInt(result[2].str(), talkpower);
+
+	if (IsValidChannel(cid) == false)
+		return;
+
+
+	m_Channels.at(cid)->RequiredTalkPower = talkpower;
+
+
+	Callback *cb = new Callback("TSC_OnChannelRequiredTPChanged");
+	cb->Params.push(cid);
+	cb->Params.push(talkpower);
 	CCallbackHandler::Get()->Push(cb);
 }

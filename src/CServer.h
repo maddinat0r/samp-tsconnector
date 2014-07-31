@@ -46,6 +46,7 @@ struct Channel
 		Type(CHANNEL_TYPE_INVALID),
 		HasPassword(false),
 		WasPasswordToggled(false),
+		RequiredTalkPower(0),
 
 		MaxClients(-1)
 	{}
@@ -59,6 +60,7 @@ struct Channel
 	bool
 		HasPassword,
 		WasPasswordToggled;
+	int RequiredTalkPower;
 
 	list<unsigned int> Clients;
 	int MaxClients;
@@ -141,6 +143,11 @@ public: //channel functions
 	{
 		return IsValidChannel(cid) ? m_Channels.at(cid)->HasPassword : false;
 	}
+	bool SetChannelRequiredTalkPower(Channel::Id_t cid, int talkpower);
+	inline int GetChannelRequiredTalkPower(Channel::Id_t cid) const
+	{
+		return IsValidChannel(cid) ? m_Channels.at(cid)->RequiredTalkPower : 0;
+	}
 	bool SetChannelUserLimit(Channel::Id_t cid, int maxusers);
 	inline int GetChannelUserLimit(Channel::Id_t cid) const
 	{
@@ -183,6 +190,7 @@ public: //event callbacks
 	void OnChannelTypeChanged(boost::smatch &result);
 	void OnChannelSetDefault(boost::smatch &result);
 	void OnChannelMaxClientsChanged(boost::smatch &result);
+	void OnChannelRequiredTalkPowerChanged(boost::smatch &result);
 };
 
 
