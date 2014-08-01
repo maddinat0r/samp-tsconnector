@@ -31,7 +31,7 @@ void CNetwork::Connect(char *ip, unsigned short port, unsigned short query_port)
 	AsyncConnect();
 	m_IoThread = new thread(boost::bind(&asio::io_service::run, boost::ref(m_IoService)));
 
-	Execute(str(fmt::Writer() << "use port=" << m_ServerPort));
+	Execute(fmt::format("use port={}", m_ServerPort));
 }
 
 void CNetwork::Disconnect()

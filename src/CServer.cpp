@@ -67,11 +67,11 @@ void CServer::Initialize()
 
 
 	//fill up cache
-	CNetwork::Get()->Execute(str(fmt::Writer() << "channellist -flags -limit -voice"),
+	CNetwork::Get()->Execute("channellist -flags -limit -voice",
 		boost::bind(&CServer::OnChannelList, this, _1));
 
 	//retrieve vserver-id
-	CNetwork::Get()->Execute(str(fmt::Format("serveridgetbyport virtualserver_port={}", CNetwork::Get()->GetServerPort())),
+	CNetwork::Get()->Execute(fmt::format("serveridgetbyport virtualserver_port={}", CNetwork::Get()->GetServerPort()),
 		boost::bind(&CServer::OnServerIdRetrieved, this, _1));
 }
 
@@ -91,7 +91,7 @@ bool CServer::Login(string login, string pass)
 	CUtils::Get()->EscapeString(login);
 	CUtils::Get()->EscapeString(pass);
 	
-	CNetwork::Get()->Execute(str(fmt::Format("login client_login_name={} client_login_password={}", login, pass)),
+	CNetwork::Get()->Execute(fmt::format("login client_login_name={} client_login_password={}", login, pass),
 		boost::bind(&CServer::OnLogin, this, _1));
 	return true;
 }
@@ -103,7 +103,7 @@ bool CServer::ChangeNickname(string nickname)
 
 
 	CUtils::Get()->EscapeString(nickname);
-	CNetwork::Get()->Execute(str(fmt::Format("clientupdate client_nickname={}", nickname)));
+	CNetwork::Get()->Execute(fmt::format("clientupdate client_nickname={}", nickname));
 	return true;
 }
 
@@ -120,7 +120,7 @@ bool CServer::SendServerMessage(string msg)
 
 
 	CUtils::Get()->EscapeString(msg);
-	CNetwork::Get()->Execute(str(fmt::Format("sendtextmessage targetmode=3 target={} msg={}", m_ServerId, msg)));
+	CNetwork::Get()->Execute(fmt::format("sendtextmessage targetmode=3 target={} msg={}", m_ServerId, msg));
 	return true;
 }
 
@@ -136,7 +136,7 @@ bool CServer::CreateChannel(string name)
 
 
 	CUtils::Get()->EscapeString(name);
-	CNetwork::Get()->Execute(str(fmt::Writer() << "channelcreate channel_name=" << name));
+	CNetwork::Get()->Execute(fmt::format("channelcreate channel_name={}", name));
 	return true;
 }
 
@@ -152,7 +152,7 @@ bool CServer::DeleteChannel(Channel::Id_t cid)
 	delete m_Channels.at(cid);
 	m_Channels.erase(cid);
 
-	CNetwork::Get()->Execute(str(fmt::Format("channeldelete cid={} force=1", cid)));
+	CNetwork::Get()->Execute(fmt::format("channeldelete cid={} force=1", cid));
 	return true;
 }
 
@@ -171,7 +171,7 @@ bool CServer::SetChannelName(Channel::Id_t cid, string name)
 	m_Channels.at(cid)->Name = name;
 
 	CUtils::Get()->EscapeString(name);
-	CNetwork::Get()->Execute(str(fmt::Format("channeledit cid={} channel_name={}", cid, name)));
+	CNetwork::Get()->Execute(fmt::format("channeledit cid={} channel_name={}", cid, name));
 	return true;
 }
 
@@ -189,7 +189,7 @@ bool CServer::SetChannelDescription(Channel::Id_t cid, string desc)
 
 
 	CUtils::Get()->EscapeString(desc);
-	CNetwork::Get()->Execute(str(fmt::Format("channeledit cid={} channel_description={}", cid, desc)));
+	CNetwork::Get()->Execute(fmt::format("channeledit cid={} channel_description={}", cid, desc));
 	return true;
 }
 
@@ -242,7 +242,7 @@ bool CServer::SetChannelType(Channel::Id_t cid, unsigned int type)
 		return false;
 	}
 
-	CNetwork::Get()->Execute(str(fmt::Format("channeledit cid={} {}=1 {}=0", cid, type_flag_str, old_type_flag_str)));
+	CNetwork::Get()->Execute(fmt::format("channeledit cid={} {}=1 {}=0", cid, type_flag_str, old_type_flag_str));
 	return true;
 }
 
@@ -258,7 +258,7 @@ bool CServer::SetChannelPassword(Channel::Id_t cid, string password)
 	m_Channels.at(cid)->HasPassword = (password.empty() == false);
 
 	CUtils::Get()->EscapeString(password);
-	CNetwork::Get()->Execute(str(fmt::Format("channeledit cid={} channel_password={}", cid, password)));
+	CNetwork::Get()->Execute(fmt::format("channeledit cid={} channel_password={}", cid, password));
 	return true;
 }
 
@@ -273,7 +273,7 @@ bool CServer::SetChannelRequiredTalkPower(Channel::Id_t cid, int talkpower)
 
 	m_Channels.at(cid)->RequiredTalkPower = talkpower;
 
-	CNetwork::Get()->Execute(str(fmt::Format("channeledit cid={} channel_needed_talk_power={}", cid, talkpower)));
+	CNetwork::Get()->Execute(fmt::format("channeledit cid={} channel_needed_talk_power={}", cid, talkpower));
 	return true;
 }
 
@@ -291,7 +291,7 @@ bool CServer::SetChannelUserLimit(Channel::Id_t cid, int maxusers)
 
 	m_Channels.at(cid)->MaxClients = maxusers;
 
-	CNetwork::Get()->Execute(str(fmt::Format("channeledit cid={} channel_maxclients={}", cid, maxusers)));
+	CNetwork::Get()->Execute(fmt::format("channeledit cid={} channel_maxclients={}", cid, maxusers));
 	return true;
 }
 
@@ -309,7 +309,7 @@ bool CServer::SetChannelParentId(Channel::Id_t cid, Channel::Id_t pcid)
 
 	m_Channels.at(cid)->ParentId = pcid;
 
-	CNetwork::Get()->Execute(str(fmt::Format("channelmove cid={} cpid={}", cid, pcid)));
+	CNetwork::Get()->Execute(fmt::format("channelmove cid={} cpid={}", cid, pcid));
 	return true;
 }
 
@@ -327,7 +327,7 @@ bool CServer::SetChannelOrderId(Channel::Id_t cid, Channel::Id_t ocid)
 
 	m_Channels.at(cid)->OrderId = ocid;
 
-	CNetwork::Get()->Execute(str(fmt::Format("channeledit cid={} channel_order={}", cid, ocid)));
+	CNetwork::Get()->Execute(fmt::format("channeledit cid={} channel_order={}", cid, ocid));
 	return true;
 }
 
