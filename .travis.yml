@@ -1,9 +1,7 @@
 language: cpp
 before_install:
   - sudo apt-get update
-  - sudo apt-get install -f -y ia32-libs-multiarch g++:i386 build-essential:i386 python-dev:i386 autotools-dev:i386 libicu-dev:i386 libbz2-dev:i386
-  - sudo dpkg --configure -a
-  - sudo apt-get install -f
+  - sudo apt-get install -y g++-multilib build-essential python-dev libicu-dev libbz2-dev
   - wget -O boost_1_55_0.tar.gz http://sourceforge.net/projects/boost/files/boost/1.55.0/boost_1_55_0.tar.gz/download
   - tar xzvf boost_1_55_0.tar.gz
 install:
