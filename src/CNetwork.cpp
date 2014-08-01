@@ -125,7 +125,9 @@ void CNetwork::OnRead(const boost::system::error_code &error_code)
 							result_set.push_back(row);
 						} while (delim_pos != string::npos && ++delim_pos);
 
-						i = captured_data.insert(captured_data.erase(i), result_set.begin(), result_set.end());
+						i = captured_data.erase(i);
+						for (vector<string>::iterator j = result_set.begin(), jend = result_set.end(); j != jend; ++j)
+							i = captured_data.insert(i, *j);
 					}
 				}
 				
@@ -207,7 +209,7 @@ void CNetwork::Execute(string cmd, ReadCallback_t callback)
 		AsyncWrite(m_CmdQueue.front().get<0>());
 }
 
-void CNetwork::RegisterEvent(boost::regex &event_rx, EventCallback_t callback)
+void CNetwork::RegisterEvent(boost::regex event_rx, EventCallback_t callback)
 {
-	m_EventList.push_back(boost::make_tuple(event_rx, boost::move(callback)));
+	m_EventList.push_back(boost::make_tuple(boost::move(event_rx), boost::move(callback)));
 }

@@ -86,7 +86,7 @@ public: //functions
 
 	void Execute(string cmd, ReadCallback_t callback = ReadCallback_t());
 
-	void RegisterEvent(boost::regex &event_rx, EventCallback_t callback);
+	void RegisterEvent(boost::regex event_rx, EventCallback_t callback);
 
 
 private: //handlers
