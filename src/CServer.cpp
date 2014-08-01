@@ -4,6 +4,7 @@
 #include "CCallback.h"
 
 #include "main.h"
+#include "format.h"
 
 
 void CServer::Initialize()
