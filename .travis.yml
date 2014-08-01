@@ -3,11 +3,11 @@ before_install:
   - sudo apt-get update
   - sudo apt-get install -y g++-multilib build-essential python-dev libicu-dev libbz2-dev
   - wget -O boost_1_55_0.tar.gz http://sourceforge.net/projects/boost/files/boost/1.55.0/boost_1_55_0.tar.gz/download
-  - tar xzvf boost_1_55_0.tar.gz
+  - tar xzf boost_1_55_0.tar.gz
 install:
   - cd boost_1_55_0/
-  - ./bootstrap.sh --prefix=/usr/local --with-libraries=system,chrono,thread,regex,date_time,atomic
-  - ./b2 variant=release link=static threading=multi address-model=32 runtime-link=shared install
+  - sudo bash bootstrap.sh --prefix=/usr/local --with-libraries=system,chrono,thread,regex,date_time,atomic
+  - sudo ./b2 variant=release link=static threading=multi address-model=32 runtime-link=shared -j 4 install
   - sudo ldconfig
   - cd ..
 script: make
