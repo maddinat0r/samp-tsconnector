@@ -67,7 +67,7 @@ void CServer::Initialize()
 
 
 	//fill up cache
-	CNetwork::Get()->Execute(str(fmt::Writer() << "channellist -flags -limit"),
+	CNetwork::Get()->Execute(str(fmt::Writer() << "channellist -flags -limit -voice"),
 		boost::bind(&CServer::OnChannelList, this, _1));
 
 	//retrieve vserver-id
