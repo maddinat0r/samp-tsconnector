@@ -61,7 +61,6 @@ void CServer::Initialize()
 		boost::bind(&CServer::OnChannelRequiredTalkPowerChanged, this, _1));
 	
 
-
 	CNetwork::Get()->Execute("servernotifyregister event=server");
 	CNetwork::Get()->Execute("servernotifyregister event=channel id=0");
 

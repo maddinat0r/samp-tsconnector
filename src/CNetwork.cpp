@@ -36,6 +36,9 @@ void CNetwork::Connect(char *ip, unsigned short port, unsigned short query_port)
 
 void CNetwork::Disconnect()
 {
+	if (m_Socket.is_open() == false)
+		return; 
+
 	m_Socket.close();
 	m_IoService.stop();
 	
