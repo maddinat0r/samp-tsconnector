@@ -233,6 +233,16 @@ AMX_DECLARE_NATIVE(Native::TSC_GetDefaultChannelId)
 }
 
 
+
+//native TSC_FindClient(uid[]);
+AMX_DECLARE_NATIVE(Native::TSC_FindClient)
+{
+	char *tmp_uid = NULL;
+	amx_StrParam(amx, params[1], tmp_uid);
+	return CServer::Get()->FindClient(tmp_uid == NULL ? string() : tmp_uid);
+}
+
+
 //native TSC_GetClientUid(clientid, dest[], sizeof(dest[]));
 AMX_DECLARE_NATIVE(Native::TSC_GetClientUid)
 {
@@ -252,7 +262,6 @@ AMX_DECLARE_NATIVE(Native::TSC_GetClientChannelId)
 {
 	return CServer::Get()->GetClientChannelId(static_cast<Client::Id_t>(params[1]));
 }
-
 
 
 //native TSC_KickClient(clientid, TSC_KICKTYPE:kicktype, reasonmsg[]);

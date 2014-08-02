@@ -498,6 +498,21 @@ Channel::Id_t CServer::FindChannel(string name)
 
 
 
+Client::Id_t CServer::FindClient(string uid)
+{
+	boost::lock_guard<mutex> client_mtx_guard(m_ClientMtx);
+	if (uid.empty() == false)
+	{
+		for (auto &i : m_Clients)
+		{
+			if (i.second->Uid == uid)
+				return i.first;
+		}
+	}
+
+	return Client::Invalid;
+}
+
 string CServer::GetClientUid(Client::Id_t clid)
 {
 	if (IsValidClient(clid))

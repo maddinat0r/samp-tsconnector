@@ -67,6 +67,8 @@ extern "C" const AMX_NATIVE_INFO native_list[] =
 	AMX_DEFINE_NATIVE(TSC_GetDefaultChannelId)
 
 
+	AMX_DEFINE_NATIVE(TSC_FindClient)
+
 	AMX_DEFINE_NATIVE(TSC_GetClientUid)
 	AMX_DEFINE_NATIVE(TSC_GetClientDatabaseId)
 	AMX_DEFINE_NATIVE(TSC_GetClientChannelId)
