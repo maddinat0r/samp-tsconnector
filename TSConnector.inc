@@ -3,25 +3,25 @@
  * made by maddinat0r
  */
 
-#if defined TSConnector_included
+#if defined tsconnector_included
 	#endinput
 #endif
-#define TSConnector_included
+#define tsconnector_included
 
 
-enum E_CHANNEL_TYPE
+enum TSC_CHANNELTYPE
 {
-	CHANNEL_TYPE_INVALID,
-	CHANNEL_TYPE_TEMPORARY,
-	CHANNEL_TYPE_SEMI_PERMANENT,
-	CHANNEL_TYPE_PERMANENT
+	INVALID,
+	TEMPORARY,
+	SEMI_PERMANENT,
+	PERMANENT
 };
 
-enum E_KICK_TYPE
+enum TSC_KICKTYPE
 {
-	KICK_TYPE_INVALID,
-	KICK_TYPE_CHANNEL,
-	KICK_TYPE_SERVER
+	INVALID,
+	CHANNEL,
+	SERVER
 };
 
 
@@ -36,8 +36,8 @@ native TSC_IsValidChannel(channelid);
 native TSC_SetChannelName(channelid, channelname[]);
 native TSC_GetChannelName(channelid, dest[], maxlen = sizeof(dest));
 native TSC_SetChannelDescription(channelid, desc[]);
-native TSC_SetChannelType(channelid, type);
-native TSC_GetChannelType(channelid);
+native TSC_SetChannelType(channelid, TSC_CHANNELTYPE:type);
+native TSC_CHANNELTYPE:TSC_GetChannelType(channelid);
 native TSC_SetChannelPassword(channelid, password[]);
 native TSC_HasChannelPassword(channelid);
 native TSC_SetChannelRequiredTP(channelid, talkpower);
@@ -83,7 +83,7 @@ forward TSC_OnChannelReorder(channelid, orderid);
 forward TSC_OnChannelMoved(channelid, parentid, orderid);
 forward TSC_OnChannelRenamed(channelid, name[]);
 forward TSC_OnChannelPasswordEdited(channelid, bool:ispassworded, bool:passwordchanged);
-forward TSC_OnChannelTypeChanged(channelid, type);
+forward TSC_OnChannelTypeChanged(channelid, TSC_CHANNELTYPE:type);
 forward TSC_OnChannelSetDefault(channelid);
 forward TSC_OnChannelMaxClientsChanged(channelid, maxclients);
 forward TSC_OnChannelRequiredTPChanged(channelid, talkpower);
