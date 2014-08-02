@@ -106,11 +106,6 @@ private: //constructor / deconstructor
 
 
 private: //functions (internal)
-	inline bool IsValidChannel(Channel::Id_t cid) const
-	{
-		return (m_Channels.find(cid) != m_Channels.end());
-	}
-
 	void Initialize();
 
 
@@ -127,6 +122,10 @@ public: //server functions
 public: //channel functions
 	bool CreateChannel(string name);
 	bool DeleteChannel(Channel::Id_t cid);
+	inline bool IsValidChannel(Channel::Id_t cid) const
+	{
+		return (m_Channels.find(cid) != m_Channels.end());
+	}
 	bool SetChannelName(Channel::Id_t cid, string name);
 	inline string GetChannelName(Channel::Id_t cid) const
 	{

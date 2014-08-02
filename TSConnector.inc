@@ -31,6 +31,8 @@ native TSC_ChangeNickname(nickname[]);
 
 native TSC_CreateChannel(channelname[]);
 native TSC_DeleteChannel(channelid);
+native TSC_FindChannel(channelname[]);
+native TSC_IsValidChannel(channelid);
 native TSC_SetChannelName(channelid, channelname[]);
 native TSC_GetChannelName(channelid, dest[], maxlen = sizeof(dest));
 native TSC_SetChannelDescription(channelid, desc[]);
@@ -47,7 +49,6 @@ native TSC_GetChannelParentId(channelid);
 native TSC_SetChannelOrderId(channelid, upperchannelid);
 native TSC_GetChannelOrderId(channelid);
 native TSC_GetDefaultChannelId();
-native TSC_FindChannel(channelname[]);
 
 /*
 native TSC_KickClient(uid[], E_KICK_TYPE:kicktype, reason[]);

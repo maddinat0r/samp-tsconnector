@@ -48,6 +48,19 @@ AMX_DECLARE_NATIVE(Native::TSC_Disconnect)
 	return 1;
 }
 
+//native TSC_FindChannel(channelname[]);
+AMX_DECLARE_NATIVE(Native::TSC_FindChannel)
+{
+	char *name = NULL;
+	amx_StrParam(amx, params[1], name);
+	return CServer::Get()->FindChannel(name == NULL ? string() : name);
+}
+
+//native TSC_IsValidChannel(channelid);
+AMX_DECLARE_NATIVE(Native::TSC_IsValidChannel)
+{
+	return CServer::Get()->IsValidChannel(static_cast<Channel::Id_t>(params[1]));
+}
 
 //native TSC_ChangeNickname(nickname[]);
 AMX_DECLARE_NATIVE(Native::TSC_ChangeNickname)
@@ -200,14 +213,6 @@ AMX_DECLARE_NATIVE(Native::TSC_GetChannelOrderId)
 AMX_DECLARE_NATIVE(Native::TSC_GetDefaultChannelId)
 {
 	return CServer::Get()->GetDefaultChannelId();
-}
-
-//native TSC_FindChannel(channelname[]);
-AMX_DECLARE_NATIVE(Native::TSC_FindChannel)
-{
-	char *name = NULL;
-	amx_StrParam(amx, params[1], name);
-	return CServer::Get()->FindChannel(name == NULL ? string() : name);
 }
 
 //
