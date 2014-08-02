@@ -7,34 +7,39 @@
 
 #include <string>
 #include <stack>
+#include <deque>
 #include <boost/variant.hpp>
 #include <boost/unordered_set.hpp>
 #include <boost/lockfree/spsc_queue.hpp>
 
 using std::string;
 using std::stack;
+using std::deque;
 using boost::variant;
 using boost::unordered_set;
 
 #include "CSingleton.h"
 
 
-struct Callback
-{
-	typedef variant<cell, string> Param_t;
-	
-	Callback(const char *name) :
-		Name(name)
-	{}
-
-	string Name;
-	stack<Param_t> Params;
-};
 
 
 class CCallbackHandler : public CSingleton<CCallbackHandler>
 {
 	friend class CSingleton<CCallbackHandler>;
+private: //callback data
+	struct Callback
+	{
+		template <typename... Args>
+		Callback(const char *name, Args&&... args) :
+			Name(name),
+			Params(deque<variant<cell, string>>{ args... })
+		{ }
+
+		string Name;
+		stack<variant<cell, string>> Params;
+	};
+
+
 private: //constructor / deconstructor
 	CCallbackHandler() {}
 	~CCallbackHandler() {}
@@ -51,9 +56,10 @@ private: //variables
 
 
 public: //functions
-	inline void Push(Callback *cb)
+	template <typename... Args>
+	void Call(const char *name, Args&&... args)
 	{
-		m_Queue.push(cb);
+		m_Queue.push(new Callback(name, std::forward<Args>(args)...));
 	}
 
 	inline void AddAmx(AMX *amx)

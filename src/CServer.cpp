@@ -72,16 +72,20 @@ void CServer::Initialize()
 
 	//retrieve vserver-id
 	CNetwork::Get()->Execute(fmt::format("serveridgetbyport virtualserver_port={}", CNetwork::Get()->GetServerPort()),
-		boost::bind(&CServer::OnServerIdRetrieved, this, _1));
+		[this](CNetwork::ResultSet_t &result)
+		{
+			if (result.empty() == false)
+				CUtils::Get()->ParseField(result.at(0), "server_id", m_ServerId);
+		});
 }
 
 CServer::~CServer()
 {
-	for (unordered_map<unsigned int, Channel *>::iterator i = m_Channels.begin(), end = m_Channels.end(); i != end; ++i)
-		delete i->second;
+	for (auto &c : m_Channels)
+		delete c.second;
 
-	for (unordered_map<unsigned int, Client *>::iterator i = m_Clients.begin(), end = m_Clients.end(); i != end; ++i)
-		delete i->second;
+	for (auto &c : m_Clients)
+		delete c.second;
 }
 
 
@@ -149,10 +153,12 @@ bool CServer::DeleteChannel(Channel::Id_t cid)
 		return false;
 
 
-	delete m_Channels.at(cid);
-	m_Channels.erase(cid);
-
-	CNetwork::Get()->Execute(fmt::format("channeldelete cid={} force=1", cid));
+	CNetwork::Get()->Execute(fmt::format("channeldelete cid={} force=1", cid),
+		[this, cid](CNetwork::ResultSet_t &result)
+		{
+			delete m_Channels.at(cid);
+			m_Channels.erase(cid);
+		});
 	return true;
 }
 
@@ -168,10 +174,14 @@ bool CServer::SetChannelName(Channel::Id_t cid, string name)
 		return false;
 
 
-	m_Channels.at(cid)->Name = name;
+	string unescaped_name(name);
 
 	CUtils::Get()->EscapeString(name);
-	CNetwork::Get()->Execute(fmt::format("channeledit cid={} channel_name={}", cid, name));
+	CNetwork::Get()->Execute(fmt::format("channeledit cid={} channel_name={}", cid, name),
+		[this, cid, unescaped_name](CNetwork::ResultSet_t &result)
+		{
+			m_Channels.at(cid)->Name = unescaped_name;
+		});
 	return true;
 }
 
@@ -193,7 +203,7 @@ bool CServer::SetChannelDescription(Channel::Id_t cid, string desc)
 	return true;
 }
 
-bool CServer::SetChannelType(Channel::Id_t cid, unsigned int type)
+bool CServer::SetChannelType(Channel::Id_t cid, Channel::Types type)
 {
 	if (m_IsLoggedIn == false)
 		return false;
@@ -208,15 +218,15 @@ bool CServer::SetChannelType(Channel::Id_t cid, unsigned int type)
 
 	switch(type) 
 	{
-		case CHANNEL_TYPE_PERMANENT:
+		case Channel::Types::PERMANENT:
 			type_flag_str = "channel_flag_permanent";
 		break;
 
-		case CHANNEL_TYPE_SEMI_PERMANENT:
+		case Channel::Types::SEMI_PERMANENT:
 			type_flag_str = "channel_flag_semi_permanent";
 		break;
 
-		case CHANNEL_TYPE_TEMPORARY:
+		case Channel::Types::TEMPORARY:
 			type_flag_str = "channel_flag_temporary";
 		break;
 
@@ -226,23 +236,27 @@ bool CServer::SetChannelType(Channel::Id_t cid, unsigned int type)
 
 	switch (m_Channels.at(cid)->Type)
 	{
-	case CHANNEL_TYPE_PERMANENT:
-		old_type_flag_str = "channel_flag_permanent";
-		break;
+		case Channel::Types::PERMANENT:
+			old_type_flag_str = "channel_flag_permanent";
+			break;
 
-	case CHANNEL_TYPE_SEMI_PERMANENT:
-		old_type_flag_str = "channel_flag_semi_permanent";
-		break;
+		case Channel::Types::SEMI_PERMANENT:
+			old_type_flag_str = "channel_flag_semi_permanent";
+			break;
 
-	case CHANNEL_TYPE_TEMPORARY:
-		old_type_flag_str = "channel_flag_temporary";
-		break;
+		case Channel::Types::TEMPORARY:
+			old_type_flag_str = "channel_flag_temporary";
+			break;
 
-	default:
-		return false;
+		default:
+			return false;
 	}
 
-	CNetwork::Get()->Execute(fmt::format("channeledit cid={} {}=1 {}=0", cid, type_flag_str, old_type_flag_str));
+	CNetwork::Get()->Execute(fmt::format("channeledit cid={} {}=1 {}=0", cid, type_flag_str, old_type_flag_str),
+		[this, cid, type](CNetwork::ResultSet_t &result)
+		{
+			m_Channels.at(cid)->Type = type;
+		});
 	return true;
 }
 
@@ -255,10 +269,13 @@ bool CServer::SetChannelPassword(Channel::Id_t cid, string password)
 		return false;
 
 
-	m_Channels.at(cid)->HasPassword = (password.empty() == false);
-
+	bool password_empty = password.empty();
 	CUtils::Get()->EscapeString(password);
-	CNetwork::Get()->Execute(fmt::format("channeledit cid={} channel_password={}", cid, password));
+	CNetwork::Get()->Execute(fmt::format("channeledit cid={} channel_password={}", cid, password),
+		[this, cid, password_empty](CNetwork::ResultSet_t &result)
+		{
+			m_Channels.at(cid)->HasPassword = (password_empty == false);
+		});
 	return true;
 }
 
@@ -271,9 +288,11 @@ bool CServer::SetChannelRequiredTalkPower(Channel::Id_t cid, int talkpower)
 		return false;
 
 
-	m_Channels.at(cid)->RequiredTalkPower = talkpower;
-
-	CNetwork::Get()->Execute(fmt::format("channeledit cid={} channel_needed_talk_power={}", cid, talkpower));
+	CNetwork::Get()->Execute(fmt::format("channeledit cid={} channel_needed_talk_power={}", cid, talkpower),
+		[this, cid, talkpower](CNetwork::ResultSet_t &result)
+		{
+			m_Channels.at(cid)->RequiredTalkPower = talkpower;
+		});
 	return true;
 }
 
@@ -289,9 +308,11 @@ bool CServer::SetChannelUserLimit(Channel::Id_t cid, int maxusers)
 		return false;
 
 
-	m_Channels.at(cid)->MaxClients = maxusers;
-
-	CNetwork::Get()->Execute(fmt::format("channeledit cid={} channel_maxclients={}", cid, maxusers));
+	CNetwork::Get()->Execute(fmt::format("channeledit cid={} channel_maxclients={}", cid, maxusers),
+		[this, cid, maxusers](CNetwork::ResultSet_t &result)
+		{
+			m_Channels.at(cid)->MaxClients = maxusers;
+		});
 	return true;
 }
 
@@ -303,13 +324,18 @@ bool CServer::SetChannelParentId(Channel::Id_t cid, Channel::Id_t pcid)
 	if (IsValidChannel(cid) == false)
 		return false;
 
-	if (IsValidChannel(pcid) == false)
+	if (pcid != 0 && IsValidChannel(pcid) == false)
+		return false;
+
+	if (m_Channels.at(cid)->ParentId == pcid)
 		return false;
 
 
-	m_Channels.at(cid)->ParentId = pcid;
-
-	CNetwork::Get()->Execute(fmt::format("channelmove cid={} cpid={}", cid, pcid));
+	CNetwork::Get()->Execute(fmt::format("channelmove cid={} cpid={}", cid, pcid),
+		[this, cid, pcid](CNetwork::ResultSet_t &result)
+		{
+			m_Channels.at(cid)->ParentId = pcid;
+		});
 	return true;
 }
 
@@ -321,13 +347,18 @@ bool CServer::SetChannelOrderId(Channel::Id_t cid, Channel::Id_t ocid)
 	if (IsValidChannel(cid) == false)
 		return false;
 
-	if (IsValidChannel(ocid) == false)
+	if (ocid != 0 && IsValidChannel(ocid) == false)
+		return false;
+
+	if (m_Channels.at(cid)->OrderId == ocid)
 		return false;
 
 
-	m_Channels.at(cid)->OrderId = ocid;
-
-	CNetwork::Get()->Execute(fmt::format("channeledit cid={} channel_order={}", cid, ocid));
+	CNetwork::Get()->Execute(fmt::format("channeledit cid={} channel_order={}", cid, ocid),
+		[this, cid, ocid](CNetwork::ResultSet_t &result)
+		{
+			m_Channels.at(cid)->OrderId = ocid;
+		});
 	return true;
 }
 
@@ -335,11 +366,10 @@ Channel::Id_t CServer::FindChannel(string name)
 {
 	if (name.empty() == false)
 	{
-		for (unordered_map<Channel::Id_t, Channel *>::iterator i = m_Channels.begin(),
-			end = m_Channels.end(); i != end; ++i)
+		for (auto &i : m_Channels)
 		{
-			if (i->second->Name == name)
-				return i->first;
+			if (i.second->Name == name)
+				return i.first;
 		}
 	}
 
@@ -354,7 +384,7 @@ void CServer::OnLogin(vector<string> &res)
 	m_IsLoggedIn = true;
 
 
-	CCallbackHandler::Get()->Push(new Callback("TSC_OnConnect"));
+	CCallbackHandler::Get()->Call("TSC_OnConnect");
 }
 
 void CServer::OnChannelList(vector<string> &res)
@@ -373,7 +403,7 @@ void CServer::OnChannelList(vector<string> &res)
 		....
 		channel_maxclients=-1
 	*/
-	for (vector<string>::iterator i = res.begin(), end = res.end(); i != end; ++i)
+	for (auto &res_row : res)
 	{
 		unsigned int
 			cid = 0,
@@ -390,16 +420,16 @@ void CServer::OnChannelList(vector<string> &res)
 
 		string name;
 
-		CUtils::Get()->ParseField(*i, "cid", cid);
-		CUtils::Get()->ParseField(*i, "pid", pid);
-		CUtils::Get()->ParseField(*i, "channel_order", order);
-		CUtils::Get()->ParseField(*i, "channel_name", name);
-		CUtils::Get()->ParseField(*i, "channel_flag_default", is_default);
-		CUtils::Get()->ParseField(*i, "channel_flag_password", has_password);
-		CUtils::Get()->ParseField(*i, "channel_flag_permanent", is_permanent);
-		CUtils::Get()->ParseField(*i, "channel_flag_semi_permanent", is_semi_perm);
-		CUtils::Get()->ParseField(*i, "channel_maxclients", max_clients);
-		CUtils::Get()->ParseField(*i, "channel_needed_talk_power", needed_talkpower);
+		CUtils::Get()->ParseField(res_row, "cid", cid);
+		CUtils::Get()->ParseField(res_row, "pid", pid);
+		CUtils::Get()->ParseField(res_row, "channel_order", order);
+		CUtils::Get()->ParseField(res_row, "channel_name", name);
+		CUtils::Get()->ParseField(res_row, "channel_flag_default", is_default);
+		CUtils::Get()->ParseField(res_row, "channel_flag_password", has_password);
+		CUtils::Get()->ParseField(res_row, "channel_flag_permanent", is_permanent);
+		CUtils::Get()->ParseField(res_row, "channel_flag_semi_permanent", is_semi_perm);
+		CUtils::Get()->ParseField(res_row, "channel_maxclients", max_clients);
+		CUtils::Get()->ParseField(res_row, "channel_needed_talk_power", needed_talkpower);
 
 		CUtils::Get()->UnEscapeString(name);
 
@@ -410,24 +440,18 @@ void CServer::OnChannelList(vector<string> &res)
 		chan->Name = name;
 		chan->HasPassword = has_password != 0;
 		if (is_permanent != 0)
-			chan->Type = CHANNEL_TYPE_PERMANENT;
+			chan->Type = Channel::Types::PERMANENT;
 		else if (is_semi_perm != 0)
-			chan->Type = CHANNEL_TYPE_SEMI_PERMANENT;
+			chan->Type = Channel::Types::SEMI_PERMANENT;
 		else
-			chan->Type = CHANNEL_TYPE_TEMPORARY;
+			chan->Type = Channel::Types::TEMPORARY;
 		chan->MaxClients = max_clients;
 		chan->RequiredTalkPower = needed_talkpower;
 
 		if (is_default != 0)
 			m_DefaultChannel = cid;
-		m_Channels.insert(unordered_map<unsigned int, Channel *>::value_type(cid, chan));
+		m_Channels.emplace(cid, chan);
 	}
-}
-
-void CServer::OnServerIdRetrieved(vector<string> &res)
-{
-	if (res.empty() == false)
-		CUtils::Get()->ParseField(res.at(0), "server_id", m_ServerId);
 }
 
 
@@ -438,10 +462,10 @@ void CServer::OnChannelCreated(boost::smatch &result)
 		id = 0,
 		parent_id = 0,
 		order_id = 0;
-	unsigned int type = CHANNEL_TYPE_INVALID;
 	int
 		maxclients = -1,
 		needed_talkpower = 0;
+	Channel::Types type = Channel::Types::INVALID;
 	string name;
 
 	CUtils::Get()->ConvertStringToInt(result[1].str(), id);
@@ -460,11 +484,11 @@ void CServer::OnChannelCreated(boost::smatch &result)
 	CUtils::Get()->ParseField(extra_data, "channel_flag_permanent", is_permanent);
 	CUtils::Get()->ParseField(extra_data, "channel_flag_semi_permanent", is_semi_perm);
 	if (is_permanent != 0)
-		type = CHANNEL_TYPE_PERMANENT;
+		type = Channel::Types::PERMANENT;
 	else if (is_semi_perm != 0)
-		type = CHANNEL_TYPE_SEMI_PERMANENT;
+		type = Channel::Types::SEMI_PERMANENT;
 	else
-		type = CHANNEL_TYPE_TEMPORARY;
+		type = Channel::Types::TEMPORARY;
 
 
 	CUtils::Get()->UnEscapeString(name);
@@ -480,12 +504,10 @@ void CServer::OnChannelCreated(boost::smatch &result)
 
 	if (extra_data.find("channel_flag_default") != string::npos)
 		m_DefaultChannel = id;
-	m_Channels.insert(unordered_map<unsigned int, Channel *>::value_type(id, chan));
+	m_Channels.emplace(id, chan);
 
 
-	Callback *cb = new Callback("TSC_OnChannelCreated");
-	cb->Params.push(id);
-	CCallbackHandler::Get()->Push(cb);
+	CCallbackHandler::Get()->Call("TSC_OnChannelCreated", id);
 }
 
 void CServer::OnChannelDeleted(boost::smatch &result)
@@ -500,9 +522,7 @@ void CServer::OnChannelDeleted(boost::smatch &result)
 	m_Channels.erase(cid);
 
 
-	Callback *cb = new Callback("TSC_OnChannelDeleted");
-	cb->Params.push(cid);
-	CCallbackHandler::Get()->Push(cb);
+	CCallbackHandler::Get()->Call("TSC_OnChannelDeleted", cid);
 }
 
 void CServer::OnChannelReorder(boost::smatch &result)
@@ -524,10 +544,7 @@ void CServer::OnChannelReorder(boost::smatch &result)
 	m_Channels.at(cid)->OrderId = orderid;
 
 
-	Callback *cb = new Callback("TSC_OnChannelReorder");
-	cb->Params.push(cid);
-	cb->Params.push(orderid);
-	CCallbackHandler::Get()->Push(cb);
+	CCallbackHandler::Get()->Call("TSC_OnChannelReorder", cid, orderid);
 }
 
 void CServer::OnChannelMoved(boost::smatch &result)
@@ -551,15 +568,12 @@ void CServer::OnChannelMoved(boost::smatch &result)
 		return;
 	
 
-	m_Channels.at(cid)->ParentId = parentid;
-	m_Channels.at(cid)->OrderId = orderid;
+	Channel *channel = m_Channels.at(cid);
+	channel->ParentId = parentid;
+	channel->OrderId = orderid;
 
 	
-	Callback *cb = new Callback("TSC_OnChannelMoved");
-	cb->Params.push(cid);
-	cb->Params.push(parentid);
-	cb->Params.push(orderid);
-	CCallbackHandler::Get()->Push(cb);
+	CCallbackHandler::Get()->Call("TSC_OnChannelMoved", cid, parentid, orderid);
 }
 
 void CServer::OnChannelRenamed(boost::smatch &result)
@@ -578,10 +592,7 @@ void CServer::OnChannelRenamed(boost::smatch &result)
 	m_Channels.at(cid)->Name = name;
 
 	
-	Callback *cb = new Callback("TSC_OnChannelRenamed");
-	cb->Params.push(cid);
-	cb->Params.push(name);
-	CCallbackHandler::Get()->Push(cb);
+	CCallbackHandler::Get()->Call("TSC_OnChannelRenamed", cid, name);
 }
 
 void CServer::OnChannelPasswordToggled(boost::smatch &result)
@@ -602,11 +613,8 @@ void CServer::OnChannelPasswordToggled(boost::smatch &result)
 	channel->WasPasswordToggled = true;
 
 	
-	Callback *cb = new Callback("TSC_OnChannelPasswordEdited");
-	cb->Params.push(cid);
-	cb->Params.push(toggle_password); //ispassworded
-	cb->Params.push(0); //passwordchanged
-	CCallbackHandler::Get()->Push(cb);
+	//forward TSC_OnChannelPasswordEdited(channelid, bool:ispassworded, bool:passwordchanged);
+	CCallbackHandler::Get()->Call("TSC_OnChannelPasswordEdited", cid, toggle_password, 0);
 }
 
 void CServer::OnChannelPasswordChanged(boost::smatch &result)
@@ -621,11 +629,8 @@ void CServer::OnChannelPasswordChanged(boost::smatch &result)
 	Channel *channel = m_Channels.at(cid);
 	if (channel->WasPasswordToggled == false)
 	{
-		Callback *cb = new Callback("TSC_OnChannelPasswordEdited");
-		cb->Params.push(cid);
-		cb->Params.push(1); //ispassworded
-		cb->Params.push(1); //passwordchanged
-		CCallbackHandler::Get()->Push(cb);
+		//forward TSC_OnChannelPasswordEdited(channelid, bool:ispassworded, bool:passwordchanged);
+		CCallbackHandler::Get()->Call("TSC_OnChannelPasswordEdited", cid, 1, 1);
 	}
 	else
 		channel->WasPasswordToggled = false;
@@ -654,20 +659,21 @@ void CServer::OnChannelTypeChanged(boost::smatch &result)
 	Channel *channel = m_Channels.at(cid);
 	if (flag_data != 0)
 	{
-		channel->Type = (flag.find("semi_") == 0) ? CHANNEL_TYPE_SEMI_PERMANENT : CHANNEL_TYPE_PERMANENT;
+		channel->Type = (flag.find("semi_") == 0)
+			? Channel::Types::SEMI_PERMANENT
+			: Channel::Types::PERMANENT;
 	}
 	else if (sec_flag_data != 0)
 	{
-		channel->Type = (sec_flag.find("semi_") == 0) ? CHANNEL_TYPE_SEMI_PERMANENT : CHANNEL_TYPE_PERMANENT;
+		channel->Type = (sec_flag.find("semi_") == 0)
+			? Channel::Types::SEMI_PERMANENT
+			: Channel::Types::PERMANENT;
 	}
 	else
-		channel->Type = CHANNEL_TYPE_TEMPORARY;
+		channel->Type = Channel::Types::TEMPORARY;
 
 	
-	Callback *cb = new Callback("TSC_OnChannelTypeChanged");
-	cb->Params.push(cid);
-	cb->Params.push(channel->Type);
-	CCallbackHandler::Get()->Push(cb);
+	CCallbackHandler::Get()->Call("TSC_OnChannelTypeChanged", cid, static_cast<int>(channel->Type));
 }
 
 void CServer::OnChannelSetDefault(boost::smatch &result)
@@ -682,9 +688,7 @@ void CServer::OnChannelSetDefault(boost::smatch &result)
 	m_DefaultChannel = cid;
 
 	
-	Callback *cb = new Callback("TSC_OnChannelSetDefault");
-	cb->Params.push(cid);
-	CCallbackHandler::Get()->Push(cb);
+	CCallbackHandler::Get()->Call("TSC_OnChannelSetDefault", cid);
 }
 
 void CServer::OnChannelMaxClientsChanged(boost::smatch &result)
@@ -702,10 +706,7 @@ void CServer::OnChannelMaxClientsChanged(boost::smatch &result)
 	m_Channels.at(cid)->MaxClients = maxclients;
 
 	
-	Callback *cb = new Callback("TSC_OnChannelMaxClientsChanged");
-	cb->Params.push(cid);
-	cb->Params.push(maxclients);
-	CCallbackHandler::Get()->Push(cb);
+	CCallbackHandler::Get()->Call("TSC_OnChannelMaxClientsChanged", cid, maxclients);
 }
 
 void CServer::OnChannelRequiredTalkPowerChanged(boost::smatch &result)
@@ -723,8 +724,5 @@ void CServer::OnChannelRequiredTalkPowerChanged(boost::smatch &result)
 	m_Channels.at(cid)->RequiredTalkPower = talkpower;
 
 
-	Callback *cb = new Callback("TSC_OnChannelRequiredTPChanged");
-	cb->Params.push(cid);
-	cb->Params.push(talkpower);
-	CCallbackHandler::Get()->Push(cb);
+	CCallbackHandler::Get()->Call("TSC_OnChannelRequiredTPChanged", cid, talkpower);
 }

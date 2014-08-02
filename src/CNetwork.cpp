@@ -42,12 +42,12 @@ void CNetwork::Disconnect()
 	m_Socket.close();
 	m_IoService.stop();
 	
-	if (m_IoThread != NULL)
+	if (m_IoThread != nullptr)
 	{
 		if (m_IoThread->get_id() != boost::this_thread::get_id())
 			m_IoThread->join();
 		delete m_IoThread;
-		m_IoThread = NULL;
+		m_IoThread = nullptr;
 	}
 }
 
@@ -110,7 +110,7 @@ void CNetwork::OnRead(const boost::system::error_code &error_code)
 		{
 			if (error_rx_result[1].str() == "0")
 			{
-				for (vector<string>::iterator i = captured_data.begin(); i != captured_data.end(); ++i)
+				for (auto i = captured_data.begin(); i != captured_data.end(); ++i)
 				{
 					string &data = *i;
 					if (data.find('|') != string::npos) //multiple data rows with '|' as delimiter
@@ -126,7 +126,7 @@ void CNetwork::OnRead(const boost::system::error_code &error_code)
 						} while (delim_pos != string::npos && ++delim_pos);
 
 						i = captured_data.erase(i);
-						for (vector<string>::iterator j = result_set.begin(), jend = result_set.end(); j != jend; ++j)
+						for (auto j = result_set.begin(), jend = result_set.end(); j != jend; ++j)
 							i = captured_data.insert(i, *j);
 					}
 				}
@@ -167,11 +167,11 @@ void CNetwork::OnRead(const boost::system::error_code &error_code)
 			{
 				//notify event
 				boost::smatch event_result;
-				for (vector<EventTuple_t>::iterator i = m_EventList.begin(); i != m_EventList.end(); ++i)
+				for (auto &event : m_EventList)
 				{
-					if (boost::regex_search(read_data, event_result, i->get<0>()))
+					if (boost::regex_search(read_data, event_result, event.get<0>()))
 					{
-						i->get<1>()(event_result);
+						event.get<1>()(event_result);
 						break;
 					}
 				}
@@ -209,7 +209,3 @@ void CNetwork::Execute(string cmd, ReadCallback_t callback)
 		AsyncWrite(m_CmdQueue.front().get<0>());
 }
 
-void CNetwork::RegisterEvent(boost::regex event_rx, EventCallback_t callback)
-{
-	m_EventList.push_back(boost::make_tuple(boost::move(event_rx), boost::move(callback)));
-}

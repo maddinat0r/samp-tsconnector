@@ -3,20 +3,18 @@
 
 void CCallbackHandler::Process()
 {
-	Callback *callback = NULL;
+	Callback *callback = nullptr;
 	while (m_Queue.pop(callback))
 	{
-		for (unordered_set<AMX *>::iterator i = m_AmxList.begin(), end = m_AmxList.end(); i != end; ++i) 
+		for (auto amx : m_AmxList) 
 		{
 			int cb_idx;
-			AMX *amx = (*i);
-
 			if (amx_FindPublic(amx, callback->Name.c_str(), &cb_idx) == AMX_ERR_NONE) 
 			{
 				cell amx_address = -1;
 				while(callback->Params.empty() == false) 
 				{
-					Callback::Param_t &param = callback->Params.top();
+					auto &param = callback->Params.top();
 					if (param.type() == typeid(cell))
 					{
 						amx_Push(amx, boost::get<cell>(param));

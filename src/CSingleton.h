@@ -15,23 +15,23 @@ public:
 
 	inline static T *Get()
 	{
-		if (m_Instance == NULL)
+		if (m_Instance == nullptr)
 			m_Instance = new T;
 		return m_Instance;
 	}
 
 	inline static void Destroy()
 	{
-		if (m_Instance != NULL)
+		if (m_Instance != nullptr)
 		{
 			delete m_Instance;
-			m_Instance = NULL;
+			m_Instance = nullptr;
 		}
 	}
 };
 
 template <class T>
-T* CSingleton<T>::m_Instance = NULL;
+T* CSingleton<T>::m_Instance = nullptr;
 
 
 #endif // INC_CSINGLETON_H

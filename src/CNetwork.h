@@ -41,11 +41,11 @@ public: //definitions
 
 private: //variables
 	asio::io_service m_IoService;
-	thread *m_IoThread;
+	thread *m_IoThread = nullptr;
 
 	tcp::socket m_Socket;
 	tcp::endpoint m_SocketDest;
-	unsigned short m_ServerPort;
+	unsigned short m_ServerPort = 9987;
 
 	asio::deadline_timer m_AliveTimer;
 
@@ -60,8 +60,6 @@ private: //variables
 
 private: //constructor / deconstructor
 	CNetwork() :
-		m_IoThread(NULL),
-
 		m_Socket(m_IoService),
 		m_AliveTimer(m_IoService)
 	{
@@ -86,7 +84,10 @@ public: //functions
 
 	void Execute(string cmd, ReadCallback_t callback = ReadCallback_t());
 
-	void RegisterEvent(boost::regex event_rx, EventCallback_t callback);
+	inline void RegisterEvent(boost::regex &&event_rx, EventCallback_t &&callback)
+	{
+		m_EventList.push_back(boost::make_tuple(event_rx, callback));
+	}
 
 
 private: //handlers

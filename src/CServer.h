@@ -18,59 +18,47 @@ using std::vector;
 using boost::unordered_map;
 
 
-enum E_CHANNEL_TYPES
-{
-	CHANNEL_TYPE_INVALID,
-	CHANNEL_TYPE_TEMPORARY,
-	CHANNEL_TYPE_SEMI_PERMANENT,
-	CHANNEL_TYPE_PERMANENT
-};
-
-enum E_KICK_TYPES
-{
-	KICK_TYPE_INVALID,
-	KICK_TYPE_CHANNEL,
-	KICK_TYPE_SERVER
-};
-
-
 struct Channel
 {
 	typedef unsigned int Id_t;
-	static const Id_t Invalid = 0;
-	
-	Channel() :
-		ParentId(0),
-		OrderId(0),
+	static const Id_t Invalid = -1;
 
-		Type(CHANNEL_TYPE_INVALID),
-		HasPassword(false),
-		WasPasswordToggled(false),
-		RequiredTalkPower(0),
-
-		MaxClients(-1)
-	{}
+	enum class Types
+	{
+		INVALID,
+		TEMPORARY,
+		SEMI_PERMANENT,
+		PERMANENT
+	};
 	
+
 	Id_t
-		ParentId,
-		OrderId;
+		ParentId = Invalid,
+		OrderId = Invalid;
 
 	string Name;
-	unsigned int Type; //temporary, permanent, semi-permanent
+	Types Type = Types::INVALID;
 	bool
-		HasPassword,
-		WasPasswordToggled;
-	int RequiredTalkPower;
+		HasPassword = false,
+		WasPasswordToggled = false;
+	int RequiredTalkPower = 0;
 
 	list<unsigned int> Clients;
-	int MaxClients;
+	int MaxClients = -1;
 };
 
 struct Client
 {
 	typedef unsigned int Id_t;
+	static const Id_t Invalid = 0;
 
-	Client() {}
+	enum class KickTypes
+	{
+		INVALID,
+		CHANNEL,
+		SERVER
+	};
+
 
 	string
 		Uid,
@@ -78,7 +66,7 @@ struct Client
 
 	string Desc;
 
-	Channel::Id_t CurrentChannel;
+	Channel::Id_t CurrentChannel = Channel::Invalid;
 };
 
 
@@ -87,20 +75,18 @@ class CServer : public CSingleton <CServer>
 	friend class CSingleton <CServer>;
 private: //variables
 	unordered_map<Channel::Id_t, Channel *> m_Channels;
-	Channel::Id_t m_DefaultChannel;
+	Channel::Id_t m_DefaultChannel = Channel::Invalid;
 
 	unordered_map<Client::Id_t, Client *> m_Clients;
 
 	boost::atomic<bool> m_IsLoggedIn;
 
-	unsigned int m_ServerId;
+	unsigned int m_ServerId = 0;
 
 
 private: //constructor / deconstructor
 	CServer() :
-		m_DefaultChannel(0),
-		m_IsLoggedIn(false),
-		m_ServerId(0)
+		m_IsLoggedIn(false)
 	{}
 	~CServer();
 
@@ -132,10 +118,10 @@ public: //channel functions
 		return IsValidChannel(cid) ? m_Channels.at(cid)->Name : string();
 	}
 	bool SetChannelDescription(Channel::Id_t cid, string desc);
-	bool SetChannelType(Channel::Id_t cid, unsigned int type);
-	inline unsigned int GetChannelType(Channel::Id_t cid) const
+	bool SetChannelType(Channel::Id_t cid, Channel::Types type);
+	inline Channel::Types GetChannelType(Channel::Id_t cid) const
 	{
-		return IsValidChannel(cid) ? m_Channels.at(cid)->Type : CHANNEL_TYPE_INVALID;
+		return IsValidChannel(cid) ? m_Channels.at(cid)->Type : Channel::Types::INVALID;
 	}
 	bool SetChannelPassword(Channel::Id_t cid, string password);
 	inline bool HasChannelPassword(Channel::Id_t cid) const
@@ -155,12 +141,12 @@ public: //channel functions
 	bool SetChannelParentId(Channel::Id_t cid, Channel::Id_t pcid);
 	Channel::Id_t GetChannelParentId(Channel::Id_t cid) const
 	{
-		return IsValidChannel(cid) ? m_Channels.at(cid)->ParentId : 0;
+		return IsValidChannel(cid) ? m_Channels.at(cid)->ParentId : Channel::Invalid;
 	}
 	bool SetChannelOrderId(Channel::Id_t cid, Channel::Id_t ocid);
 	Channel::Id_t GetChannelOrderId(Channel::Id_t cid) const
 	{
-		return IsValidChannel(cid) ? m_Channels.at(cid)->OrderId : 0;
+		return IsValidChannel(cid) ? m_Channels.at(cid)->OrderId : Channel::Invalid;
 	}
 	Channel::Id_t GetDefaultChannelId() const
 	{
@@ -175,7 +161,6 @@ public: //client functions
 public: //network callbacks
 	void OnLogin(vector<string> &res);
 	void OnChannelList(vector<string> &res);
-	void OnServerIdRetrieved(vector<string> &res);
 
 
 public: //event callbacks

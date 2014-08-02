@@ -131,13 +131,15 @@ AMX_DECLARE_NATIVE(Native::TSC_SetChannelDescription)
 //native TSC_SetChannelType(channelid, type);
 AMX_DECLARE_NATIVE(Native::TSC_SetChannelType)
 {
-	return CServer::Get()->SetChannelType(static_cast<Channel::Id_t>(params[1]), params[2]);
+	return CServer::Get()->SetChannelType(
+		static_cast<Channel::Id_t>(params[1]), static_cast<Channel::Types>(params[2]));
 }
 
 //native TSC_GetChannelType(channelid);
 AMX_DECLARE_NATIVE(Native::TSC_GetChannelType)
 {
-	return CServer::Get()->GetChannelType(static_cast<Channel::Id_t>(params[1]));
+	return static_cast<cell>(
+		CServer::Get()->GetChannelType(static_cast<Channel::Id_t>(params[1])));
 }
 
 //native TSC_SetChannelPassword(channelid, password[]);
