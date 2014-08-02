@@ -10,6 +10,7 @@
 #include <boost/regex.hpp>
 #include <boost/atomic.hpp>
 #include <boost/thread/mutex.hpp>
+#include <boost/thread/lock_guard.hpp>
 
 #include "CSingleton.h"
 
@@ -110,69 +111,42 @@ public: //channel functions
 	bool CreateChannel(string name);
 	bool DeleteChannel(Channel::Id_t cid);
 	Channel::Id_t FindChannel(string name);
-	inline bool IsValidChannel(Channel::Id_t cid) const
+	inline bool IsValidChannel(Channel::Id_t cid)
 	{
+		boost::lock_guard<mutex> channel_mtx_guard(m_ChannelMtx);
 		return (m_Channels.find(cid) != m_Channels.end());
 	}
 	bool SetChannelName(Channel::Id_t cid, string name);
-	inline string GetChannelName(Channel::Id_t cid) const
-	{
-		return IsValidChannel(cid) ? m_Channels.at(cid)->Name : string();
-	}
+	string GetChannelName(Channel::Id_t cid);
 	bool SetChannelDescription(Channel::Id_t cid, string desc);
 	bool SetChannelType(Channel::Id_t cid, Channel::Types type);
-	inline Channel::Types GetChannelType(Channel::Id_t cid) const
-	{
-		return IsValidChannel(cid) ? m_Channels.at(cid)->Type : Channel::Types::INVALID;
-	}
+	Channel::Types GetChannelType(Channel::Id_t cid);
 	bool SetChannelPassword(Channel::Id_t cid, string password);
-	inline bool HasChannelPassword(Channel::Id_t cid) const
-	{
-		return IsValidChannel(cid) ? m_Channels.at(cid)->HasPassword : false;
-	}
+	bool HasChannelPassword(Channel::Id_t cid);
 	bool SetChannelRequiredTalkPower(Channel::Id_t cid, int talkpower);
-	inline int GetChannelRequiredTalkPower(Channel::Id_t cid) const
-	{
-		return IsValidChannel(cid) ? m_Channels.at(cid)->RequiredTalkPower : 0;
-	}
+	int GetChannelRequiredTalkPower(Channel::Id_t cid);
 	bool SetChannelUserLimit(Channel::Id_t cid, int maxusers);
-	inline int GetChannelUserLimit(Channel::Id_t cid) const
-	{
-		return IsValidChannel(cid) ? m_Channels.at(cid)->MaxClients : 0;
-	}
+	int GetChannelUserLimit(Channel::Id_t cid);
 	bool SetChannelParentId(Channel::Id_t cid, Channel::Id_t pcid);
-	Channel::Id_t GetChannelParentId(Channel::Id_t cid) const
-	{
-		return IsValidChannel(cid) ? m_Channels.at(cid)->ParentId : Channel::Invalid;
-	}
+	Channel::Id_t GetChannelParentId(Channel::Id_t cid);
 	bool SetChannelOrderId(Channel::Id_t cid, Channel::Id_t ocid);
-	Channel::Id_t GetChannelOrderId(Channel::Id_t cid) const
+	Channel::Id_t GetChannelOrderId(Channel::Id_t cid);
+	inline Channel::Id_t GetDefaultChannelId()
 	{
-		return IsValidChannel(cid) ? m_Channels.at(cid)->OrderId : Channel::Invalid;
-	}
-	Channel::Id_t GetDefaultChannelId() const
-	{
+		boost::lock_guard<mutex> channel_mtx_guard(m_ChannelMtx);
 		return m_DefaultChannel;
 	}
 
 
 public: //client functions
-	inline bool IsValidClient(Client::Id_t clid) const
+	inline bool IsValidClient(Client::Id_t clid)
 	{
+		boost::lock_guard<mutex> client_mtx_guard(m_ClientMtx);
 		return (m_Clients.find(clid) != m_Clients.end());
 	}
-	inline string GetClientUid(Client::Id_t clid)
-	{
-		return IsValidClient(clid) ? m_Clients.at(clid)->Uid : string();
-	}
-	inline Client::Id_t GetClientDatabaseId(Client::Id_t clid)
-	{
-		return IsValidClient(clid) ? m_Clients.at(clid)->DatabaseId : Client::Invalid;
-	}
-	inline Channel::Id_t GetClientChannelId(Client::Id_t clid)
-	{
-		return IsValidClient(clid) ? m_Clients.at(clid)->CurrentChannel : Channel::Invalid;
-	}
+	string GetClientUid(Client::Id_t clid);
+	Client::Id_t GetClientDatabaseId(Client::Id_t clid);
+	Channel::Id_t GetClientChannelId(Client::Id_t clid);
 
 	bool KickClient(Client::Id_t clid, Client::KickTypes type, string reasonmsg);
 	bool BanClient(string uid, int seconds, string reasonmsg);

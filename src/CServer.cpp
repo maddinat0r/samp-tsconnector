@@ -186,6 +186,7 @@ bool CServer::DeleteChannel(Channel::Id_t cid)
 	CNetwork::Get()->Execute(fmt::format("channeldelete cid={} force=1", cid),
 		[this, cid](CNetwork::ResultSet_t &result)
 		{
+			boost::lock_guard<mutex> channel_mtx_guard(m_ChannelMtx);
 			delete m_Channels.at(cid);
 			m_Channels.erase(cid);
 		});
@@ -210,9 +211,21 @@ bool CServer::SetChannelName(Channel::Id_t cid, string name)
 	CNetwork::Get()->Execute(fmt::format("channeledit cid={} channel_name={}", cid, name),
 		[this, cid, unescaped_name](CNetwork::ResultSet_t &result)
 		{
+			boost::lock_guard<mutex> channel_mtx_guard(m_ChannelMtx);
 			m_Channels.at(cid)->Name = unescaped_name;
 		});
 	return true;
+}
+
+string CServer::GetChannelName(Channel::Id_t cid)
+{
+	if (IsValidChannel(cid))
+	{
+		boost::lock_guard<mutex> channel_mtx_guard(m_ChannelMtx);
+		return m_Channels.at(cid)->Name;
+	}
+	else
+		return string();
 }
 
 bool CServer::SetChannelDescription(Channel::Id_t cid, string desc)
@@ -242,6 +255,10 @@ bool CServer::SetChannelType(Channel::Id_t cid, Channel::Types type)
 		type_flag_str,
 		old_type_flag_str;
 
+	m_ChannelMtx.lock();
+	auto current_type = m_Channels.at(cid)->Type;
+	m_ChannelMtx.unlock();
+
 	switch(type) 
 	{
 		case Channel::Types::PERMANENT:
@@ -260,7 +277,7 @@ bool CServer::SetChannelType(Channel::Id_t cid, Channel::Types type)
 			return false;
 	}
 
-	switch (m_Channels.at(cid)->Type)
+	switch (current_type)
 	{
 		case Channel::Types::PERMANENT:
 			old_type_flag_str = "channel_flag_permanent";
@@ -281,9 +298,21 @@ bool CServer::SetChannelType(Channel::Id_t cid, Channel::Types type)
 	CNetwork::Get()->Execute(fmt::format("channeledit cid={} {}=1 {}=0", cid, type_flag_str, old_type_flag_str),
 		[this, cid, type](CNetwork::ResultSet_t &result)
 		{
+			boost::lock_guard<mutex> channel_mtx_guard(m_ChannelMtx);
 			m_Channels.at(cid)->Type = type;
 		});
 	return true;
+}
+
+Channel::Types CServer:: GetChannelType(Channel::Id_t cid)
+{
+	if (IsValidChannel(cid))
+	{
+		boost::lock_guard<mutex> channel_mtx_guard(m_ChannelMtx);
+		return m_Channels.at(cid)->Type;
+	}
+	else
+		return Channel::Types::INVALID;
 }
 
 bool CServer::SetChannelPassword(Channel::Id_t cid, string password)
@@ -300,9 +329,21 @@ bool CServer::SetChannelPassword(Channel::Id_t cid, string password)
 	CNetwork::Get()->Execute(fmt::format("channeledit cid={} channel_password={}", cid, password),
 		[this, cid, password_empty](CNetwork::ResultSet_t &result)
 		{
+			boost::lock_guard<mutex> channel_mtx_guard(m_ChannelMtx);
 			m_Channels.at(cid)->HasPassword = (password_empty == false);
 		});
 	return true;
+}
+
+bool CServer::HasChannelPassword(Channel::Id_t cid)
+{
+	if (IsValidChannel(cid))
+	{
+		boost::lock_guard<mutex> channel_mtx_guard(m_ChannelMtx);
+		return m_Channels.at(cid)->HasPassword;
+	}
+	else
+		return false;
 }
 
 bool CServer::SetChannelRequiredTalkPower(Channel::Id_t cid, int talkpower)
@@ -317,9 +358,21 @@ bool CServer::SetChannelRequiredTalkPower(Channel::Id_t cid, int talkpower)
 	CNetwork::Get()->Execute(fmt::format("channeledit cid={} channel_needed_talk_power={}", cid, talkpower),
 		[this, cid, talkpower](CNetwork::ResultSet_t &result)
 		{
+			boost::lock_guard<mutex> channel_mtx_guard(m_ChannelMtx);
 			m_Channels.at(cid)->RequiredTalkPower = talkpower;
 		});
 	return true;
+}
+
+int CServer::GetChannelRequiredTalkPower(Channel::Id_t cid)
+{
+	if (IsValidChannel(cid))
+	{
+		boost::lock_guard<mutex> channel_mtx_guard(m_ChannelMtx);
+		return m_Channels.at(cid)->RequiredTalkPower;
+	}
+	else
+		return 0;
 }
 
 bool CServer::SetChannelUserLimit(Channel::Id_t cid, int maxusers)
@@ -337,9 +390,21 @@ bool CServer::SetChannelUserLimit(Channel::Id_t cid, int maxusers)
 	CNetwork::Get()->Execute(fmt::format("channeledit cid={} channel_maxclients={}", cid, maxusers),
 		[this, cid, maxusers](CNetwork::ResultSet_t &result)
 		{
+			boost::lock_guard<mutex> channel_mtx_guard(m_ChannelMtx);
 			m_Channels.at(cid)->MaxClients = maxusers;
 		});
 	return true;
+}
+
+int CServer::GetChannelUserLimit(Channel::Id_t cid)
+{
+	if (IsValidChannel(cid))
+	{
+		boost::lock_guard<mutex> channel_mtx_guard(m_ChannelMtx);
+		return m_Channels.at(cid)->MaxClients;
+	}
+	else
+		return 0;
 }
 
 bool CServer::SetChannelParentId(Channel::Id_t cid, Channel::Id_t pcid)
@@ -353,6 +418,8 @@ bool CServer::SetChannelParentId(Channel::Id_t cid, Channel::Id_t pcid)
 	if (pcid != 0 && IsValidChannel(pcid) == false)
 		return false;
 
+	boost::lock_guard<mutex> channel_mtx_guard(m_ChannelMtx);
+
 	if (m_Channels.at(cid)->ParentId == pcid)
 		return false;
 
@@ -360,9 +427,21 @@ bool CServer::SetChannelParentId(Channel::Id_t cid, Channel::Id_t pcid)
 	CNetwork::Get()->Execute(fmt::format("channelmove cid={} cpid={}", cid, pcid),
 		[this, cid, pcid](CNetwork::ResultSet_t &result)
 		{
+			boost::lock_guard<mutex> channel_mtx_guard(m_ChannelMtx);
 			m_Channels.at(cid)->ParentId = pcid;
 		});
 	return true;
+}
+
+Channel::Id_t CServer::GetChannelParentId(Channel::Id_t cid)
+{
+	if (IsValidChannel(cid))
+	{
+		boost::lock_guard<mutex> channel_mtx_guard(m_ChannelMtx);
+		return m_Channels.at(cid)->ParentId;
+	}
+	else
+		return Channel::Invalid;
 }
 
 bool CServer::SetChannelOrderId(Channel::Id_t cid, Channel::Id_t ocid)
@@ -376,6 +455,8 @@ bool CServer::SetChannelOrderId(Channel::Id_t cid, Channel::Id_t ocid)
 	if (ocid != 0 && IsValidChannel(ocid) == false)
 		return false;
 
+	boost::lock_guard<mutex> channel_mtx_guard(m_ChannelMtx);
+
 	if (m_Channels.at(cid)->OrderId == ocid)
 		return false;
 
@@ -383,13 +464,26 @@ bool CServer::SetChannelOrderId(Channel::Id_t cid, Channel::Id_t ocid)
 	CNetwork::Get()->Execute(fmt::format("channeledit cid={} channel_order={}", cid, ocid),
 		[this, cid, ocid](CNetwork::ResultSet_t &result)
 		{
+			boost::lock_guard<mutex> channel_mtx_guard(m_ChannelMtx);
 			m_Channels.at(cid)->OrderId = ocid;
 		});
 	return true;
 }
 
+Channel::Id_t CServer::GetChannelOrderId(Channel::Id_t cid)
+{
+	if (IsValidChannel(cid))
+	{
+		boost::lock_guard<mutex> channel_mtx_guard(m_ChannelMtx);
+		return m_Channels.at(cid)->OrderId;
+	}
+	else
+		return Channel::Invalid;
+}
+
 Channel::Id_t CServer::FindChannel(string name)
 {
+	boost::lock_guard<mutex> channel_mtx_guard(m_ChannelMtx);
 	if (name.empty() == false)
 	{
 		for (auto &i : m_Channels)
@@ -402,6 +496,40 @@ Channel::Id_t CServer::FindChannel(string name)
 	return Channel::Invalid;
 }
 
+
+
+string CServer::GetClientUid(Client::Id_t clid)
+{
+	if (IsValidClient(clid))
+	{
+		boost::lock_guard<mutex> client_mtx_guard(m_ClientMtx);
+		return m_Clients.at(clid)->Uid;
+	}
+	else
+		return string();
+}
+
+Client::Id_t CServer::GetClientDatabaseId(Client::Id_t clid)
+{
+	if (IsValidClient(clid))
+	{
+		boost::lock_guard<mutex> client_mtx_guard(m_ClientMtx);
+		return m_Clients.at(clid)->DatabaseId;
+	}
+	else
+		return Client::Invalid;
+}
+
+Channel::Id_t CServer::GetClientChannelId(Client::Id_t clid)
+{
+	if (IsValidClient(clid))
+	{
+		boost::lock_guard<mutex> client_mtx_guard(m_ClientMtx);
+		return m_Clients.at(clid)->CurrentChannel;
+	}
+	else
+		return Channel::Invalid;
+}
 
 bool CServer::KickClient(Client::Id_t clid, Client::KickTypes type, string reasonmsg)
 {
@@ -469,6 +597,7 @@ bool CServer::SetClientChannelGroup(Client::Id_t clid, int groupid, Channel::Id_
 		return false;
 
 
+	boost::lock_guard<mutex> client_mtx_guard(m_ClientMtx);
 	Client::Id_t dbid = m_Clients.at(clid)->DatabaseId;
 	CNetwork::Get()->Execute(fmt::format("setclientchannelgroup cgid={} cid={} cldbid={}", groupid, cid, dbid));
 	return true;
@@ -480,6 +609,7 @@ bool CServer::AddClientToServerGroup(Client::Id_t clid, int groupid)
 		return false;
 
 
+	boost::lock_guard<mutex> client_mtx_guard(m_ClientMtx);
 	Client::Id_t dbid = m_Clients.at(clid)->DatabaseId;
 	CNetwork::Get()->Execute(fmt::format("servergroupaddclient sgid={} cldbid={}", groupid, dbid));
 	return true;
@@ -491,6 +621,7 @@ bool CServer::RemoveClientFromServerGroup(Client::Id_t clid, int groupid)
 		return false;
 
 
+	boost::lock_guard<mutex> client_mtx_guard(m_ClientMtx);
 	Client::Id_t dbid = m_Clients.at(clid)->DatabaseId;
 	CNetwork::Get()->Execute(fmt::format("servergroupdelclient sgid={} cldbid={}", groupid, dbid));
 	return true;
@@ -546,6 +677,7 @@ void CServer::OnChannelList(vector<string> &res)
 		....
 		channel_maxclients=-1
 	*/
+	boost::lock_guard<mutex> channel_mtx_guard(m_ChannelMtx);
 	for (auto &res_row : res)
 	{
 		unsigned int
@@ -599,6 +731,7 @@ void CServer::OnChannelList(vector<string> &res)
 
 void CServer::OnClientList(vector<string> &res)
 {
+	boost::lock_guard<mutex> client_mtx_guard(m_ClientMtx);
 	for (auto &r : res)
 	{
 		Client::Id_t
@@ -674,6 +807,8 @@ void CServer::OnChannelCreated(boost::smatch &result)
 
 	if (extra_data.find("channel_flag_default") != string::npos)
 		m_DefaultChannel = id;
+
+	boost::lock_guard<mutex> channel_mtx_guard(m_ChannelMtx);
 	m_Channels.emplace(id, chan);
 
 
@@ -689,6 +824,7 @@ void CServer::OnChannelDeleted(boost::smatch &result)
 		return;
 
 
+	boost::lock_guard<mutex> channel_mtx_guard(m_ChannelMtx);
 	m_Channels.erase(cid);
 
 
@@ -710,7 +846,8 @@ void CServer::OnChannelReorder(boost::smatch &result)
 	if (IsValidChannel(cid) == false)
 		return;
 	
-	
+
+	boost::lock_guard<mutex> channel_mtx_guard(m_ChannelMtx);
 	m_Channels.at(cid)->OrderId = orderid;
 
 
@@ -738,6 +875,7 @@ void CServer::OnChannelMoved(boost::smatch &result)
 		return;
 	
 
+	boost::lock_guard<mutex> channel_mtx_guard(m_ChannelMtx);
 	Channel *channel = m_Channels.at(cid);
 	channel->ParentId = parentid;
 	channel->OrderId = orderid;
@@ -759,6 +897,7 @@ void CServer::OnChannelRenamed(boost::smatch &result)
 		return;
 
 
+	boost::lock_guard<mutex> channel_mtx_guard(m_ChannelMtx);
 	m_Channels.at(cid)->Name = name;
 
 	
@@ -778,6 +917,7 @@ void CServer::OnChannelPasswordToggled(boost::smatch &result)
 		return;
 
 
+	boost::lock_guard<mutex> channel_mtx_guard(m_ChannelMtx);
 	Channel *channel = m_Channels.at(cid);
 	channel->HasPassword = (toggle_password != 0);
 	channel->WasPasswordToggled = true;
@@ -796,6 +936,7 @@ void CServer::OnChannelPasswordChanged(boost::smatch &result)
 		return;
 
 
+	boost::lock_guard<mutex> channel_mtx_guard(m_ChannelMtx);
 	Channel *channel = m_Channels.at(cid);
 	if (channel->WasPasswordToggled == false)
 	{
@@ -826,6 +967,7 @@ void CServer::OnChannelTypeChanged(boost::smatch &result)
 		return;
 
 
+	boost::lock_guard<mutex> channel_mtx_guard(m_ChannelMtx);
 	Channel *channel = m_Channels.at(cid);
 	if (flag_data != 0)
 	{
@@ -855,6 +997,7 @@ void CServer::OnChannelSetDefault(boost::smatch &result)
 		return;
 
 
+	boost::lock_guard<mutex> channel_mtx_guard(m_ChannelMtx);
 	m_DefaultChannel = cid;
 
 	
@@ -873,6 +1016,7 @@ void CServer::OnChannelMaxClientsChanged(boost::smatch &result)
 		return;
 
 
+	boost::lock_guard<mutex> channel_mtx_guard(m_ChannelMtx);
 	m_Channels.at(cid)->MaxClients = maxclients;
 
 	
@@ -891,6 +1035,7 @@ void CServer::OnChannelRequiredTalkPowerChanged(boost::smatch &result)
 		return;
 
 
+	boost::lock_guard<mutex> channel_mtx_guard(m_ChannelMtx);
 	m_Channels.at(cid)->RequiredTalkPower = talkpower;
 
 
@@ -922,6 +1067,7 @@ void CServer::OnClientConnect(boost::smatch &result)
 	client->Uid = uid;
 	client->CurrentChannel = cid;
 
+	boost::lock_guard<mutex> client_mtx_guard(m_ClientMtx);
 	m_Clients.emplace(clid, client);
 
 
@@ -943,6 +1089,7 @@ void CServer::OnClientDisconnect(boost::smatch &result)
 		return;
 
 
+	boost::lock_guard<mutex> client_mtx_guard(m_ClientMtx);
 	delete m_Clients.at(clid);
 	m_Clients.erase(clid);
 
@@ -982,6 +1129,7 @@ void CServer::OnClientMoved(boost::smatch &result)
 
 		if (IsValidClient(clid))
 		{
+			boost::lock_guard<mutex> client_mtx_guard(m_ClientMtx);
 			m_Clients.at(clid)->CurrentChannel = to_cid;
 
 			CCallbackHandler::Get()->Call("TSC_OnClientMoved", clid, to_cid, invokerid);
