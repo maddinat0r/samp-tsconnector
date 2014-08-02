@@ -193,10 +193,6 @@ bool CServer::SetChannelDescription(Channel::Id_t cid, string desc)
 	if (IsValidChannel(cid) == false)
 		return false;
 
-	//TODO: check if empty desc is OK
-	//if (desc.empty())
-	//	return false;
-
 
 	CUtils::Get()->EscapeString(desc);
 	CNetwork::Get()->Execute(fmt::format("channeledit cid={} channel_description={}", cid, desc));
