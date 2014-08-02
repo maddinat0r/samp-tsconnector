@@ -12,13 +12,14 @@
 
 namespace Native
 {
-	//system natives
+	//server functions
 	AMX_DECLARE_NATIVE(TSC_Connect);
 	AMX_DECLARE_NATIVE(TSC_Disconnect);
 	AMX_DECLARE_NATIVE(TSC_ChangeNickname);
+	AMX_DECLARE_NATIVE(TSC_SendServerMessage);
 
 
-	//channel natives
+	//channel functions
 	AMX_DECLARE_NATIVE(TSC_CreateChannel);
 	AMX_DECLARE_NATIVE(TSC_DeleteChannel);
 	AMX_DECLARE_NATIVE(TSC_FindChannel);
@@ -40,24 +41,22 @@ namespace Native
 	AMX_DECLARE_NATIVE(TSC_GetChannelOrderId);
 	AMX_DECLARE_NATIVE(TSC_GetDefaultChannelId);
 
-	/*
-	//client natives
+	
+	//client functions
+	AMX_DECLARE_NATIVE(TSC_GetClientUid);
+	AMX_DECLARE_NATIVE(TSC_GetClientDatabaseId);
+	AMX_DECLARE_NATIVE(TSC_GetClientChannelId);
+
 	AMX_DECLARE_NATIVE(TSC_KickClient);
 	AMX_DECLARE_NATIVE(TSC_BanClient);
 	AMX_DECLARE_NATIVE(TSC_MoveClient);
 
-
 	AMX_DECLARE_NATIVE(TSC_SetClientChannelGroup);
 	AMX_DECLARE_NATIVE(TSC_AddClientToServerGroup);
 	AMX_DECLARE_NATIVE(TSC_RemoveClientFromServerGroup);
-	AMX_DECLARE_NATIVE(TSC_ToggleClientTalkAbility);
 
 	AMX_DECLARE_NATIVE(TSC_PokeClient);
-
-
-	//messaging
-	AMX_DECLARE_NATIVE(TSC_SendClientMessage);*/
-	AMX_DECLARE_NATIVE(TSC_SendServerMessage);
+	AMX_DECLARE_NATIVE(TSC_SendClientMessage);
 }
 
 

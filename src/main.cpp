@@ -42,6 +42,7 @@ extern "C" const AMX_NATIVE_INFO native_list[] =
 	AMX_DEFINE_NATIVE(TSC_Connect)
 	AMX_DEFINE_NATIVE(TSC_Disconnect)
 	AMX_DEFINE_NATIVE(TSC_ChangeNickname)
+	AMX_DEFINE_NATIVE(TSC_SendServerMessage)
 
 
 	AMX_DEFINE_NATIVE(TSC_CreateChannel)
@@ -65,22 +66,21 @@ extern "C" const AMX_NATIVE_INFO native_list[] =
 	AMX_DEFINE_NATIVE(TSC_GetChannelOrderId)
 	AMX_DEFINE_NATIVE(TSC_GetDefaultChannelId)
 
-	/*
+
+	AMX_DEFINE_NATIVE(TSC_GetClientUid)
+	AMX_DEFINE_NATIVE(TSC_GetClientDatabaseId)
+	AMX_DEFINE_NATIVE(TSC_GetClientChannelId)
+
 	AMX_DEFINE_NATIVE(TSC_KickClient)
 	AMX_DEFINE_NATIVE(TSC_BanClient)
 	AMX_DEFINE_NATIVE(TSC_MoveClient)
 
-
 	AMX_DEFINE_NATIVE(TSC_SetClientChannelGroup)
 	AMX_DEFINE_NATIVE(TSC_AddClientToServerGroup)
 	AMX_DEFINE_NATIVE(TSC_RemoveClientFromServerGroup)
-	AMX_DEFINE_NATIVE(TSC_ToggleClientTalkAbility)
 
 	AMX_DEFINE_NATIVE(TSC_PokeClient)
-
-
-	AMX_DEFINE_NATIVE(TSC_SendClientMessage)*/
-	AMX_DEFINE_NATIVE(TSC_SendServerMessage)
+	AMX_DEFINE_NATIVE(TSC_SendClientMessage)
 	
 	{NULL, NULL}
 };

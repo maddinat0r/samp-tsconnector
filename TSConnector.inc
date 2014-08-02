@@ -25,10 +25,14 @@ enum TSC_KICKTYPE
 };
 
 
+//server functions
 native TSC_Connect(user[], pass[], ip[], port = 9987, serverquery_port = 10011, bool:wait = true);
 native TSC_Disconnect();
 native TSC_ChangeNickname(nickname[]);
+native TSC_SendServerMessage(msg[]);
 
+
+//channel functions
 native TSC_CreateChannel(channelname[]);
 native TSC_DeleteChannel(channelid);
 native TSC_FindChannel(channelname[]);
@@ -50,33 +54,30 @@ native TSC_SetChannelOrderId(channelid, upperchannelid);
 native TSC_GetChannelOrderId(channelid);
 native TSC_GetDefaultChannelId();
 
-/*
-native TSC_KickClient(uid[], E_KICK_TYPE:kicktype, reason[]);
-native TSC_BanClient(uid[], seconds, reason[]);
-native TSC_MoveClient(uid[], channelname[]);
 
-native TSC_SetClientChannelGroup(uid[], groupid, channelname[]);
-native TSC_AddClientToServerGroup(uid[], groupid);
-native TSC_RemoveClientFromServerGroup(uid[], groupid);
-native TSC_ToggleClientTalkAbility(uid[], bool:toggle);
+//client functions
+native TSC_GetClientUid(clientid, dest[], maxlen = sizeof(dest));
+native TSC_GetClientDatabaseId(clientid);
+native TSC_GetClientChannelId(clientid);
 
-native TSC_PokeClient(uid[], msg[]);
+native TSC_KickClient(clientid, TSC_KICKTYPE:kicktype, reasonmsg[] = "");
+native TSC_BanClient(clientuid[], seconds, reasonmsg[]);
+native TSC_MoveClient(clientid, channelid);
+
+native TSC_SetClientChannelGroup(clientid, groupid, channelid);
+native TSC_AddClientToServerGroup(clientid, groupid);
+native TSC_RemoveClientFromServerGroup(clientid, groupid);
+
+native TSC_PokeClient(clientid, msg[]);
+native TSC_SendClientMessage(clientid, msg[]);
 
 
-native TSC_SendClientMessage(uid[], msg[]);
-*/
-native TSC_SendServerMessage(msg[]);
 
-/*
-forward TSC_OnClientConnect(nickname[], uid[]);
-forward TSC_OnClientDisconnect(nickname[], uid[]);
-forward TSC_OnClientChannelMove(nickname[], uid[], channelname[]);
-forward TSC_OnClientChannelText(nickname[], uid[], channelname[], msg[]);
-forward TSC_OnClientServerText(nickname[], uid[], msg[]);
-*/
 
+//server callbacks
 forward TSC_OnConnect();
 
+//channel callbacks
 forward TSC_OnChannelCreated(channelid);
 forward TSC_OnChannelDeleted(channelid);
 forward TSC_OnChannelReorder(channelid, orderid);
@@ -87,3 +88,10 @@ forward TSC_OnChannelTypeChanged(channelid, TSC_CHANNELTYPE:type);
 forward TSC_OnChannelSetDefault(channelid);
 forward TSC_OnChannelMaxClientsChanged(channelid, maxclients);
 forward TSC_OnChannelRequiredTPChanged(channelid, talkpower);
+
+//client callbacks
+forward TSC_OnClientConnect(clientid, nickname[]);
+forward TSC_OnClientDisconnect(clientid, reasonid, reasonmsg[]);
+forward TSC_OnClientMoved(clientid, to_channelid, invokerid);
+forward TSC_OnClientServerText(clientid, nickname[], msg[]);
+forward TSC_OnClientPrivateText(from_clid, from_nickname[], to_clid, msg[]);

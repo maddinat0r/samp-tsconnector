@@ -48,20 +48,6 @@ AMX_DECLARE_NATIVE(Native::TSC_Disconnect)
 	return 1;
 }
 
-//native TSC_FindChannel(channelname[]);
-AMX_DECLARE_NATIVE(Native::TSC_FindChannel)
-{
-	char *name = NULL;
-	amx_StrParam(amx, params[1], name);
-	return CServer::Get()->FindChannel(name == NULL ? string() : name);
-}
-
-//native TSC_IsValidChannel(channelid);
-AMX_DECLARE_NATIVE(Native::TSC_IsValidChannel)
-{
-	return CServer::Get()->IsValidChannel(static_cast<Channel::Id_t>(params[1]));
-}
-
 //native TSC_ChangeNickname(nickname[]);
 AMX_DECLARE_NATIVE(Native::TSC_ChangeNickname)
 {
@@ -74,6 +60,21 @@ AMX_DECLARE_NATIVE(Native::TSC_ChangeNickname)
 	
 	return CServer::Get()->ChangeNickname(nick_tmp);
 }
+
+//native TSC_SendServerMessage(msg[]);
+AMX_DECLARE_NATIVE(Native::TSC_SendServerMessage)
+{
+	char *msg_tmp = NULL;
+	amx_StrParam(amx, params[1], msg_tmp);
+
+	if (msg_tmp == NULL)
+		return 0;
+
+
+	return CServer::Get()->SendServerMessage(msg_tmp);
+}
+
+
 
 //native TSC_CreateChannel(channelname[]);
 AMX_DECLARE_NATIVE(Native::TSC_CreateChannel)
@@ -93,6 +94,20 @@ AMX_DECLARE_NATIVE(Native::TSC_CreateChannel)
 AMX_DECLARE_NATIVE(Native::TSC_DeleteChannel)
 {
 	return CServer::Get()->DeleteChannel(static_cast<Channel::Id_t>(params[1]));
+}
+
+//native TSC_FindChannel(channelname[]);
+AMX_DECLARE_NATIVE(Native::TSC_FindChannel)
+{
+	char *name = NULL;
+	amx_StrParam(amx, params[1], name);
+	return CServer::Get()->FindChannel(name == NULL ? string() : name);
+}
+
+//native TSC_IsValidChannel(channelid);
+AMX_DECLARE_NATIVE(Native::TSC_IsValidChannel)
+{
+	return CServer::Get()->IsValidChannel(static_cast<Channel::Id_t>(params[1]));
 }
 
 //native TSC_SetChannelName(channelid, channelname[]);
@@ -217,369 +232,99 @@ AMX_DECLARE_NATIVE(Native::TSC_GetDefaultChannelId)
 	return CServer::Get()->GetDefaultChannelId();
 }
 
-//
-////native TSC_SetClientChannelGroup(uid[], groupid, channelname[]);
-//AMX_DECLARE_NATIVE(Native::TSC_SetClientChannelGroup)
-//{
-//	char
-//		*uid_tmp = NULL,
-//		*channelname_tmp = NULL;
-//
-//	amx_StrParam(amx, params[1], uid_tmp);
-//	int groupid = static_cast<int>(params[2]);
-//	amx_StrParam(amx, params[3], channelname_tmp);
-//	
-//	if (uid_tmp == NULL || channelname_tmp == NULL)
-//		return 0;
-//
-//	string 
-//		uid(uid_tmp),
-//		channelname(channelname_tmp);
-//
-//	CNetwork::Get()->EscapeString(uid);
-//	CNetwork::Get()->EscapeString(channelname);
-//	
-//	
-//	CommandList *cmd_list = new CommandList;
-//
-//	string chfind_cmd;
-//	karma::generate(std::back_insert_iterator<string>(chfind_cmd),
-//		lit("channelfind pattern=") << karma::string(channelname)
-//	);
-//	cmd_list->push(new CCommand(chfind_cmd, "cid"));
-//
-//	string cldbfind_cmd;
-//	karma::generate(std::back_insert_iterator<string>(cldbfind_cmd),
-//		lit("clientdbfind pattern=") << karma::string(uid) << lit(" -uid")
-//	);
-//	cmd_list->push(new CCommand(cldbfind_cmd, "cldbid"));
-//
-//	string clchgrp_cmd;
-//	karma::generate(std::back_insert_iterator<string>(clchgrp_cmd),
-//		lit("setclientchannelgroup cgid=") << karma::int_(groupid) << lit(" cid=<1> cldbid=<2>")
-//	);
-//	cmd_list->push(new CCommand(clchgrp_cmd));
-//
-//	CNetwork::Get()->PushCommandList(cmd_list);
-//	return 1;
-//}
-//
-////native TSC_AddClientToServerGroup(uid[], groupid);
-//AMX_DECLARE_NATIVE(Native::TSC_AddClientToServerGroup)
-//{
-//	char *uid_tmp = NULL;
-//
-//	amx_StrParam(amx, params[1], uid_tmp);
-//	int groupid = static_cast<int>(params[2]);
-//
-//	if (uid_tmp == NULL)
-//		return 0;
-//
-//	string uid(uid_tmp);
-//	CNetwork::Get()->EscapeString(uid);
-//	
-//
-//	CommandList *cmd_list = new CommandList;
-//
-//	string cldbfind_cmd;
-//	karma::generate(std::back_insert_iterator<string>(cldbfind_cmd),
-//		lit("clientdbfind pattern=") << karma::string(uid) << lit(" -uid")
-//	);
-//	cmd_list->push(new CCommand(cldbfind_cmd, "cldbid"));
-//
-//	string srvgrpcl_cmd;
-//	karma::generate(std::back_insert_iterator<string>(srvgrpcl_cmd),
-//		lit("servergroupaddclient sgid=") << karma::int_(groupid) << lit(" cldbid=<1>")
-//	);
-//	cmd_list->push(new CCommand(srvgrpcl_cmd));
-//
-//	CNetwork::Get()->PushCommandList(cmd_list);
-//	return 1;
-//}
-//
-////native TSC_RemoveClientFromServerGroup(uid[], groupid);
-//AMX_DECLARE_NATIVE(Native::TSC_RemoveClientFromServerGroup)
-//{
-//	char *uid_tmp = NULL;
-//
-//	amx_StrParam(amx, params[1], uid_tmp);
-//	int groupid = static_cast<int>(params[2]);
-//
-//	if (uid_tmp == NULL)
-//		return 0;
-//
-//	string uid(uid_tmp);
-//	CNetwork::Get()->EscapeString(uid);
-//
-//	
-//	CommandList *cmd_list = new CommandList;
-//
-//	string cldbfind_cmd;
-//	karma::generate(std::back_insert_iterator<string>(cldbfind_cmd),
-//		lit("clientdbfind pattern=") << karma::string(uid) << lit(" -uid")
-//	);
-//	cmd_list->push(new CCommand(cldbfind_cmd, "cldbid"));
-//
-//	string srvgrpcl_cmd;
-//	karma::generate(std::back_insert_iterator<string>(srvgrpcl_cmd),
-//		lit("servergroupdelclient sgid=") << karma::int_(groupid) << lit(" cldbid=<1>")
-//	);
-//	cmd_list->push(new CCommand(srvgrpcl_cmd));
-//
-//	CNetwork::Get()->PushCommandList(cmd_list);
-//	return 1;
-//}
-//
-//
-////native TSC_KickClient(uid[], kicktype, reason[]);
-//AMX_DECLARE_NATIVE(Native::TSC_KickClient)
-//{
-//	char
-//		*uid_tmp = NULL,
-//		*reason_msg_tmp = NULL;
-//
-//	amx_StrParam(amx, params[1], uid_tmp);
-//	int kicktype = static_cast<int>(params[2]);
-//	amx_StrParam(amx, params[3], reason_msg_tmp);
-//
-//	if (uid_tmp == NULL)
-//		return 0;
-//
-//	string
-//		uid(uid_tmp),
-//		reason_msg(reason_msg_tmp == NULL ? string() : reason_msg_tmp);
-//	int kickreason_id;
-//
-//	switch (kicktype) {
-//		case KICK_TYPE_CHANNEL:
-//			kickreason_id = 4;
-//			break;
-//		case KICK_TYPE_SERVER:
-//			kickreason_id = 5;
-//			break;
-//		default:
-//			return 0;
-//	}
-//
-//	CNetwork::Get()->EscapeString(uid);
-//	CNetwork::Get()->EscapeString(reason_msg);
-//
-//
-//	CommandList *cmd_list = new CommandList;
-//	
-//	CCommand *cmd = new CCommand("clientlist -uid", "clid");
-//	karma::generate(std::back_insert_iterator<string>(cmd->MFind),
-//		lit("client_unique_identifier=") << karma::string(uid)
-//	);
-//	cmd_list->push(cmd);
-//
-//	string clkick_cmd;
-//	karma::generate(std::back_insert_iterator<string>(clkick_cmd),
-//		lit("clientkick clid=<1> reasonid=") << karma::int_(kickreason_id) << lit(" reasonmsg=") << karma::string(reason_msg)
-//	);
-//	cmd_list->push(new CCommand(clkick_cmd));
-//
-//	CNetwork::Get()->PushCommandList(cmd_list);
-//	return 1;
-//}
-//
-////native TSC_BanClient(uid[], seconds, reason[]);
-//AMX_DECLARE_NATIVE(Native::TSC_BanClient)
-//{
-//	char
-//		*uid_tmp = NULL,
-//		*reason_msg_tmp = NULL;
-//
-//	amx_StrParam(amx, params[1], uid_tmp);
-//	unsigned int seconds = static_cast<unsigned int>(params[2] < 0 ? 0 : params[2]);
-//	amx_StrParam(amx, params[3], reason_msg_tmp);
-//
-//	if (uid_tmp == NULL)
-//		return 0;
-//
-//	string
-//		uid(uid_tmp),
-//		reason_msg(reason_msg_tmp == NULL ? string() : reason_msg_tmp);
-//
-//	CNetwork::Get()->EscapeString(uid);
-//	CNetwork::Get()->EscapeString(reason_msg);
-//	
-//
-//	CommandList *cmd_list = new CommandList;
-//	
-//	string clban_cmd;
-//	karma::generate(std::back_insert_iterator<string>(clban_cmd),
-//		lit("banadd uid=") << karma::string(uid) << lit(" time=") << karma::uint_(seconds) << lit(" banreason=") << karma::string(reason_msg)
-//	);
-//	cmd_list->push(new CCommand(clban_cmd));
-//
-//	CNetwork::Get()->PushCommandList(cmd_list);
-//	return 1;
-//}
-//
-////native TSC_MoveClient(uid[], channelname[]);
-//AMX_DECLARE_NATIVE(Native::TSC_MoveClient)
-//{
-//	char
-//		*uid_tmp = NULL,
-//		*channelname_tmp = NULL;
-//
-//	amx_StrParam(amx, params[1], uid_tmp);
-//	amx_StrParam(amx, params[2], channelname_tmp);
-//
-//	if (uid_tmp == NULL || channelname_tmp == NULL)
-//		return 0;
-//
-//	string
-//		uid(uid_tmp),
-//		channelname(channelname_tmp);
-//
-//	CNetwork::Get()->EscapeString(uid);
-//	CNetwork::Get()->EscapeString(channelname);
-//	
-//
-//	CommandList *cmd_list = new CommandList;
-//	
-//	CCommand *cmd = new CCommand("clientlist -uid", "clid");
-//	karma::generate(std::back_insert_iterator<string>(cmd->MFind),
-//		lit("client_unique_identifier=") << karma::string(uid)
-//	);
-//	cmd_list->push(cmd);
-//
-//	string chfind_cmd;
-//	karma::generate(std::back_insert_iterator<string>(chfind_cmd),
-//		lit("channelfind pattern=") << karma::string(channelname)
-//	);
-//	cmd_list->push(new CCommand(chfind_cmd, "cid"));
-//
-//	cmd_list->push(new CCommand("clientmove clid=<1> cid=<2>"));
-//
-//	CNetwork::Get()->PushCommandList(cmd_list);
-//	return 1;
-//}
-//
-////native TSC_ToggleClientTalkAbility(uid[], bool:toggle);
-//AMX_DECLARE_NATIVE(Native::TSC_ToggleClientTalkAbility)
-//{
-//	char *uid_tmp = NULL;
-//
-//	amx_StrParam(amx, params[1], uid_tmp);
-//	bool toggle = (params[2] != 0);
-//
-//	if (uid_tmp == NULL)
-//		return 0;
-//
-//	string uid(uid_tmp);
-//	CNetwork::Get()->EscapeString(uid);
-//
-//
-//	CommandList *cmd_list = new CommandList;
-//
-//	CCommand *cmd = new CCommand("clientlist -uid", "clid");
-//	karma::generate(std::back_insert_iterator<string>(cmd->MFind),
-//		lit("client_unique_identifier=") << karma::string(uid)
-//	);
-//	cmd_list->push(cmd);
-//
-//	string cledit_cmd;
-//	karma::generate(std::back_insert_iterator<string>(cledit_cmd),
-//		lit("clientedit clid=<1> client_is_talker=") << karma::int_(toggle = true ? 1 : 0)
-//	);
-//	cmd_list->push(new CCommand(cledit_cmd));
-//
-//	CNetwork::Get()->PushCommandList(cmd_list);
-//	return 1;
-//}
-//
-//
-////native TSC_PokeClient(uid[], msg[]);
-//AMX_DECLARE_NATIVE(Native::TSC_PokeClient)
-//{
-//	char
-//		*uid_tmp = NULL,
-//		*msg_tmp = NULL;
-//
-//	amx_StrParam(amx, params[1], uid_tmp);
-//	amx_StrParam(amx, params[2], msg_tmp);
-//
-//	if (uid_tmp == NULL || msg_tmp == NULL)
-//		return 0;
-//
-//	string
-//		uid(uid_tmp),
-//		msg(msg_tmp);
-//
-//	CNetwork::Get()->EscapeString(uid);
-//	CNetwork::Get()->EscapeString(msg);
-//
-//
-//	CommandList *cmd_list = new CommandList;
-//
-//	CCommand *cmd = new CCommand("clientlist -uid", "clid");
-//	karma::generate(std::back_insert_iterator<string>(cmd->MFind),
-//		lit("client_unique_identifier=") << karma::string(uid)
-//	);
-//	cmd_list->push(cmd);
-//
-//	string clpoke_cmd;
-//	karma::generate(std::back_insert_iterator<string>(clpoke_cmd),
-//		lit("clientpoke msg=") << karma::string(msg) << lit(" clid=<1>")
-//	);
-//	cmd_list->push(new CCommand(clpoke_cmd));
-//
-//	CNetwork::Get()->PushCommandList(cmd_list);
-//	return 1;
-//}
-//
-//
-////native TSC_SendClientMessage(uid[], msg[]);
-//AMX_DECLARE_NATIVE(Native::TSC_SendClientMessage)
-//{
-//	char
-//		*uid_tmp = NULL,
-//		*msg_tmp = NULL;
-//
-//	amx_StrParam(amx, params[1], uid_tmp);
-//	amx_StrParam(amx, params[2], msg_tmp);
-//
-//	if (uid_tmp == NULL || msg_tmp == NULL)
-//		return 0;
-//
-//	string
-//		uid(uid_tmp),
-//		msg(msg_tmp);
-//
-//	CNetwork::Get()->EscapeString(uid);
-//	CNetwork::Get()->EscapeString(msg);
-//
-//
-//	CommandList *cmd_list = new CommandList;
-//
-//	CCommand *cmd = new CCommand("clientlist -uid", "clid");
-//	karma::generate(std::back_insert_iterator<string>(cmd->MFind),
-//		lit("client_unique_identifier=") << karma::string(uid)
-//	);
-//	cmd_list->push(cmd);
-//
-//	string msg_cmd;
-//	karma::generate(std::back_insert_iterator<string>(msg_cmd),
-//		lit("sendtextmessage targetmode=1 target=<1> msg=") << karma::string(msg)
-//	);
-//	cmd_list->push(new CCommand(msg_cmd));
-//
-//	CNetwork::Get()->PushCommandList(cmd_list);
-//	return 1;
-//}
-//
-//native TSC_SendServerMessage(msg[]);
-AMX_DECLARE_NATIVE(Native::TSC_SendServerMessage)
-{
-	char *msg_tmp = NULL;
-	amx_StrParam(amx, params[1], msg_tmp);
 
-	if (msg_tmp == NULL)
+//native TSC_GetClientUid(clientid, dest[], sizeof(dest[]));
+AMX_DECLARE_NATIVE(Native::TSC_GetClientUid)
+{
+	string uid = CServer::Get()->GetClientUid(static_cast<Client::Id_t>(params[1]));
+	amx_SetCppString(amx, params[2], uid, params[3]);
+	return (uid.empty() == false);
+}
+
+//native TSC_GetClientDatabaseId(clientid);
+AMX_DECLARE_NATIVE(Native::TSC_GetClientDatabaseId)
+{
+	return CServer::Get()->GetClientDatabaseId(static_cast<Client::Id_t>(params[1]));
+}
+
+//native TSC_GetClientChannelId(clientid);
+AMX_DECLARE_NATIVE(Native::TSC_GetClientChannelId)
+{
+	return CServer::Get()->GetClientChannelId(static_cast<Client::Id_t>(params[1]));
+}
+
+
+
+//native TSC_KickClient(clientid, TSC_KICKTYPE:kicktype, reasonmsg[]);
+AMX_DECLARE_NATIVE(Native::TSC_KickClient)
+{
+	char *tmp_msg = NULL;
+	amx_StrParam(amx, params[3], tmp_msg);
+	return CServer::Get()->KickClient(static_cast<Client::Id_t>(params[1]),
+		static_cast<Client::KickTypes>(params[2]), tmp_msg != NULL ? tmp_msg : string());
+}
+
+//native TSC_BanClient(uid[], seconds, reasonmsg[]);
+AMX_DECLARE_NATIVE(Native::TSC_BanClient)
+{
+	char 
+		*tmp_uid = NULL,
+		*tmp_msg = NULL;
+	amx_StrParam(amx, params[1], tmp_msg);
+	amx_StrParam(amx, params[3], tmp_msg);
+
+	if (tmp_uid == NULL)
 		return 0;
 
 
-	return CServer::Get()->SendServerMessage(msg_tmp);
+	return CServer::Get()->BanClient(tmp_uid, params[2], 
+		tmp_msg != NULL ? tmp_msg : string());
+}
+
+//native TSC_MoveClient(clientid, channelid);
+AMX_DECLARE_NATIVE(Native::TSC_MoveClient)
+{
+	return CServer::Get()->MoveClient(static_cast<Client::Id_t>(params[1]),
+		static_cast<Channel::Id_t>(params[2]));
+}
+
+
+//native TSC_SetClientChannelGroup(clientid, groupid, channelid);
+AMX_DECLARE_NATIVE(Native::TSC_SetClientChannelGroup)
+{
+	return CServer::Get()->SetClientChannelGroup(static_cast<Client::Id_t>(params[1]),
+		params[2], static_cast<Channel::Id_t>(params[3]));
+}
+
+//native TSC_AddClientToServerGroup(clientid, groupid);
+AMX_DECLARE_NATIVE(Native::TSC_AddClientToServerGroup)
+{
+	return CServer::Get()->AddClientToServerGroup(
+		static_cast<Client::Id_t>(params[1]), params[2]);
+}
+
+//native TSC_RemoveClientFromServerGroup(clientid, groupid);
+AMX_DECLARE_NATIVE(Native::TSC_RemoveClientFromServerGroup)
+{
+	return CServer::Get()->RemoveClientFromServerGroup(
+		static_cast<Client::Id_t>(params[1]), params[2]);
+}
+
+
+//native TSC_PokeClient(clientid, msg[]);
+AMX_DECLARE_NATIVE(Native::TSC_PokeClient)
+{
+	char *tmp_msg = NULL;
+	amx_StrParam(amx, params[2], tmp_msg);
+	return CServer::Get()->PokeClient(static_cast<Client::Id_t>(params[1]), 
+		tmp_msg != NULL ? tmp_msg : string());
+}
+
+//native TSC_SendClientMessage(clientid, msg[]);
+AMX_DECLARE_NATIVE(Native::TSC_SendClientMessage)
+{
+	char *tmp_msg = NULL;
+	amx_StrParam(amx, params[2], tmp_msg);
+	return CServer::Get()->SendClientMessage(static_cast<Client::Id_t>(params[1]),
+		tmp_msg != NULL ? tmp_msg : string());
 }

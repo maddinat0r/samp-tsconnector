@@ -9,6 +9,7 @@
 #include <boost/unordered_map.hpp>
 #include <boost/regex.hpp>
 #include <boost/atomic.hpp>
+#include <boost/thread/mutex.hpp>
 
 #include "CSingleton.h"
 
@@ -16,6 +17,7 @@ using std::string;
 using std::list;
 using std::vector;
 using boost::unordered_map;
+using boost::mutex;
 
 
 struct Channel
@@ -59,12 +61,8 @@ struct Client
 		SERVER
 	};
 
-
-	string
-		Uid,
-		Nickname;
-
-	string Desc;
+	Id_t DatabaseId = Invalid;
+	string Uid;
 
 	Channel::Id_t CurrentChannel = Channel::Invalid;
 };
@@ -76,8 +74,10 @@ class CServer : public CSingleton <CServer>
 private: //variables
 	unordered_map<Channel::Id_t, Channel *> m_Channels;
 	Channel::Id_t m_DefaultChannel = Channel::Invalid;
+	mutex m_ChannelMtx;
 
 	unordered_map<Client::Id_t, Client *> m_Clients;
+	mutex m_ClientMtx;
 
 	boost::atomic<bool> m_IsLoggedIn;
 
@@ -105,9 +105,11 @@ public: //server functions
 
 	bool SendServerMessage(string msg);
 
+
 public: //channel functions
 	bool CreateChannel(string name);
 	bool DeleteChannel(Channel::Id_t cid);
+	Channel::Id_t FindChannel(string name);
 	inline bool IsValidChannel(Channel::Id_t cid) const
 	{
 		return (m_Channels.find(cid) != m_Channels.end());
@@ -152,16 +154,42 @@ public: //channel functions
 	{
 		return m_DefaultChannel;
 	}
-	Channel::Id_t FindChannel(string name);
 
 
 public: //client functions
+	inline bool IsValidClient(Client::Id_t clid) const
+	{
+		return (m_Clients.find(clid) != m_Clients.end());
+	}
+	inline string GetClientUid(Client::Id_t clid)
+	{
+		return IsValidClient(clid) ? m_Clients.at(clid)->Uid : string();
+	}
+	inline Client::Id_t GetClientDatabaseId(Client::Id_t clid)
+	{
+		return IsValidClient(clid) ? m_Clients.at(clid)->DatabaseId : Client::Invalid;
+	}
+	inline Channel::Id_t GetClientChannelId(Client::Id_t clid)
+	{
+		return IsValidClient(clid) ? m_Clients.at(clid)->CurrentChannel : Channel::Invalid;
+	}
+
+	bool KickClient(Client::Id_t clid, Client::KickTypes type, string reasonmsg);
+	bool BanClient(string uid, int seconds, string reasonmsg);
+	bool MoveClient(Client::Id_t clid, Channel::Id_t cid);
+
+	bool SetClientChannelGroup(Client::Id_t clid, int groupid, Channel::Id_t cid);
+	bool AddClientToServerGroup(Client::Id_t clid, int groupid);
+	bool RemoveClientFromServerGroup(Client::Id_t clid, int groupid);
+
+	bool PokeClient(Client::Id_t clid, string msg);
+	bool SendClientMessage(Client::Id_t clid, string msg);
 
 
 public: //network callbacks
 	void OnLogin(vector<string> &res);
 	void OnChannelList(vector<string> &res);
-
+	void OnClientList(vector<string> &res);
 
 public: //event callbacks
 	void OnChannelCreated(boost::smatch &result);
@@ -175,6 +203,13 @@ public: //event callbacks
 	void OnChannelSetDefault(boost::smatch &result);
 	void OnChannelMaxClientsChanged(boost::smatch &result);
 	void OnChannelRequiredTalkPowerChanged(boost::smatch &result);
+
+
+	void OnClientConnect(boost::smatch &result);
+	void OnClientDisconnect(boost::smatch &result);
+	void OnClientMoved(boost::smatch &result);
+	void OnClientServerText(boost::smatch &result);
+	void OnClientPrivateText(boost::smatch &result);
 };
 
 

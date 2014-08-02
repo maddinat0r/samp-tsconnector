@@ -60,15 +60,45 @@ void CServer::Initialize()
 	CNetwork::Get()->RegisterEvent(
 		boost::regex("notifychanneledited cid=([0-9]+) reasonid=10 invokerid=[0-9]+ .+ channel_needed_talk_power=([-0-9]+)"),
 		boost::bind(&CServer::OnChannelRequiredTalkPowerChanged, this, _1));
+
+
+	CNetwork::Get()->RegisterEvent(
+		boost::regex("notifycliententerview cfid=0 ctid=([0-9]+) reasonid=0 clid=([0-9]+) client_unique_identifier=([^ ]+) client_nickname=([^ ]+) .+ client_database_id=([0-9]+) .+ client_type=([01]).*"),
+		boost::bind(&CServer::OnClientConnect, this, _1));
+
+	CNetwork::Get()->RegisterEvent(
+		boost::regex("notifyclientleftview cfid=[0-9]+ ctid=0 reasonid=([0-9]+) reasonmsg=([^ ]+) clid=([0-9]+).*"),
+		boost::bind(&CServer::OnClientDisconnect, this, _1));
+
+	CNetwork::Get()->RegisterEvent(
+		boost::regex("notifyclientmoved ctid=([0-9]+) reasonid=([0-9]+)(?: invokerid=([0-9]+))?.* (clid=.*)"),
+		boost::bind(&CServer::OnClientMoved, this, _1));
+
+	CNetwork::Get()->RegisterEvent(
+		boost::regex("notifytextmessage targetmode=3 msg=([^ ]+) invokerid=([0-9]+) invokername=([^ ]+).*"),
+		boost::bind(&CServer::OnClientServerText, this, _1));
+
+	CNetwork::Get()->RegisterEvent(
+		boost::regex("notifytextmessage targetmode=1 msg=([^ ]+) target=([0-9]+) invokerid=([0-9]+) invokername=([^ ]+).*"),
+		boost::bind(&CServer::OnClientPrivateText, this, _1));
 	
 
+
+	//register for all events
 	CNetwork::Get()->Execute("servernotifyregister event=server");
 	CNetwork::Get()->Execute("servernotifyregister event=channel id=0");
+	CNetwork::Get()->Execute("servernotifyregister event=textserver");
+	CNetwork::Get()->Execute("servernotifyregister event=textprivate");
+
 
 
 	//fill up cache
 	CNetwork::Get()->Execute("channellist -flags -limit -voice",
 		boost::bind(&CServer::OnChannelList, this, _1));
+	CNetwork::Get()->Execute("clientlist -uid",
+		boost::bind(&CServer::OnClientList, this, _1));
+
+
 
 	//retrieve vserver-id
 	CNetwork::Get()->Execute(fmt::format("serveridgetbyport virtualserver_port={}", CNetwork::Get()->GetServerPort()),
@@ -373,6 +403,123 @@ Channel::Id_t CServer::FindChannel(string name)
 }
 
 
+bool CServer::KickClient(Client::Id_t clid, Client::KickTypes type, string reasonmsg)
+{
+	if (IsValidClient(clid) == false)
+		return false;
+
+	if (type == Client::KickTypes::INVALID)
+		return false;
+
+
+	int kicktype_id;
+	switch (type)
+	{
+		case Client::KickTypes::CHANNEL:
+			kicktype_id = 4;
+			break;
+
+		case Client::KickTypes::SERVER:
+			kicktype_id = 5;
+			break;
+
+		default:
+			return false;
+	}
+
+
+	CUtils::Get()->EscapeString(reasonmsg);
+	if (reasonmsg.length() > 40)
+		reasonmsg.resize(40);
+
+	CNetwork::Get()->Execute(fmt::format("clientkick clid={} reasonid={} reasonmsg={}", clid, kicktype_id, reasonmsg));
+	return true;
+}
+
+bool CServer::BanClient(string uid, int seconds, string reasonmsg)
+{
+	if (uid.empty())
+		return false;
+
+
+	CUtils::Get()->EscapeString(reasonmsg);
+	CNetwork::Get()->Execute(fmt::format("banadd uid={} time={} banreason={}", uid, seconds, reasonmsg));
+	return true;
+}
+
+bool CServer::MoveClient(Client::Id_t clid, Channel::Id_t cid)
+{
+	if (IsValidClient(clid) == false)
+		return false;
+
+	if (IsValidChannel(cid) == false)
+		return false;
+
+
+	CNetwork::Get()->Execute(fmt::format("clientmove clid={} cid={}", clid, cid));
+	return true;
+}
+
+bool CServer::SetClientChannelGroup(Client::Id_t clid, int groupid, Channel::Id_t cid)
+{
+	if (IsValidClient(clid) == false)
+		return false;
+
+	if (IsValidChannel(cid) == false)
+		return false;
+
+
+	Client::Id_t dbid = m_Clients.at(clid)->DatabaseId;
+	CNetwork::Get()->Execute(fmt::format("setclientchannelgroup cgid={} cid={} cldbid={}", groupid, cid, dbid));
+	return true;
+}
+
+bool CServer::AddClientToServerGroup(Client::Id_t clid, int groupid)
+{
+	if (IsValidClient(clid) == false)
+		return false;
+
+
+	Client::Id_t dbid = m_Clients.at(clid)->DatabaseId;
+	CNetwork::Get()->Execute(fmt::format("servergroupaddclient sgid={} cldbid={}", groupid, dbid));
+	return true;
+}
+
+bool CServer::RemoveClientFromServerGroup(Client::Id_t clid, int groupid)
+{
+	if (IsValidClient(clid) == false)
+		return false;
+
+
+	Client::Id_t dbid = m_Clients.at(clid)->DatabaseId;
+	CNetwork::Get()->Execute(fmt::format("servergroupdelclient sgid={} cldbid={}", groupid, dbid));
+	return true;
+}
+
+bool CServer::PokeClient(Client::Id_t clid, string msg)
+{
+	if (IsValidClient(clid) == false)
+		return false;
+
+
+	CUtils::Get()->EscapeString(msg);
+	CNetwork::Get()->Execute(fmt::format("clientpoke clid={} msg={}", clid, msg));
+	return true;
+}
+
+bool CServer::SendClientMessage(Client::Id_t clid, string msg)
+{
+	if (IsValidClient(clid) == false)
+		return false;
+
+
+	CUtils::Get()->EscapeString(msg);
+	CNetwork::Get()->Execute(fmt::format("sendtextmessage targetmode=1 target={} msg={}", clid, msg));
+	return true;
+}
+
+
+
 
 void CServer::OnLogin(vector<string> &res)
 {
@@ -447,6 +594,33 @@ void CServer::OnChannelList(vector<string> &res)
 		if (is_default != 0)
 			m_DefaultChannel = cid;
 		m_Channels.emplace(cid, chan);
+	}
+}
+
+void CServer::OnClientList(vector<string> &res)
+{
+	for (auto &r : res)
+	{
+		Client::Id_t
+			id = Client::Invalid,
+			dbid = Client::Invalid;
+		Channel::Id_t cid = Channel::Invalid;
+		string uid;
+		int type = 0;
+
+		CUtils::Get()->ParseField(r, "clid", id);
+		CUtils::Get()->ParseField(r, "cid", cid);
+		CUtils::Get()->ParseField(r, "client_database_id", dbid);
+		CUtils::Get()->ParseField(r, "client_unique_identifier", uid);
+		CUtils::Get()->ParseField(r, "client_type", type);
+
+
+		Client *client = new Client;
+		client->DatabaseId = dbid;
+		client->Uid = uid;
+		client->CurrentChannel = cid;
+
+		m_Clients.emplace(id, client);
 	}
 }
 
@@ -722,3 +896,141 @@ void CServer::OnChannelRequiredTalkPowerChanged(boost::smatch &result)
 
 	CCallbackHandler::Get()->Call("TSC_OnChannelRequiredTPChanged", cid, talkpower);
 }
+
+
+
+void CServer::OnClientConnect(boost::smatch &result)
+{
+	Client::Id_t
+		clid = Client::Invalid,
+		dbid = Client::Invalid;
+	string
+		uid,
+		nickname;
+	Channel::Id_t cid = Channel::Invalid;
+	int type = 0;
+
+	CUtils::Get()->ConvertStringToInt(result[1].str(), cid);
+	CUtils::Get()->ConvertStringToInt(result[2].str(), clid);
+	uid = result[3].str();
+	nickname = result[4].str();
+	CUtils::Get()->ConvertStringToInt(result[5].str(), dbid);
+	CUtils::Get()->ConvertStringToInt(result[6].str(), type);
+
+	Client *client = new Client;
+	client->DatabaseId = dbid;
+	client->Uid = uid;
+	client->CurrentChannel = cid;
+
+	m_Clients.emplace(clid, client);
+
+
+	CUtils::Get()->UnEscapeString(nickname);
+	CCallbackHandler::Get()->Call("TSC_OnClientConnect", clid, nickname);
+}
+
+void CServer::OnClientDisconnect(boost::smatch &result)
+{
+	Client::Id_t clid = Client::Invalid;
+	int reasonid;
+	string reasonmsg;
+
+	CUtils::Get()->ConvertStringToInt(result[1].str(), reasonid);
+	reasonmsg = result[2].str();
+	CUtils::Get()->ConvertStringToInt(result[3].str(), clid);
+
+	if (IsValidClient(clid) == false)
+		return;
+
+
+	delete m_Clients.at(clid);
+	m_Clients.erase(clid);
+
+
+	CUtils::Get()->UnEscapeString(reasonmsg);
+	CCallbackHandler::Get()->Call("TSC_OnClientDisconnect", clid, reasonid, reasonmsg);
+}
+
+void CServer::OnClientMoved(boost::smatch &result)
+{
+	Channel::Id_t to_cid;
+	int reasonid;
+	Client::Id_t invokerid = Client::Invalid;
+
+	CUtils::Get()->ConvertStringToInt(result[1].str(), to_cid);
+	CUtils::Get()->ConvertStringToInt(result[2].str(), reasonid);
+	CUtils::Get()->ConvertStringToInt(result[3].str(), invokerid);
+	string client_list(result[4].str());
+
+
+	if (IsValidChannel(to_cid) == false)
+		return;
+
+	if (invokerid != Client::Invalid && IsValidClient(invokerid) == false)
+		return;
+
+	size_t
+		delim_pos = 0,
+		old_delim_pos = 0;
+	do
+	{
+		delim_pos = client_list.find('|', delim_pos + 1);
+
+		Client::Id_t clid = Client::Invalid;
+		CUtils::Get()->ParseField(client_list.substr(old_delim_pos, delim_pos - old_delim_pos), "clid", clid);
+		old_delim_pos = delim_pos;
+
+		if (IsValidClient(clid))
+		{
+			m_Clients.at(clid)->CurrentChannel = to_cid;
+
+			CCallbackHandler::Get()->Call("TSC_OnClientMoved", clid, to_cid, invokerid);
+		}
+	} while (delim_pos != string::npos);
+
+}
+
+void CServer::OnClientServerText(boost::smatch &result)
+{
+	Client::Id_t clid = Client::Invalid;
+	string
+		nickname,
+		msg;
+
+	msg = result[1].str();
+	CUtils::Get()->ConvertStringToInt(result[2].str(), clid);
+	nickname = result[3].str();
+
+	if (clid != Client::Invalid && IsValidClient(clid) == false)
+		return;
+
+
+	CUtils::Get()->UnEscapeString(nickname);
+	CUtils::Get()->UnEscapeString(msg);
+	CCallbackHandler::Get()->Call("TSC_OnClientServerText", clid, nickname, msg);
+}
+
+void CServer::OnClientPrivateText(boost::smatch &result)
+{
+	Client::Id_t
+		from_clid = Client::Invalid,
+		to_clid = Client::Invalid;
+	string
+		from_nickname,
+		msg;
+
+	msg = result[1].str();
+	CUtils::Get()->ConvertStringToInt(result[2].str(), to_clid);
+	CUtils::Get()->ConvertStringToInt(result[3].str(), from_clid);
+	from_nickname = result[4].str();
+	
+	//one of both clid's has to be invalid because it's our ServerQuery client
+	if (IsValidClient(from_clid) == false && IsValidClient(to_clid) == false)
+		return;
+
+
+	CUtils::Get()->UnEscapeString(from_nickname);
+	CUtils::Get()->UnEscapeString(msg);
+	CCallbackHandler::Get()->Call("TSC_OnClientPrivateText", from_clid, from_nickname, to_clid, msg);
+}
+
