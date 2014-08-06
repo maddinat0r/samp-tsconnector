@@ -12,6 +12,7 @@ compile:
 	@mkdir -p bin
 	@echo Compiling plugin...
 	@ $(GPP) $(COMPILE_FLAGS) src/*.cpp
+	@ $(GPP) $(COMPILE_FLAGS) src/*.cc
 	@echo Compiling SDK...
 	@ $(GCC) $(COMPILE_FLAGS) lib/sdk/amx/*.c
 	@ $(GPP) $(COMPILE_FLAGS) lib/sdk/*.cpp
