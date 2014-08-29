@@ -101,6 +101,12 @@ void CNetwork::OnRead(const boost::system::error_code &error_code)
 		string read_data;
 		std::getline(tmp_stream, read_data, '\r');
 
+#ifdef _DEBUG
+		if (read_data.length() < 512)
+			logprintf(">>>> %s", read_data.c_str());
+		else
+			logprintf(">>>> <INPUT TOO LONG>");
+#endif
 
 		//regex: parse error
 		//if this is an error message, it means that no other result data will come
@@ -196,6 +202,9 @@ void CNetwork::OnRead(const boost::system::error_code &error_code)
 
 void CNetwork::OnWrite(const boost::system::error_code &error_code)
 {
+#ifdef _DEBUG
+	logprintf("<<<< %s", m_CmdWriteBuffer.c_str());
+#endif
 	m_CmdWriteBuffer.clear();
 	if (error_code.value() != 0)
 		logprintf(">> plugin.TSConnector: Error while writing: %s (#%d)", error_code.message().c_str(), error_code.value());
