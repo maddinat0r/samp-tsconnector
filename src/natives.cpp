@@ -8,14 +8,10 @@
 //native TSC_Connect(user[], pass[], ip[], port = 9987, serverquery_port = 10011, bool:wait = true);
 AMX_DECLARE_NATIVE(Native::TSC_Connect)
 {
-	char
-		*login_tmp = NULL,
-		*pass_tmp = NULL,
-		*ip_tmp = NULL;
-
-	amx_StrParam(amx, params[1], login_tmp);
-	amx_StrParam(amx, params[2], pass_tmp);
-	amx_StrParam(amx, params[3], ip_tmp);
+	string
+		login = amx_GetCppString(amx, params[1]),
+		pass = amx_GetCppString(amx, params[2]),
+		ip = amx_GetCppString(amx, params[3]);
 	
 	unsigned short
 		server_port = static_cast<unsigned short>(params[4]),
@@ -24,18 +20,18 @@ AMX_DECLARE_NATIVE(Native::TSC_Connect)
 	bool wait = (params[6] != 0);
 
 
-	if (login_tmp == NULL || pass_tmp == NULL 
-		|| ip_tmp == NULL || server_port == 0 || query_port == 0)
+	if (login.empty() || pass.empty() || ip.empty() 
+		|| server_port == 0 || query_port == 0)
 		return 0;
 
 
-	CNetwork::Get()->Connect(ip_tmp, server_port, query_port);
-	bool ret_val = CServer::Get()->Login(login_tmp, pass_tmp);
+	CNetwork::Get()->Connect(ip, server_port, query_port);
+	bool ret_val = CServer::Get()->Login(login, pass);
 
 	if (ret_val && wait)
 	{
 		while (CServer::Get()->IsLoggedIn() == false)
-			boost::this_thread::sleep(boost::posix_time::milliseconds(100));
+			boost::this_thread::sleep(boost::posix_time::milliseconds(30));
 	}
 
 	return ret_val;
@@ -51,27 +47,15 @@ AMX_DECLARE_NATIVE(Native::TSC_Disconnect)
 //native TSC_ChangeNickname(nickname[]);
 AMX_DECLARE_NATIVE(Native::TSC_ChangeNickname)
 {
-	char *nick_tmp = NULL;
-	amx_StrParam(amx, params[1], nick_tmp);
-
-	if (nick_tmp == NULL)
-		return 0;
-
-	
-	return CServer::Get()->ChangeNickname(nick_tmp);
+	return CServer::Get()->ChangeNickname(
+		amx_GetCppString(amx, params[1]));
 }
 
 //native TSC_SendServerMessage(msg[]);
 AMX_DECLARE_NATIVE(Native::TSC_SendServerMessage)
 {
-	char *msg_tmp = NULL;
-	amx_StrParam(amx, params[1], msg_tmp);
-
-	if (msg_tmp == NULL)
-		return 0;
-
-
-	return CServer::Get()->SendServerMessage(msg_tmp);
+	return CServer::Get()->SendServerMessage(
+		amx_GetCppString(amx, params[1]));
 }
 
 
@@ -79,105 +63,91 @@ AMX_DECLARE_NATIVE(Native::TSC_SendServerMessage)
 //native TSC_CreateChannel(channelname[]);
 AMX_DECLARE_NATIVE(Native::TSC_CreateChannel)
 {
-	char *channelname_tmp = NULL;
-	amx_StrParam(amx, params[1], channelname_tmp);
-
-	if (channelname_tmp == NULL)
-		return 0;
-
-
-	CServer::Get()->CreateChannel(channelname_tmp);
-	return 1;
+	return CServer::Get()->CreateChannel(
+		amx_GetCppString(amx, params[1]));
 }
 
 //native TSC_DeleteChannel(channelid);
 AMX_DECLARE_NATIVE(Native::TSC_DeleteChannel)
 {
-	return CServer::Get()->DeleteChannel(static_cast<Channel::Id_t>(params[1]));
+	return CServer::Get()->DeleteChannel(
+		static_cast<Channel::Id_t>(params[1]));
 }
 
 //native TSC_GetChannelIdByName(channelname[]);
 AMX_DECLARE_NATIVE(Native::TSC_GetChannelIdByName)
 {
-	char *name = NULL;
-	amx_StrParam(amx, params[1], name);
-	return CServer::Get()->GetChannelIdByName(name == NULL ? string() : name);
+	return CServer::Get()->GetChannelIdByName(
+		amx_GetCppString(amx, params[1]));
 }
 
 //native TSC_IsValidChannel(channelid);
 AMX_DECLARE_NATIVE(Native::TSC_IsValidChannel)
 {
-	return CServer::Get()->IsValidChannel(static_cast<Channel::Id_t>(params[1]));
+	return CServer::Get()->IsValidChannel(
+		static_cast<Channel::Id_t>(params[1]));
 }
 
 //native TSC_SetChannelName(channelid, channelname[]);
 AMX_DECLARE_NATIVE(Native::TSC_SetChannelName)
 {
-	char *channelname_tmp = NULL;
-	amx_StrParam(amx, params[2], channelname_tmp);
-
-	if (channelname_tmp == NULL)
-		return 0;
-
-
 	return CServer::Get()->SetChannelName(
-		static_cast<Channel::Id_t>(params[1]), channelname_tmp);
+		static_cast<Channel::Id_t>(params[1]), 
+		amx_GetCppString(amx, params[2]));
 }
 
 //native TSC_GetChannelName(channelid, dest[], maxlen = sizeof(dest));
 AMX_DECLARE_NATIVE(Native::TSC_GetChannelName)
 {
-	amx_SetCppString(amx, params[2],
-		CServer::Get()->GetChannelName(static_cast<Channel::Id_t>(params[1])),
-		static_cast<size_t>(params[3]));
-	return 1;
+	string channel_name = CServer::Get()->GetChannelName(static_cast<Channel::Id_t>(params[1]));
+	amx_SetCppString(amx, params[2], channel_name, params[3]);
+	return (channel_name.empty() == false);
 }
 
 //native TSC_SetChannelDescription(channelid, desc[]);
 AMX_DECLARE_NATIVE(Native::TSC_SetChannelDescription)
 {
-	char *channeldesc_tmp = NULL;
-	amx_StrParam(amx, params[2], channeldesc_tmp);
-
-	return CServer::Get()->SetChannelDescription(static_cast<Channel::Id_t>(params[1]), 
-		channeldesc_tmp == NULL ? string() : channeldesc_tmp);
+	return CServer::Get()->SetChannelDescription(
+		static_cast<Channel::Id_t>(params[1]), 
+		amx_GetCppString(amx, params[2]));
 }
 
 //native TSC_SetChannelType(channelid, type);
 AMX_DECLARE_NATIVE(Native::TSC_SetChannelType)
 {
 	return CServer::Get()->SetChannelType(
-		static_cast<Channel::Id_t>(params[1]), static_cast<Channel::Types>(params[2]));
+		static_cast<Channel::Id_t>(params[1]), 
+		static_cast<Channel::Types>(params[2]));
 }
 
 //native TSC_GetChannelType(channelid);
 AMX_DECLARE_NATIVE(Native::TSC_GetChannelType)
 {
-	return static_cast<cell>(
-		CServer::Get()->GetChannelType(static_cast<Channel::Id_t>(params[1])));
+	return static_cast<cell>(CServer::Get()->GetChannelType(
+		static_cast<Channel::Id_t>(params[1])));
 }
 
 //native TSC_SetChannelPassword(channelid, password[]);
 AMX_DECLARE_NATIVE(Native::TSC_SetChannelPassword)
 {
-	char *pwd_tmp = NULL;
-	amx_StrParam(amx, params[2], pwd_tmp);
-
 	return CServer::Get()->SetChannelPassword(
-		static_cast<Channel::Id_t>(params[1]), pwd_tmp == NULL ? string() : pwd_tmp);
+		static_cast<Channel::Id_t>(params[1]),
+		amx_GetCppString(amx, params[2]));
 }
 
 //native TSC_HasChannelPassword(channelid);
 AMX_DECLARE_NATIVE(Native::TSC_HasChannelPassword)
 {
-	return CServer::Get()->HasChannelPassword(static_cast<Channel::Id_t>(params[1]));
+	return CServer::Get()->HasChannelPassword(
+		static_cast<Channel::Id_t>(params[1]));
 }
 
 //native TSC_SetChannelRequiredTP(channelid, talkpower);
 AMX_DECLARE_NATIVE(Native::TSC_SetChannelRequiredTP)
 {
 	return CServer::Get()->SetChannelRequiredTalkPower(
-		static_cast<Channel::Id_t>(params[1]), params[2]);
+		static_cast<Channel::Id_t>(params[1]), 
+		params[2]);
 }
 
 //native TSC_GetChannelRequiredTP(channelid);
@@ -191,39 +161,45 @@ AMX_DECLARE_NATIVE(Native::TSC_GetChannelRequiredTP)
 AMX_DECLARE_NATIVE(Native::TSC_SetChannelUserLimit)
 {
 	return CServer::Get()->SetChannelUserLimit(
-		static_cast<Channel::Id_t>(params[1]), params[2]);
+		static_cast<Channel::Id_t>(params[1]), 
+		params[2]);
 }
 
 //native TSC_GetChannelUserLimit(channelid);
 AMX_DECLARE_NATIVE(Native::TSC_GetChannelUserLimit)
 {
-	return CServer::Get()->GetChannelUserLimit(static_cast<Channel::Id_t>(params[1]));
+	return CServer::Get()->GetChannelUserLimit(
+		static_cast<Channel::Id_t>(params[1]));
 }
 
 //native TSC_SetChannelParentId(channelid, parentchannelid);
 AMX_DECLARE_NATIVE(Native::TSC_SetChannelParentId)
 {
 	return CServer::Get()->SetChannelParentId(
-		static_cast<Channel::Id_t>(params[1]), static_cast<Channel::Id_t>(params[2]));
+		static_cast<Channel::Id_t>(params[1]), 
+		static_cast<Channel::Id_t>(params[2]));
 }
 
 //native TSC_GetChannelParentId(channelid);
 AMX_DECLARE_NATIVE(Native::TSC_GetChannelParentId)
 {
-	return CServer::Get()->GetChannelParentId(static_cast<Channel::Id_t>(params[1]));
+	return CServer::Get()->GetChannelParentId(
+		static_cast<Channel::Id_t>(params[1]));
 }
 
 //native TSC_SetChannelOrderId(channelid, upperchannelid);
 AMX_DECLARE_NATIVE(Native::TSC_SetChannelOrderId)
 {
 	return CServer::Get()->SetChannelOrderId(
-		static_cast<Channel::Id_t>(params[1]), static_cast<Channel::Id_t>(params[2]));
+		static_cast<Channel::Id_t>(params[1]), 
+		static_cast<Channel::Id_t>(params[2]));
 }
 
 //native TSC_GetChannelOrderId(channelid);
 AMX_DECLARE_NATIVE(Native::TSC_GetChannelOrderId)
 {
-	return CServer::Get()->GetChannelOrderId(static_cast<Channel::Id_t>(params[1]));
+	return CServer::Get()->GetChannelOrderId(
+		static_cast<Channel::Id_t>(params[1]));
 }
 
 //native TSC_GetDefaultChannelId();
@@ -237,9 +213,8 @@ AMX_DECLARE_NATIVE(Native::TSC_GetDefaultChannelId)
 //native TSC_GetClientIdByUid(uid[]);
 AMX_DECLARE_NATIVE(Native::TSC_GetClientIdByUid)
 {
-	char *tmp_uid = NULL;
-	amx_StrParam(amx, params[1], tmp_uid);
-	return CServer::Get()->GetClientIdByUid(tmp_uid == NULL ? string() : tmp_uid);
+	return CServer::Get()->GetClientIdByUid(
+		amx_GetCppString(amx, params[1]));
 }
 
 
@@ -254,13 +229,15 @@ AMX_DECLARE_NATIVE(Native::TSC_GetClientUid)
 //native TSC_GetClientDatabaseId(clientid);
 AMX_DECLARE_NATIVE(Native::TSC_GetClientDatabaseId)
 {
-	return CServer::Get()->GetClientDatabaseId(static_cast<Client::Id_t>(params[1]));
+	return CServer::Get()->GetClientDatabaseId(
+		static_cast<Client::Id_t>(params[1]));
 }
 
 //native TSC_GetClientChannelId(clientid);
 AMX_DECLARE_NATIVE(Native::TSC_GetClientChannelId)
 {
-	return CServer::Get()->GetClientChannelId(static_cast<Client::Id_t>(params[1]));
+	return CServer::Get()->GetClientChannelId(
+		static_cast<Client::Id_t>(params[1]));
 }
 
 //native TSC_GetClientIpAddress(clientid, dest[], sizeof(dest[]));
@@ -275,33 +252,26 @@ AMX_DECLARE_NATIVE(Native::TSC_GetClientIpAddress)
 //native TSC_KickClient(clientid, TSC_KICKTYPE:kicktype, reasonmsg[]);
 AMX_DECLARE_NATIVE(Native::TSC_KickClient)
 {
-	char *tmp_msg = NULL;
-	amx_StrParam(amx, params[3], tmp_msg);
-	return CServer::Get()->KickClient(static_cast<Client::Id_t>(params[1]),
-		static_cast<Client::KickTypes>(params[2]), tmp_msg != NULL ? tmp_msg : string());
+	return CServer::Get()->KickClient(
+		static_cast<Client::Id_t>(params[1]),
+		static_cast<Client::KickTypes>(params[2]), 
+		amx_GetCppString(amx, params[3]));
 }
 
 //native TSC_BanClient(uid[], seconds, reasonmsg[]);
 AMX_DECLARE_NATIVE(Native::TSC_BanClient)
 {
-	char 
-		*tmp_uid = NULL,
-		*tmp_msg = NULL;
-	amx_StrParam(amx, params[1], tmp_msg);
-	amx_StrParam(amx, params[3], tmp_msg);
-
-	if (tmp_uid == NULL)
-		return 0;
-
-
-	return CServer::Get()->BanClient(tmp_uid, params[2], 
-		tmp_msg != NULL ? tmp_msg : string());
+	return CServer::Get()->BanClient(
+		amx_GetCppString(amx, params[1]), 
+		params[2],
+		amx_GetCppString(amx, params[3]));
 }
 
 //native TSC_MoveClient(clientid, channelid);
 AMX_DECLARE_NATIVE(Native::TSC_MoveClient)
 {
-	return CServer::Get()->MoveClient(static_cast<Client::Id_t>(params[1]),
+	return CServer::Get()->MoveClient(
+		static_cast<Client::Id_t>(params[1]),
 		static_cast<Channel::Id_t>(params[2]));
 }
 
@@ -309,39 +279,41 @@ AMX_DECLARE_NATIVE(Native::TSC_MoveClient)
 //native TSC_SetClientChannelGroup(clientid, groupid, channelid);
 AMX_DECLARE_NATIVE(Native::TSC_SetClientChannelGroup)
 {
-	return CServer::Get()->SetClientChannelGroup(static_cast<Client::Id_t>(params[1]),
-		params[2], static_cast<Channel::Id_t>(params[3]));
+	return CServer::Get()->SetClientChannelGroup(
+		static_cast<Client::Id_t>(params[1]),
+		params[2], 
+		static_cast<Channel::Id_t>(params[3]));
 }
 
 //native TSC_AddClientToServerGroup(clientid, groupid);
 AMX_DECLARE_NATIVE(Native::TSC_AddClientToServerGroup)
 {
 	return CServer::Get()->AddClientToServerGroup(
-		static_cast<Client::Id_t>(params[1]), params[2]);
+		static_cast<Client::Id_t>(params[1]), 
+		params[2]);
 }
 
 //native TSC_RemoveClientFromServerGroup(clientid, groupid);
 AMX_DECLARE_NATIVE(Native::TSC_RemoveClientFromServerGroup)
 {
 	return CServer::Get()->RemoveClientFromServerGroup(
-		static_cast<Client::Id_t>(params[1]), params[2]);
+		static_cast<Client::Id_t>(params[1]), 
+		params[2]);
 }
 
 
 //native TSC_PokeClient(clientid, msg[]);
 AMX_DECLARE_NATIVE(Native::TSC_PokeClient)
 {
-	char *tmp_msg = NULL;
-	amx_StrParam(amx, params[2], tmp_msg);
-	return CServer::Get()->PokeClient(static_cast<Client::Id_t>(params[1]), 
-		tmp_msg != NULL ? tmp_msg : string());
+	return CServer::Get()->PokeClient(
+		static_cast<Client::Id_t>(params[1]),
+		amx_GetCppString(amx, params[2]));
 }
 
 //native TSC_SendClientMessage(clientid, msg[]);
 AMX_DECLARE_NATIVE(Native::TSC_SendClientMessage)
 {
-	char *tmp_msg = NULL;
-	amx_StrParam(amx, params[2], tmp_msg);
-	return CServer::Get()->SendClientMessage(static_cast<Client::Id_t>(params[1]),
-		tmp_msg != NULL ? tmp_msg : string());
+	return CServer::Get()->SendClientMessage(
+		static_cast<Client::Id_t>(params[1]),
+		amx_GetCppString(amx, params[2]));
 }

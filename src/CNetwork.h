@@ -73,7 +73,7 @@ private: //constructor / deconstructor
 
 
 public: //functions
-	void Connect(char *ip, unsigned short port, unsigned short query_port = 10011);
+	void Connect(string ip, unsigned short port, unsigned short query_port = 10011);
 	void Disconnect();
 
 	inline unsigned short GetServerPort() const

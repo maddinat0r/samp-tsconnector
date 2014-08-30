@@ -24,7 +24,7 @@ void CNetwork::NetAlive(const boost::system::error_code &error_code, bool from_w
 }
 
 
-void CNetwork::Connect(char *ip, unsigned short port, unsigned short query_port)
+void CNetwork::Connect(string ip, unsigned short port, unsigned short query_port)
 {
 	m_SocketDest = tcp::endpoint(asio::ip::address::from_string(ip), query_port);
 	m_ServerPort = port;
