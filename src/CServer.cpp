@@ -160,7 +160,8 @@ bool CServer::SendServerMessage(string msg)
 
 
 
-bool CServer::CreateChannel(string name)
+bool CServer::CreateChannel(string name, Channel::Types type, int maxusers, 
+	Channel::Id_t pcid, Channel::Id_t ocid, int talkpower)
 {
 	if (m_IsLoggedIn == false)
 		return false;
@@ -168,9 +169,56 @@ bool CServer::CreateChannel(string name)
 	if (name.empty())
 		return false;
 
+	if (type == Channel::Types::INVALID)
+		return false;
+
+	if (maxusers < -1)
+		return false;
+
+	if (pcid != 0 && pcid != Channel::Invalid && IsValidChannel(pcid) == false)
+		return false;
+
+	if (ocid != 0 && ocid != Channel::Invalid && IsValidChannel(ocid) == false)
+		return false;
+
+
+	string type_flag_str;
+	switch (type)
+	{
+	case Channel::Types::PERMANENT:
+		type_flag_str = "channel_flag_permanent";
+		break;
+
+	case Channel::Types::SEMI_PERMANENT:
+		type_flag_str = "channel_flag_semi_permanent";
+		break;
+
+	case Channel::Types::TEMPORARY:
+		type_flag_str = "channel_flag_temporary";
+		break;
+
+	default:
+		return false;
+	}
 
 	CUtils::Get()->EscapeString(name);
-	CNetwork::Get()->Execute(fmt::format("channelcreate channel_name={}", name));
+	
+
+	string cmd = fmt::format("channelcreate channel_name={} {}=1", name, type_flag_str);
+
+	if (maxusers != -1)
+		cmd.append(fmt::format(" channel_maxclients={} channel_flag_maxclients_unlimited=0", maxusers));
+
+	if (talkpower != 0)
+		cmd.append(fmt::format(" channel_needed_talk_power={}", talkpower));
+
+	if (pcid != Channel::Invalid)
+		cmd.append(fmt::format(" cpid={}", pcid));
+	
+	if (ocid != Channel::Invalid)
+		cmd.append(fmt::format(" channel_order={}", ocid));
+
+	CNetwork::Get()->Execute(cmd);
 	return true;
 }
 

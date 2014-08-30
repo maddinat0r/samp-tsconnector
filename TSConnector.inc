@@ -33,7 +33,7 @@ native TSC_SendServerMessage(msg[]);
 
 
 //channel functions
-native TSC_CreateChannel(channelname[]);
+native TSC_CreateChannel(channelname[], TSC_CHANNELTYPE:type = TEMPORARY, maxusers = -1, parentchannelid = -1, upperchannelid = -1, talkpower = 0);
 native TSC_DeleteChannel(channelid);
 native TSC_GetChannelIdByName(channelname[]);
 native TSC_IsValidChannel(channelid);

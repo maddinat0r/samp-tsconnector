@@ -60,11 +60,16 @@ AMX_DECLARE_NATIVE(Native::TSC_SendServerMessage)
 
 
 
-//native TSC_CreateChannel(channelname[]);
+//native TSC_CreateChannel(channelname[], TSC_CHANNELTYPE:type = TEMPORARY, maxusers = -1, parentchannelid = -1, upperchannelid = -1, talkpower = 0);
 AMX_DECLARE_NATIVE(Native::TSC_CreateChannel)
 {
 	return CServer::Get()->CreateChannel(
-		amx_GetCppString(amx, params[1]));
+		amx_GetCppString(amx, params[1]),
+		static_cast<Channel::Types>(params[2]),
+		params[3],
+		static_cast<Channel::Id_t>(params[4]),
+		static_cast<Channel::Id_t>(params[5]),
+		params[6]);
 }
 
 //native TSC_DeleteChannel(channelid);

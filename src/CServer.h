@@ -110,7 +110,9 @@ public: //server functions
 
 
 public: //channel functions
-	bool CreateChannel(string name);
+	bool CreateChannel(string name, Channel::Types type = Channel::Types::TEMPORARY,
+		int maxusers = -1, Channel::Id_t pcid = Channel::Invalid, Channel::Id_t ocid = Channel::Invalid,
+		int talkpower = 0);
 	bool DeleteChannel(Channel::Id_t cid);
 	Channel::Id_t GetChannelIdByName(string name);
 	inline bool IsValidChannel(Channel::Id_t cid)
