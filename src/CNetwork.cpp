@@ -105,7 +105,11 @@ void CNetwork::OnRead(const boost::system::error_code &error_code)
 		if (read_data.length() < 512)
 			logprintf(">>>> %s", read_data.c_str());
 		else
-			logprintf(">>>> <INPUT TOO LONG>");
+		{
+			string shortened_data(read_data);
+			shortened_data.resize(256);
+			logprintf(">>>> %s", shortened_data.c_str());
+		}
 #endif
 
 		//regex: parse error
