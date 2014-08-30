@@ -263,6 +263,14 @@ AMX_DECLARE_NATIVE(Native::TSC_GetClientChannelId)
 	return CServer::Get()->GetClientChannelId(static_cast<Client::Id_t>(params[1]));
 }
 
+//native TSC_GetClientIpAddress(clientid, dest[], sizeof(dest[]));
+AMX_DECLARE_NATIVE(Native::TSC_GetClientIpAddress)
+{
+	string ip = CServer::Get()->GetClientIpAddress(static_cast<Client::Id_t>(params[1]));
+	amx_SetCppString(amx, params[2], ip, params[3]);
+	return (ip.empty() == false);
+}
+
 
 //native TSC_KickClient(clientid, TSC_KICKTYPE:kicktype, reasonmsg[]);
 AMX_DECLARE_NATIVE(Native::TSC_KickClient)

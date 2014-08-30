@@ -48,6 +48,7 @@ namespace Native
 	AMX_DECLARE_NATIVE(TSC_GetClientUid);
 	AMX_DECLARE_NATIVE(TSC_GetClientDatabaseId);
 	AMX_DECLARE_NATIVE(TSC_GetClientChannelId);
+	AMX_DECLARE_NATIVE(TSC_GetClientIpAddress);
 
 	AMX_DECLARE_NATIVE(TSC_KickClient);
 	AMX_DECLARE_NATIVE(TSC_BanClient);

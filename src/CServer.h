@@ -63,7 +63,9 @@ struct Client
 	};
 
 	Id_t DatabaseId = Invalid;
-	string Uid;
+	string
+		Uid,
+		IpAddress;
 
 	Channel::Id_t CurrentChannel = Channel::Invalid;
 };
@@ -148,6 +150,7 @@ public: //client functions
 	string GetClientUid(Client::Id_t clid);
 	Client::Id_t GetClientDatabaseId(Client::Id_t clid);
 	Channel::Id_t GetClientChannelId(Client::Id_t clid);
+	string GetClientIpAddress(Client::Id_t clid);
 
 	bool KickClient(Client::Id_t clid, Client::KickTypes type, string reasonmsg);
 	bool BanClient(string uid, int seconds, string reasonmsg);

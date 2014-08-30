@@ -95,7 +95,7 @@ void CServer::Initialize()
 	//fill up cache
 	CNetwork::Get()->Execute("channellist -flags -limit -voice",
 		boost::bind(&CServer::OnChannelList, this, _1));
-	CNetwork::Get()->Execute("clientlist -uid",
+	CNetwork::Get()->Execute("clientlist -uid -ip",
 		boost::bind(&CServer::OnClientList, this, _1));
 
 
@@ -546,6 +546,17 @@ Channel::Id_t CServer::GetClientChannelId(Client::Id_t clid)
 		return Channel::Invalid;
 }
 
+string CServer::GetClientIpAddress(Client::Id_t clid)
+{
+	if (IsValidClient(clid))
+	{
+		boost::lock_guard<mutex> client_mtx_guard(m_ClientMtx);
+		return m_Clients.at(clid)->IpAddress;
+	}
+	else
+		return string();
+}
+
 bool CServer::KickClient(Client::Id_t clid, Client::KickTypes type, string reasonmsg)
 {
 	if (IsValidClient(clid) == false)
@@ -753,7 +764,7 @@ void CServer::OnClientList(vector<string> &res)
 			id = Client::Invalid,
 			dbid = Client::Invalid;
 		Channel::Id_t cid = Channel::Invalid;
-		string uid;
+		string uid, ip;
 		int type = 0;
 
 		CUtils::Get()->ParseField(r, "clid", id);
@@ -761,11 +772,13 @@ void CServer::OnClientList(vector<string> &res)
 		CUtils::Get()->ParseField(r, "client_database_id", dbid);
 		CUtils::Get()->ParseField(r, "client_unique_identifier", uid);
 		CUtils::Get()->ParseField(r, "client_type", type);
+		CUtils::Get()->ParseField(r, "connection_client_ip", ip);
 
 
 		Client *client = new Client;
 		client->DatabaseId = dbid;
 		client->Uid = uid;
+		client->IpAddress = ip;
 		client->CurrentChannel = cid;
 
 		m_Clients.emplace(id, client);
@@ -1082,12 +1095,23 @@ void CServer::OnClientConnect(boost::smatch &result)
 	client->Uid = uid;
 	client->CurrentChannel = cid;
 
-	boost::lock_guard<mutex> client_mtx_guard(m_ClientMtx);
-	m_Clients.emplace(clid, client);
-
-
 	CUtils::Get()->UnEscapeString(nickname);
-	CCallbackHandler::Get()->Call("TSC_OnClientConnect", clid, nickname);
+
+
+	CNetwork::Get()->Execute(
+		fmt::format("clientinfo clid={}", clid), 
+		[=](CNetwork::ResultSet_t &result)
+		{
+			string ip;
+			CUtils::Get()->ParseField(result.at(0), "connection_client_ip", ip);
+			client->IpAddress = ip;
+
+			boost::lock_guard<mutex> client_mtx_guard(m_ClientMtx);
+			m_Clients.emplace(clid, client);
+
+			CCallbackHandler::Get()->Call("TSC_OnClientConnect", clid, nickname);
+		}
+	);
 }
 
 void CServer::OnClientDisconnect(boost::smatch &result)
