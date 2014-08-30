@@ -142,6 +142,7 @@ public: //channel functions
 
 public: //client functions
 	Client::Id_t GetClientIdByUid(string uid);
+	Client::Id_t GetClientIdByIpAddress(string ip);
 	inline bool IsValidClient(Client::Id_t clid)
 	{
 		boost::lock_guard<mutex> client_mtx_guard(m_ClientMtx);

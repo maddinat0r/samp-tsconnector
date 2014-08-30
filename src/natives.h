@@ -44,6 +44,7 @@ namespace Native
 	
 	//client functions
 	AMX_DECLARE_NATIVE(TSC_GetClientIdByUid);
+	AMX_DECLARE_NATIVE(TSC_GetClientIdByIpAddress);
 
 	AMX_DECLARE_NATIVE(TSC_GetClientUid);
 	AMX_DECLARE_NATIVE(TSC_GetClientDatabaseId);

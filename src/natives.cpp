@@ -217,6 +217,13 @@ AMX_DECLARE_NATIVE(Native::TSC_GetClientIdByUid)
 		amx_GetCppString(amx, params[1]));
 }
 
+//native TSC_GetClientIdByIpAddress(ip[]);
+AMX_DECLARE_NATIVE(Native::TSC_GetClientIdByIpAddress)
+{
+	return CServer::Get()->GetClientIdByUid(
+		amx_GetCppString(amx, params[1]));
+}
+
 
 //native TSC_GetClientUid(clientid, dest[], sizeof(dest[]));
 AMX_DECLARE_NATIVE(Native::TSC_GetClientUid)

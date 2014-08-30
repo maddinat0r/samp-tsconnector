@@ -513,6 +513,21 @@ Client::Id_t CServer::GetClientIdByUid(string uid)
 	return Client::Invalid;
 }
 
+Client::Id_t CServer::GetClientIdByIpAddress(string ip)
+{
+	boost::lock_guard<mutex> client_mtx_guard(m_ClientMtx);
+	if (ip.empty() == false)
+	{
+		for (auto &i : m_Clients)
+		{
+			if (i.second->IpAddress == ip)
+				return i.first;
+		}
+	}
+
+	return Client::Invalid;
+}
+
 string CServer::GetClientUid(Client::Id_t clid)
 {
 	if (IsValidClient(clid))

@@ -57,6 +57,7 @@ native TSC_GetDefaultChannelId();
 
 //client functions
 native TSC_GetClientIdByUid(uid[]);
+native TSC_GetClientIdByIpAddress(ip[]);
 
 native TSC_GetClientUid(clientid, dest[], maxlen = sizeof(dest));
 native TSC_GetClientDatabaseId(clientid);
