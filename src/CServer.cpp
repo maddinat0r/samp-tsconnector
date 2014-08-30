@@ -387,7 +387,7 @@ bool CServer::SetChannelUserLimit(Channel::Id_t cid, int maxusers)
 		return false;
 
 
-	CNetwork::Get()->Execute(fmt::format("channeledit cid={} channel_maxclients={}", cid, maxusers),
+	CNetwork::Get()->Execute(fmt::format("channeledit cid={} channel_maxclients={} channel_flag_maxclients_unlimited={}", cid, maxusers, maxusers == -1 ? 1 : 0),
 		[this, cid, maxusers](CNetwork::ResultSet_t &result)
 		{
 			boost::lock_guard<mutex> channel_mtx_guard(m_ChannelMtx);
