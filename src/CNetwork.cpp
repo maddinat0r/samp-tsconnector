@@ -171,9 +171,27 @@ void CNetwork::OnRead(const boost::system::error_code &error_code)
 		}
 		else if (read_data.find("notify") == 0)
 		{
-			static string last_notify_data;
 			//check if notify is duplicate
-			if (last_notify_data != read_data)
+			static string last_notify_data;
+			static const vector<string> duplicate_notifies{ 
+				"notifyclientmoved", 
+				"notifycliententerview", 
+				"notifyclientleftview" 
+			};
+			bool is_duplicate = false;
+			
+			for (auto &s : duplicate_notifies)
+			{
+				if (read_data.find(s) == 0)
+				{
+					if (last_notify_data == read_data)
+						is_duplicate = true;
+					
+					break;
+				}
+			}
+			
+			if (is_duplicate == false)
 			{
 				//notify event
 				boost::smatch event_result;
@@ -186,6 +204,7 @@ void CNetwork::OnRead(const boost::system::error_code &error_code)
 					}
 				}
 			}
+
 			last_notify_data = read_data;
 		}
 		else
