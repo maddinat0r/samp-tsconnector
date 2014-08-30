@@ -24,7 +24,7 @@ PLUGIN_EXPORT bool PLUGIN_CALL Load(void **ppData)
 	pAMXFunctions = ppData[PLUGIN_DATA_AMX_EXPORTS];
 	logprintf = reinterpret_cast<logprintf_t>(ppData[PLUGIN_DATA_LOGPRINTF]);
 
-	logprintf(" >> plugin.TSConnector: v1.0 loaded.");
+	logprintf(" >> plugin.TSConnector: v1.1 loaded.");
 	return 1;
 }
 

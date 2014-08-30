@@ -1,5 +1,5 @@
 /* Teamspeak3 Connector
- * Version 1.0
+ * Version 1.1
  * made by maddinat0r
  */
 
