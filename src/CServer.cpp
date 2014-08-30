@@ -498,7 +498,7 @@ Channel::Id_t CServer::GetChannelIdByName(string name)
 
 
 
-Client::Id_t CServer::FindClient(string uid)
+Client::Id_t CServer::GetClientIdByUid(string uid)
 {
 	boost::lock_guard<mutex> client_mtx_guard(m_ClientMtx);
 	if (uid.empty() == false)

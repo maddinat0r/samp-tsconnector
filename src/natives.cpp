@@ -234,12 +234,12 @@ AMX_DECLARE_NATIVE(Native::TSC_GetDefaultChannelId)
 
 
 
-//native TSC_FindClient(uid[]);
-AMX_DECLARE_NATIVE(Native::TSC_FindClient)
+//native TSC_GetClientIdByUid(uid[]);
+AMX_DECLARE_NATIVE(Native::TSC_GetClientIdByUid)
 {
 	char *tmp_uid = NULL;
 	amx_StrParam(amx, params[1], tmp_uid);
-	return CServer::Get()->FindClient(tmp_uid == NULL ? string() : tmp_uid);
+	return CServer::Get()->GetClientIdByUid(tmp_uid == NULL ? string() : tmp_uid);
 }
 
 
