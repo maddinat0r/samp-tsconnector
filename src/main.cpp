@@ -47,7 +47,7 @@ extern "C" const AMX_NATIVE_INFO native_list[] =
 
 	AMX_DEFINE_NATIVE(TSC_CreateChannel)
 	AMX_DEFINE_NATIVE(TSC_DeleteChannel)
-	AMX_DEFINE_NATIVE(TSC_FindChannel)
+	AMX_DEFINE_NATIVE(TSC_GetChannelIdByName)
 	AMX_DEFINE_NATIVE(TSC_IsValidChannel)
 	AMX_DEFINE_NATIVE(TSC_SetChannelName)
 	AMX_DEFINE_NATIVE(TSC_GetChannelName)

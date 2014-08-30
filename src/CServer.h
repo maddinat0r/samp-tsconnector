@@ -110,7 +110,7 @@ public: //server functions
 public: //channel functions
 	bool CreateChannel(string name);
 	bool DeleteChannel(Channel::Id_t cid);
-	Channel::Id_t FindChannel(string name);
+	Channel::Id_t GetChannelIdByName(string name);
 	inline bool IsValidChannel(Channel::Id_t cid)
 	{
 		boost::lock_guard<mutex> channel_mtx_guard(m_ChannelMtx);

@@ -481,7 +481,7 @@ Channel::Id_t CServer::GetChannelOrderId(Channel::Id_t cid)
 		return Channel::Invalid;
 }
 
-Channel::Id_t CServer::FindChannel(string name)
+Channel::Id_t CServer::GetChannelIdByName(string name)
 {
 	boost::lock_guard<mutex> channel_mtx_guard(m_ChannelMtx);
 	if (name.empty() == false)

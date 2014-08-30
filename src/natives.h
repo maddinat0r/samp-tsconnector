@@ -22,7 +22,7 @@ namespace Native
 	//channel functions
 	AMX_DECLARE_NATIVE(TSC_CreateChannel);
 	AMX_DECLARE_NATIVE(TSC_DeleteChannel);
-	AMX_DECLARE_NATIVE(TSC_FindChannel);
+	AMX_DECLARE_NATIVE(TSC_GetChannelIdByName);
 	AMX_DECLARE_NATIVE(TSC_IsValidChannel);
 	AMX_DECLARE_NATIVE(TSC_SetChannelName);
 	AMX_DECLARE_NATIVE(TSC_GetChannelName);

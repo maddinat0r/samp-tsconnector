@@ -35,7 +35,7 @@ native TSC_SendServerMessage(msg[]);
 //channel functions
 native TSC_CreateChannel(channelname[]);
 native TSC_DeleteChannel(channelid);
-native TSC_FindChannel(channelname[]);
+native TSC_GetChannelIdByName(channelname[]);
 native TSC_IsValidChannel(channelid);
 native TSC_SetChannelName(channelid, channelname[]);
 native TSC_GetChannelName(channelid, dest[], maxlen = sizeof(dest));

@@ -96,12 +96,12 @@ AMX_DECLARE_NATIVE(Native::TSC_DeleteChannel)
 	return CServer::Get()->DeleteChannel(static_cast<Channel::Id_t>(params[1]));
 }
 
-//native TSC_FindChannel(channelname[]);
-AMX_DECLARE_NATIVE(Native::TSC_FindChannel)
+//native TSC_GetChannelIdByName(channelname[]);
+AMX_DECLARE_NATIVE(Native::TSC_GetChannelIdByName)
 {
 	char *name = NULL;
 	amx_StrParam(amx, params[1], name);
-	return CServer::Get()->FindChannel(name == NULL ? string() : name);
+	return CServer::Get()->GetChannelIdByName(name == NULL ? string() : name);
 }
 
 //native TSC_IsValidChannel(channelid);
