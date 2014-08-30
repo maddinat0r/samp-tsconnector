@@ -225,7 +225,7 @@ AMX_DECLARE_NATIVE(Native::TSC_GetClientIdByIpAddress)
 }
 
 
-//native TSC_GetClientUid(clientid, dest[], sizeof(dest[]));
+//native TSC_GetClientUid(clientid, dest[], maxlen = sizeof(dest));
 AMX_DECLARE_NATIVE(Native::TSC_GetClientUid)
 {
 	string uid = CServer::Get()->GetClientUid(static_cast<Client::Id_t>(params[1]));
@@ -247,7 +247,7 @@ AMX_DECLARE_NATIVE(Native::TSC_GetClientChannelId)
 		static_cast<Client::Id_t>(params[1]));
 }
 
-//native TSC_GetClientIpAddress(clientid, dest[], sizeof(dest[]));
+//native TSC_GetClientIpAddress(clientid, dest[], maxlen = sizeof(dest));
 AMX_DECLARE_NATIVE(Native::TSC_GetClientIpAddress)
 {
 	string ip = CServer::Get()->GetClientIpAddress(static_cast<Client::Id_t>(params[1]));

@@ -62,7 +62,7 @@ native TSC_GetClientIdByIpAddress(ip[]);
 native TSC_GetClientUid(clientid, dest[], maxlen = sizeof(dest));
 native TSC_GetClientDatabaseId(clientid);
 native TSC_GetClientChannelId(clientid);
-native TSC_GetClientIpAddress(clientid, dest[], sizeof(dest[]));
+native TSC_GetClientIpAddress(clientid, dest[], maxlen = sizeof(dest));
 
 native TSC_KickClient(clientid, TSC_KICKTYPE:kicktype, reasonmsg[] = "");
 native TSC_BanClient(clientuid[], seconds, reasonmsg[]);
