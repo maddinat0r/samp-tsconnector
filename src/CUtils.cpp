@@ -11,7 +11,8 @@ bool CUtils::ParseField(const string &row, const string &field, string &dest)
 	{
 		//field can exist in row without a result
 		//that's why we have to check if there is an equal sign
-		if (row.at(field_pos + field.length()) == '=')
+		size_t equal_sign_pos = field_pos + field.length();
+		if (equal_sign_pos < row.length() && row.at(equal_sign_pos) == '=')
 		{
 			const size_t data_pos = field_pos + field.length() + 1;
 			dest = row.substr(data_pos, row.find(' ', field_pos) - data_pos);
