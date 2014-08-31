@@ -82,7 +82,7 @@ void CNetwork::OnConnect(const boost::system::error_code &error_code)
 	}
 	else
 	{
-		logprintf(">> plugin.TSConnector: Error while connecting to server: \"%s\"", error_code.message().c_str());
+		logprintf(">> plugin.TSConnector: Error while connecting to server: (#%d) %s", error_code.value(), error_code.message().c_str());
 		Disconnect();
 	}
 }
@@ -163,7 +163,7 @@ void CNetwork::OnRead(const boost::system::error_code &error_code)
 				string error_str(error_rx_result[2].str());
 				CUtils::Get()->UnEscapeString(error_str);
 
-				logprintf(">> plugin.TSConnector: Error while executing \"%s\": %s (#%s)", 
+				logprintf(">> plugin.TSConnector: Error while executing \"%s\": (#%s) %s", 
 					m_CmdQueue.front().get<0>().c_str(), error_str.c_str(), error_rx_result[1].str().c_str());
 				m_CmdQueue.pop();
 			}
@@ -221,7 +221,7 @@ void CNetwork::OnRead(const boost::system::error_code &error_code)
 		AsyncConnect();
 	}
 	else
-		logprintf(">> plugin.TSConnector: Error while reading: %s (#%d)", error_code.message().c_str(), error_code.value());
+		logprintf(">> plugin.TSConnector: Error while reading: (#%d) %s", error_code.message().c_str(), error_code.value());
 }
 
 void CNetwork::OnWrite(const boost::system::error_code &error_code)
@@ -231,7 +231,7 @@ void CNetwork::OnWrite(const boost::system::error_code &error_code)
 #endif
 	m_CmdWriteBuffer.clear();
 	if (error_code.value() != 0)
-		logprintf(">> plugin.TSConnector: Error while writing: %s (#%d)", error_code.message().c_str(), error_code.value());
+		logprintf(">> plugin.TSConnector: Error while writing: (#%d) %s", error_code.message().c_str(), error_code.value());
 }
 
 void CNetwork::Execute(string cmd, ReadCallback_t callback)
