@@ -11,16 +11,17 @@
 
 void CNetwork::NetAlive(const boost::system::error_code &error_code, bool from_write)
 {
-	if (from_write == false)
+	if (from_write == true)
+		return;
+	
+
+	if (m_Socket.is_open())
 	{
-		if (m_Socket.is_open())
-		{
-			static string empty_data("\n");
-			m_Socket.async_send(asio::buffer(empty_data), boost::bind(&CNetwork::NetAlive, this, boost::asio::placeholders::error, true));
-		}
-		m_AliveTimer.expires_from_now(boost::posix_time::seconds(60));
-		m_AliveTimer.async_wait(boost::bind(&CNetwork::NetAlive, this, boost::asio::placeholders::error, false));
+		static string empty_data("\n");
+		m_Socket.async_send(asio::buffer(empty_data), boost::bind(&CNetwork::NetAlive, this, boost::asio::placeholders::error, true));
 	}
+	m_AliveTimer.expires_from_now(boost::posix_time::seconds(60));
+	m_AliveTimer.async_wait(boost::bind(&CNetwork::NetAlive, this, boost::asio::placeholders::error, false));
 }
 
 
@@ -240,4 +241,3 @@ void CNetwork::Execute(string cmd, ReadCallback_t callback)
 	if (m_CmdQueue.size() == 1)
 		AsyncWrite(m_CmdQueue.front().get<0>());
 }
-
