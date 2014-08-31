@@ -5,43 +5,43 @@
 #include "CServer.h"
 
 
-//native TSC_Connect(user[], pass[], ip[], port = 9987, serverquery_port = 10011, bool:wait = true);
+//native TSC_Connect(user[], pass[], host[], port = 9987, serverquery_port = 10011);
 AMX_DECLARE_NATIVE(Native::TSC_Connect)
 {
 	string
 		login = amx_GetCppString(amx, params[1]),
 		pass = amx_GetCppString(amx, params[2]),
-		ip = amx_GetCppString(amx, params[3]);
+		host = amx_GetCppString(amx, params[3]);
 	
 	unsigned short
 		server_port = static_cast<unsigned short>(params[4]),
 		query_port = static_cast<unsigned short>(params[5]);
 
-	bool wait = (params[6] != 0);
 
-
-	if (login.empty() || pass.empty() || ip.empty() 
+	if (login.empty() || pass.empty() || host.empty()
 		|| server_port == 0 || query_port == 0)
 		return 0;
 
 
-	CNetwork::Get()->Connect(ip, server_port, query_port);
-	bool ret_val = CServer::Get()->Login(login, pass);
-
-	if (ret_val && wait)
+	if (CNetwork::Get()->Connect(host, server_port, query_port))
 	{
-		while (CServer::Get()->IsLoggedIn() == false)
-			boost::this_thread::sleep(boost::posix_time::milliseconds(30));
-	}
+		while (CNetwork::Get()->IsConnected() == false)
+			boost::this_thread::sleep(boost::posix_time::milliseconds(20));
 
-	return ret_val;
+		if (CServer::Get()->Login(login, pass))
+		{
+			while (CServer::Get()->IsLoggedIn() == false)
+				boost::this_thread::sleep(boost::posix_time::milliseconds(20));
+			return 1;
+		}
+	}
+	return 0;
 }
 
 //native TSC_Disconnect();
 AMX_DECLARE_NATIVE(Native::TSC_Disconnect)
 {
-	CNetwork::Get()->Disconnect();
-	return 1;
+	return CNetwork::Get()->Disconnect();
 }
 
 //native TSC_ChangeNickname(nickname[]);

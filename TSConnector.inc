@@ -26,7 +26,7 @@ enum TSC_KICKTYPE
 
 
 //server functions
-native TSC_Connect(user[], pass[], ip[], port = 9987, serverquery_port = 10011, bool:wait = true);
+native TSC_Connect(user[], pass[], hostname[], port = 9987, serverquery_port = 10011);
 native TSC_Disconnect();
 native TSC_ChangeNickname(nickname[]);
 native TSC_SendServerMessage(msg[]);

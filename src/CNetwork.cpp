@@ -25,21 +25,38 @@ void CNetwork::NetAlive(const boost::system::error_code &error_code, bool from_w
 }
 
 
-void CNetwork::Connect(string ip, unsigned short port, unsigned short query_port)
+bool CNetwork::Connect(string hostname, unsigned short port, unsigned short query_port)
 {
-	m_SocketDest = tcp::endpoint(asio::ip::address::from_string(ip), query_port);
+	boost::system::error_code error;
+	tcp::resolver resolver(m_IoService);
+	tcp::resolver::query query(tcp::v4(), hostname, string());
+	tcp::resolver::iterator i = resolver.resolve(query, error);
+
+	if (error)
+	{
+		logprintf(">> plugin.TSConnector: Error while resolving hostname \"%s\": (#%d) %s",
+			hostname.c_str(), error.value(), error.message().c_str());
+		return false;
+	}
+
+
+	m_SocketDest = *i;
+	m_SocketDest.port(query_port);
 	m_ServerPort = port;
+
 	AsyncConnect();
 	m_IoThread = new thread(boost::bind(&asio::io_service::run, boost::ref(m_IoService)));
 
-	Execute(fmt::format("use port={}", m_ServerPort));
+	return true;
 }
 
-void CNetwork::Disconnect()
+bool CNetwork::Disconnect()
 {
-	if (m_Socket.is_open() == false)
-		return; 
+	if (m_Socket.is_open() == false || m_Connected == false)
+		return false; 
 
+
+	m_Connected = false;
 	m_Socket.close();
 	m_IoService.stop();
 	
@@ -50,6 +67,7 @@ void CNetwork::Disconnect()
 		delete m_IoThread;
 		m_IoThread = nullptr;
 	}
+	return true;
 }
 
 void CNetwork::AsyncRead()
@@ -71,6 +89,7 @@ void CNetwork::AsyncConnect()
 	if (m_Socket.is_open())
 		m_Socket.close();
 
+	m_Connected = false;
 	m_Socket.async_connect(m_SocketDest, boost::bind(&CNetwork::OnConnect, this, _1));
 }
 
@@ -78,6 +97,8 @@ void CNetwork::OnConnect(const boost::system::error_code &error_code)
 {
 	if (error_code.value() == 0)
 	{
+		m_Connected = true;
+		Execute(fmt::format("use port={}", m_ServerPort));
 		AsyncRead();
 	}
 	else

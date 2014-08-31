@@ -12,6 +12,7 @@
 #include <boost/function.hpp>
 #include <boost/tuple/tuple.hpp>
 #include <boost/regex.hpp>
+#include <boost/atomic.hpp>
 
 #include "format.h"
 
@@ -25,6 +26,7 @@ using boost::thread;
 namespace asio = boost::asio;
 using asio::ip::tcp;
 using boost::tuple;
+using boost::atomic;
 
 
 
@@ -45,6 +47,7 @@ private: //variables
 
 	tcp::socket m_Socket;
 	tcp::endpoint m_SocketDest;
+	atomic<bool> m_Connected;
 	unsigned short m_ServerPort = 9987;
 
 	asio::deadline_timer m_AliveTimer;
@@ -61,6 +64,7 @@ private: //variables
 private: //constructor / deconstructor
 	CNetwork() :
 		m_Socket(m_IoService),
+		m_Connected(false),
 		m_AliveTimer(m_IoService)
 	{
 		NetAlive(boost::system::error_code(), false);
@@ -73,14 +77,17 @@ private: //constructor / deconstructor
 
 
 public: //functions
-	void Connect(string ip, unsigned short port, unsigned short query_port = 10011);
-	void Disconnect();
+	bool Connect(string hostname, unsigned short port, unsigned short query_port = 10011);
+	bool Disconnect();
 
 	inline unsigned short GetServerPort() const
 	{
 		return m_ServerPort;
 	}
-
+	inline bool IsConnected() const
+	{
+		return m_Connected;
+	}
 
 	void Execute(string cmd, ReadCallback_t callback = ReadCallback_t());
 
