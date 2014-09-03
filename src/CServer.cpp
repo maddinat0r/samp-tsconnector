@@ -209,7 +209,7 @@ bool CServer::QueryChannelData(Channel::Id_t cid, Channel::QueryData data, CCall
 		});
 		CCallbackHandler::Get()->Call(callback);
 	});
-	//return true;
+	return true;
 }
 
 bool CServer::QueryClientData(Client::Id_t clid, Client::QueryData data, CCallback *callback)
@@ -272,7 +272,7 @@ bool CServer::QueryClientData(Client::Id_t clid, Client::QueryData data, CCallba
 		});
 		CCallbackHandler::Get()->Call(callback);
 	});
-	//return true;
+	return true;
 }
 
 bool CServer::GetQueriedData(string &dest)
