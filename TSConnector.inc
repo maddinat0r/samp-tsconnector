@@ -27,45 +27,45 @@ enum TSC_KICKTYPE
 enum TSC_CHANNEL_QUERYDATA
 {
 	INVALID,
-	CHANNEL_TOPIC, //channel_topic [string]
-	CHANNEL_DESCRIPTION, //channel_description [string]
-	CHANNEL_CODEC, //channel_codec [int]
-	CHANNEL_CODEC_QUALITY, //channel_codec_quality [int]
-	CHANNEL_FORCED_SILENCE, //channel_forced_silence [int]
-	CHANNEL_ICON_ID, //channel_icon_id [int]
-	CHANNEL_CODEC_IS_UNENCRYPTED, //channel_codec_is_unencrypted [int]
-	CHANNEL_SECONDS_EMPTY //seconds_empty [int]
+	CHANNEL_TOPIC, //string
+	CHANNEL_DESCRIPTION, //string
+	CHANNEL_CODEC, //int
+	CHANNEL_CODEC_QUALITY, //int
+	CHANNEL_FORCED_SILENCE, //int
+	CHANNEL_ICON_ID, //int
+	CHANNEL_CODEC_IS_UNENCRYPTED, //int
+	CHANNEL_SECONDS_EMPTY //int
 };
 
 enum TSC_CLIENT_QUERYDATA
 {
 	INVALID,
-	CLIENT_NICKNAME, //client_nickname [string]
-	CLIENT_VERSION, //client_version [string]
-	CLIENT_PLATFORM, //client_platform [string]
-	CLIENT_INPUT_MUTED, //client_input_muted [int]
-	CLIENT_OUTPUT_MUTED, //client_output_muted [int]
-	CLIENT_INPUT_HARDWARE, //client_input_hardware [int]
-	CLIENT_OUTPUT_HARDWARE, //client_output_hardware [int]
-	CLIENT_CHANNEL_GROUP_ID, //client_channel_group_id [int]
-	CLIENT_SERVER_GROUPS, //client_servergroups [string (list of numbers, separated by a comma)]
-	CLIENT_FIRSTCONNECTED, //client_created [int (UTC timestamp of first connection)]
-	CLIENT_LASTCONNECTED, //client_lastconnected [int (UTC timestamp of last connection)]
-	CLIENT_TOTALCONNECTIONS, //client_totalconnections [int]
-	CLIENT_AWAY, //client_away [int]
-	CLIENT_AWAY_MESSAGE, //client_away_message [string]
-	CLIENT_AVATAR, //client_flag_avatar [string] (CRC checksum?)
-	CLIENT_TALK_POWER, //client_talk_power [int]
-	CLIENT_TALK_REQUEST, //client_talk_request [int]
-	CLIENT_TALK_REQUEST_MSG, //client_talk_request_msg [string]
-	CLIENT_IS_TALKER, //client_is_talker [int]
-	CLIENT_IS_PRIORITY_SPEAKER, //client_is_priority_speaker [int]
-	CLIENT_DESCRIPTION, //client_description [string]
-	CLIENT_IS_CHANNEL_COMMANDER, //client_is_channel_commander [int]
-	CLIENT_ICON_ID, //client_icon_id [int]
-	CLIENT_COUNTRY, //client_country [string]
-	CLIENT_IDLE_TIME, //client_idle_time [int] (seconds)
-	CLIENT_IS_RECORDING //client_is_recording [int]
+	CLIENT_NICKNAME, //string
+	CLIENT_VERSION, //string
+	CLIENT_PLATFORM, //string]
+	CLIENT_INPUT_MUTED, //int
+	CLIENT_OUTPUT_MUTED, //int
+	CLIENT_INPUT_HARDWARE, //int
+	CLIENT_OUTPUT_HARDWARE, //int
+	CLIENT_CHANNEL_GROUP_ID, //int
+	CLIENT_SERVER_GROUPS, //string (list of numbers, separated by a comma)
+	CLIENT_FIRSTCONNECTED, //int (UTC timestamp of first connection)
+	CLIENT_LASTCONNECTED, //int (UTC timestamp of last connection)
+	CLIENT_TOTALCONNECTIONS, //int
+	CLIENT_AWAY, //int
+	CLIENT_AWAY_MESSAGE, //string
+	CLIENT_AVATAR, //string
+	CLIENT_TALK_POWER, //int
+	CLIENT_TALK_REQUEST, //int
+	CLIENT_TALK_REQUEST_MSG, //string
+	CLIENT_IS_TALKER, //int
+	CLIENT_IS_PRIORITY_SPEAKER, //int
+	CLIENT_DESCRIPTION, //string
+	CLIENT_IS_CHANNEL_COMMANDER, //int
+	CLIENT_ICON_ID, //int
+	CLIENT_COUNTRY, //string
+	CLIENT_IDLE_TIME, //int (seconds)
+	CLIENT_IS_RECORDING //int
 };
 
 enum /*teamspeak channel codecs*/ 
