@@ -101,7 +101,8 @@ void CServer::Initialize()
 
 
 	//retrieve vserver-id
-	CNetwork::Get()->Execute(fmt::format("serveridgetbyport virtualserver_port={}", CNetwork::Get()->GetServerPort()),
+	CNetwork::Get()->Execute(
+		fmt::format("serveridgetbyport virtualserver_port={}", CNetwork::Get()->GetServerPort()),
 		[this](CNetwork::ResultSet_t &result)
 		{
 			if (result.empty() == false)
@@ -125,7 +126,8 @@ bool CServer::Login(string login, string pass)
 	CUtils::Get()->EscapeString(login);
 	CUtils::Get()->EscapeString(pass);
 	
-	CNetwork::Get()->Execute(fmt::format("login client_login_name={} client_login_password={}", login, pass),
+	CNetwork::Get()->Execute(
+		fmt::format("login client_login_name={} client_login_password={}", login, pass),
 		boost::bind(&CServer::OnLogin, this, _1));
 	return true;
 }
@@ -154,7 +156,8 @@ bool CServer::SendServerMessage(string msg)
 
 
 	CUtils::Get()->EscapeString(msg);
-	CNetwork::Get()->Execute(fmt::format("sendtextmessage targetmode=3 target={} msg={}", m_ServerId, msg));
+	CNetwork::Get()->Execute(
+		fmt::format("sendtextmessage targetmode=3 target={} msg={}", m_ServerId, msg));
 	return true;
 }
 

@@ -18,10 +18,12 @@ void CNetwork::NetAlive(const boost::system::error_code &error_code, bool from_w
 	if (m_Socket.is_open())
 	{
 		static string empty_data("\n");
-		m_Socket.async_send(asio::buffer(empty_data), boost::bind(&CNetwork::NetAlive, this, boost::asio::placeholders::error, true));
+		m_Socket.async_send(asio::buffer(empty_data), 
+			boost::bind(&CNetwork::NetAlive, this, boost::asio::placeholders::error, true));
 	}
 	m_AliveTimer.expires_from_now(boost::posix_time::seconds(60));
-	m_AliveTimer.async_wait(boost::bind(&CNetwork::NetAlive, this, boost::asio::placeholders::error, false));
+	m_AliveTimer.async_wait(
+		boost::bind(&CNetwork::NetAlive, this, boost::asio::placeholders::error, false));
 }
 
 
@@ -72,7 +74,8 @@ bool CNetwork::Disconnect()
 
 void CNetwork::AsyncRead()
 {
-	asio::async_read_until(m_Socket, m_ReadStreamBuf, '\r', boost::bind(&CNetwork::OnRead, this, _1));
+	asio::async_read_until(m_Socket, m_ReadStreamBuf, '\r', 
+		boost::bind(&CNetwork::OnRead, this, _1));
 }
 
 void CNetwork::AsyncWrite(string &data)
@@ -81,7 +84,8 @@ void CNetwork::AsyncWrite(string &data)
 	if (data.at(data.length()-1) != '\n')
 		m_CmdWriteBuffer.push_back('\n');
 
-	m_Socket.async_send(asio::buffer(m_CmdWriteBuffer), boost::bind(&CNetwork::OnWrite, this, _1));
+	m_Socket.async_send(asio::buffer(m_CmdWriteBuffer), 
+		boost::bind(&CNetwork::OnWrite, this, _1));
 }
 
 void CNetwork::AsyncConnect()
@@ -103,7 +107,8 @@ void CNetwork::OnConnect(const boost::system::error_code &error_code)
 	}
 	else
 	{
-		logprintf(">> plugin.TSConnector: Error while connecting to server: (#%d) %s", error_code.value(), error_code.message().c_str());
+		logprintf(">> plugin.TSConnector: Error while connecting to server: (#%d) %s", 
+			error_code.value(), error_code.message().c_str());
 		Disconnect();
 	}
 }
@@ -145,22 +150,24 @@ void CNetwork::OnRead(const boost::system::error_code &error_code)
 				for (auto i = captured_data.begin(); i != captured_data.end(); ++i)
 				{
 					string &data = *i;
-					if (data.find('|') != string::npos) //multiple data rows with '|' as delimiter
-					{
-						vector<string> result_set;
-						size_t delim_pos = 0;
-						do
-						{
-							size_t old_delim_pos = delim_pos;
-							delim_pos = data.find('|', delim_pos);
-							string row = data.substr(old_delim_pos, delim_pos - old_delim_pos);
-							result_set.push_back(row);
-						} while (delim_pos != string::npos && ++delim_pos);
+					if (data.find('|') == string::npos) 
+						continue;
 
-						i = captured_data.erase(i);
-						for (auto j = result_set.begin(), jend = result_set.end(); j != jend; ++j)
-							i = captured_data.insert(i, *j);
-					}
+					//we have multiple data rows with '|' as delimiter here,
+					//split them up and re-insert every single row
+					vector<string> result_set;
+					size_t delim_pos = 0;
+					do
+					{
+						size_t old_delim_pos = delim_pos;
+						delim_pos = data.find('|', delim_pos);
+						string row = data.substr(old_delim_pos, delim_pos - old_delim_pos);
+						result_set.push_back(row);
+					} while (delim_pos != string::npos && ++delim_pos);
+
+					i = captured_data.erase(i);
+					for (auto j = result_set.begin(), jend = result_set.end(); j != jend; ++j)
+						i = captured_data.insert(i, *j);
 				}
 				
 				//call callback and send next command
@@ -242,7 +249,10 @@ void CNetwork::OnRead(const boost::system::error_code &error_code)
 		AsyncConnect();
 	}
 	else
-		logprintf(">> plugin.TSConnector: Error while reading: (#%d) %s", error_code.message().c_str(), error_code.value());
+	{
+		logprintf(">> plugin.TSConnector: Error while reading: (#%d) %s",
+			error_code.message().c_str(), error_code.value());
+	}
 }
 
 void CNetwork::OnWrite(const boost::system::error_code &error_code)
@@ -252,7 +262,10 @@ void CNetwork::OnWrite(const boost::system::error_code &error_code)
 #endif
 	m_CmdWriteBuffer.clear();
 	if (error_code.value() != 0)
-		logprintf(">> plugin.TSConnector: Error while writing: (#%d) %s", error_code.message().c_str(), error_code.value());
+	{
+		logprintf(">> plugin.TSConnector: Error while writing: (#%d) %s", 
+			error_code.message().c_str(), error_code.value());
+	}
 }
 
 void CNetwork::Execute(string cmd, ReadCallback_t callback)
