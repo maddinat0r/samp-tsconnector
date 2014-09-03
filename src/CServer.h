@@ -20,6 +20,8 @@ using std::vector;
 using boost::unordered_map;
 using boost::mutex;
 
+class CCallback;
+
 
 struct Channel
 {
