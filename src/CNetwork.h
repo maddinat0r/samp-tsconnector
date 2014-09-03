@@ -7,9 +7,9 @@
 #include <queue>
 #include <string>
 #include <list>
+#include <functional>
 #include <boost/thread/thread.hpp>
 #include <boost/asio.hpp>
-#include <boost/function.hpp>
 #include <boost/tuple/tuple.hpp>
 #include <boost/regex.hpp>
 #include <boost/atomic.hpp>
@@ -35,10 +35,10 @@ class CNetwork : public CSingleton<CNetwork>
 	friend class CSingleton<CNetwork>;
 public: //definitions
 	typedef vector<string> ResultSet_t;
-	typedef boost::function<void(ResultSet_t &)> ReadCallback_t;
+	typedef std::function<void(ResultSet_t &)> ReadCallback_t;
 	typedef tuple<string, ReadCallback_t> CmdTuple_t;
 
-	typedef boost::function<void(boost::smatch &result)> EventCallback_t;
+	typedef std::function<void(boost::smatch &result)> EventCallback_t;
 	typedef tuple<boost::regex, EventCallback_t> EventTuple_t;
 
 private: //variables

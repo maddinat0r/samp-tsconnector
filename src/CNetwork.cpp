@@ -169,7 +169,7 @@ void CNetwork::OnRead(const boost::system::error_code &error_code)
 				{
 					ReadCallback_t &callback = m_CmdQueue.front().get<1>();
 					m_CmdQueueMutex.unlock();
-					if (callback.empty() == false)
+					if (callback)
 						callback(captured_data); //calls the callback
 					m_CmdQueueMutex.lock();
 					m_CmdQueue.pop();
