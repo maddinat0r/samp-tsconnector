@@ -53,7 +53,7 @@ CCallback *CCallbackHandler::Create(string name, string format,
 	if (amx == nullptr || params == nullptr || name.empty() || format.empty())
 		return nullptr;
 
-	if ((params[0]/sizeof(cell)) < param_offset)
+	if (static_cast<cell>(params[0]/sizeof(cell)) < param_offset)
 		return nullptr;
 
 
