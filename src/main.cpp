@@ -45,6 +45,11 @@ extern "C" const AMX_NATIVE_INFO native_list[] =
 	AMX_DEFINE_NATIVE(TSC_SendServerMessage)
 
 
+	AMX_DEFINE_NATIVE(TSC_QueryChannelData)
+	AMX_DEFINE_NATIVE(TSC_QueryClientData)
+	AMX_DEFINE_NATIVE(TSC_GetQueriedData)
+	AMX_DEFINE_NATIVE(TSC_GetQueriedDataAsInt)
+
 	AMX_DEFINE_NATIVE(TSC_CreateChannel)
 	AMX_DEFINE_NATIVE(TSC_DeleteChannel)
 	AMX_DEFINE_NATIVE(TSC_GetChannelIdByName)

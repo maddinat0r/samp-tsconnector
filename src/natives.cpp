@@ -3,6 +3,7 @@
 
 #include "CNetwork.h"
 #include "CServer.h"
+#include "CCallback.h"
 
 
 //native TSC_Connect(user[], pass[], host[], port = 9987, serverquery_port = 10011);
@@ -56,6 +57,63 @@ AMX_DECLARE_NATIVE(Native::TSC_SendServerMessage)
 {
 	return CServer::Get()->SendServerMessage(
 		amx_GetCppString(amx, params[1]));
+}
+
+
+
+//native TSC_QueryChannelData(channelid, TSC_CHANNEL_QUERYDATA:data, const callback[], const format[] = "", ...);
+AMX_DECLARE_NATIVE(Native::TSC_QueryChannelData)
+{
+	auto *callback = CCallbackHandler::Get()->Create(
+		amx_GetCppString(amx, params[3]),
+		amx_GetCppString(amx, params[4]),
+		amx,
+		params,
+		5);
+
+	if (callback == nullptr)
+		return 0;
+
+	return CServer::Get()->QueryChannelData(
+		static_cast<Channel::Id_t>(params[1]),
+		static_cast<Channel::QueryData>(params[2]), 
+		callback);
+}
+
+//native TSC_QueryClientData(clientid, TSC_CLIENT_QUERYDATA:data, const callback[], const format[] = "", ...);
+AMX_DECLARE_NATIVE(Native::TSC_QueryClientData)
+{
+	auto *callback = CCallbackHandler::Get()->Create(
+		amx_GetCppString(amx, params[3]),
+		amx_GetCppString(amx, params[4]),
+		amx,
+		params,
+		5);
+
+	if (callback == nullptr)
+		return 0;
+
+	return CServer::Get()->QueryClientData(
+		static_cast<Client::Id_t>(params[1]),
+		static_cast<Client::QueryData>(params[2]),
+		callback);
+}
+
+//native TSC_GetQueriedData(dest[], max_len = sizeof(dest));
+AMX_DECLARE_NATIVE(Native::TSC_GetQueriedData)
+{
+	string dest;
+	bool ret_val = CServer::Get()->GetQueriedData(dest);
+	amx_SetCppString(amx, params[1], dest, params[2]);
+	return ret_val;
+}
+
+//native TSC_GetQueriedDataAsInt();
+AMX_DECLARE_NATIVE(Native::TSC_GetQueriedDataAsInt)
+{
+	int dest = 0;
+	CServer::Get()->GetQueriedData(dest);
+	return dest;
 }
 
 

@@ -6,17 +6,21 @@
 #include <string>
 #include <list>
 #include <vector>
+#include <queue>
 #include <boost/unordered_map.hpp>
 #include <boost/regex.hpp>
 #include <boost/atomic.hpp>
 #include <boost/thread/mutex.hpp>
 #include <boost/thread/lock_guard.hpp>
+#include <boost/lockfree/spsc_queue.hpp>
 
 #include "CSingleton.h"
 
 using std::string;
 using std::list;
 using std::vector;
+using std::queue;
+using boost::atomic;
 using boost::unordered_map;
 using boost::mutex;
 
@@ -34,6 +38,19 @@ struct Channel
 		TEMPORARY,
 		SEMI_PERMANENT,
 		PERMANENT
+	};
+
+	enum class QueryData
+	{
+		INVALID,
+		CHANNEL_TOPIC, //channel_topic [string]
+		CHANNEL_DESCRIPTION, //channel_description [string]
+		CHANNEL_CODEC, //channel_codec [int]
+		CHANNEL_CODEC_QUALITY, //channel_codec_quality [int]
+		CHANNEL_FORCED_SILENCE, //channel_forced_silence [int]
+		CHANNEL_ICON_ID, //channel_icon_id [int]
+		CHANNEL_CODEC_IS_UNENCRYPTED, //channel_codec_is_unencrypted [int]
+		CHANNEL_SECONDS_EMPTY //seconds_empty [int]
 	};
 	
 
@@ -64,6 +81,38 @@ struct Client
 		SERVER
 	};
 
+	enum class QueryData
+	{
+		INVALID,
+		CLIENT_NICKNAME, //client_nickname [string]
+		CLIENT_VERSION, //client_version [string]
+		CLIENT_PLATFORM, //client_platform [string]
+		CLIENT_INPUT_MUTED, //client_input_muted [int]
+		CLIENT_OUTPUT_MUTED, //client_output_muted [int]
+		CLIENT_INPUT_HARDWARE, //client_input_hardware [int]
+		CLIENT_OUTPUT_HARDWARE, //client_output_hardware [int]
+		CLIENT_CHANNEL_GROUP_ID, //client_channel_group_id [int]
+		CLIENT_SERVER_GROUPS, //client_servergroups [string (list of numbers, separated by a comma)]
+		CLIENT_FIRSTCONNECTED, //client_created [int (UTC timestamp of first connection)]
+		CLIENT_LASTCONNECTED, //client_lastconnected [int (UTC timestamp of last connection)]
+		CLIENT_TOTALCONNECTIONS, //client_totalconnections [int]
+		CLIENT_AWAY, //client_away [int]
+		CLIENT_AWAY_MESSAGE, //client_away_message [string]
+		CLIENT_AVATAR, //client_flag_avatar [string] (CRC checksum?)
+		CLIENT_TALK_POWER, //client_talk_power [int]
+		CLIENT_TALK_REQUEST, //client_talk_request [int]
+		CLIENT_TALK_REQUEST_MSG, //client_talk_request_msg [string]
+		CLIENT_IS_TALKER, //client_is_talker [int]
+		CLIENT_IS_PRIORITY_SPEAKER, //client_is_priority_speaker [int]
+		CLIENT_DESCRIPTION, //client_description [string]
+		CLIENT_IS_CHANNEL_COMMANDER, //client_is_channel_commander [int]
+		CLIENT_ICON_ID, //client_icon_id [int]
+		CLIENT_COUNTRY, //client_country [string]
+		CLIENT_IDLE_TIME, //client_idle_time [int] (seconds)
+		CLIENT_IS_RECORDING, //client_is_recording [int]
+	};
+
+
 	Id_t DatabaseId = Invalid;
 	string
 		Uid,
@@ -84,9 +133,16 @@ private: //variables
 	unordered_map<Client::Id_t, Client *> m_Clients;
 	mutex m_ClientMtx;
 
-	boost::atomic<bool> m_IsLoggedIn;
+	atomic<bool> m_IsLoggedIn;
 
 	unsigned int m_ServerId = 0;
+
+	boost::lockfree::spsc_queue<
+			string,
+			boost::lockfree::fixed_sized<true>,
+			boost::lockfree::capacity<32678>
+		> m_QueriedData;
+	string m_ActiveQueriedData;
 
 
 private: //constructor / deconstructor
@@ -109,6 +165,13 @@ public: //server functions
 	}
 
 	bool SendServerMessage(string msg);
+
+
+public: //data query functions
+	bool QueryChannelData(Channel::Id_t cid, Channel::QueryData data, CCallback *callback);
+	bool QueryClientData(Client::Id_t clid, Client::QueryData data, CCallback *callback);
+	bool GetQueriedData(string &dest);
+	bool GetQueriedData(int &dest);
 
 
 public: //channel functions

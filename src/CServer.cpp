@@ -163,6 +163,132 @@ bool CServer::SendServerMessage(string msg)
 
 
 
+
+bool CServer::QueryChannelData(Channel::Id_t cid, Channel::QueryData data, CCallback *callback)
+{
+	if (IsValidChannel(cid) == false)
+		return false;
+	
+	if (data == Channel::QueryData::INVALID || callback == nullptr)
+		return false;
+
+	
+	static const unordered_map<Channel::QueryData, string> data_map{
+		{Channel::QueryData::CHANNEL_TOPIC,					"channel_topic" },
+		{Channel::QueryData::CHANNEL_DESCRIPTION,			"channel_description" },
+		{Channel::QueryData::CHANNEL_CODEC,					"channel_codec" },
+		{Channel::QueryData::CHANNEL_CODEC_QUALITY,			"channel_codec_quality" },
+		{Channel::QueryData::CHANNEL_FORCED_SILENCE,		"channel_forced_silence" },
+		{Channel::QueryData::CHANNEL_ICON_ID,				"channel_icon_id" },
+		{Channel::QueryData::CHANNEL_CODEC_IS_UNENCRYPTED,	"channel_codec_is_unencrypted" },
+		{Channel::QueryData::CHANNEL_SECONDS_EMPTY,			"seconds_empty" }
+	};
+
+	auto it = data_map.find(data);
+	if (it == data_map.end())
+		return false;
+
+
+	CNetwork::Get()->Execute(fmt::format("channelinfo cid={}", cid),
+		[=](CNetwork::ResultSet_t &result)
+	{
+		string
+			&info = result.at(0),
+			data_dest;
+
+		CUtils::Get()->ParseField(info, it->second, data_dest);
+		m_QueriedData.push(data_dest);
+
+		callback->OnPreExecute([this]()
+		{
+			m_QueriedData.pop(m_ActiveQueriedData);
+		});
+		callback->OnPostExecute([this]()
+		{
+			m_ActiveQueriedData.clear();
+		});
+		CCallbackHandler::Get()->Call(callback);
+	});
+	//return true;
+}
+
+bool CServer::QueryClientData(Client::Id_t clid, Client::QueryData data, CCallback *callback)
+{
+	if (data == Client::QueryData::INVALID || callback == nullptr)
+		return false;
+
+
+	static const unordered_map<Client::QueryData, string> data_map{
+		{Client::QueryData::CLIENT_NICKNAME,			"client_nickname" },
+		{Client::QueryData::CLIENT_VERSION,				"client_version" },
+		{Client::QueryData::CLIENT_PLATFORM,			"client_platform" },
+		{Client::QueryData::CLIENT_INPUT_MUTED,			"client_input_muted" },
+		{Client::QueryData::CLIENT_OUTPUT_MUTED,		"client_output_muted" },
+		{Client::QueryData::CLIENT_INPUT_HARDWARE,		"client_input_hardware" },
+		{Client::QueryData::CLIENT_OUTPUT_HARDWARE,		"client_output_hardware" },
+		{Client::QueryData::CLIENT_CHANNEL_GROUP_ID,	"client_channel_group_id" },
+		{Client::QueryData::CLIENT_SERVER_GROUPS,		"client_servergroups" },
+		{Client::QueryData::CLIENT_FIRSTCONNECTED,		"client_created" },
+		{Client::QueryData::CLIENT_LASTCONNECTED,		"client_lastconnected" },
+		{Client::QueryData::CLIENT_TOTALCONNECTIONS,	"client_totalconnections" },
+		{Client::QueryData::CLIENT_AWAY,				"client_away" },
+		{Client::QueryData::CLIENT_AWAY_MESSAGE,		"client_away_message" },
+		{Client::QueryData::CLIENT_AVATAR,				"client_flag_avatar" },
+		{Client::QueryData::CLIENT_TALK_POWER,			"client_talk_power" },
+		{Client::QueryData::CLIENT_TALK_REQUEST,		"client_talk_request" },
+		{Client::QueryData::CLIENT_TALK_REQUEST_MSG,	"client_talk_request_msg" },
+		{Client::QueryData::CLIENT_IS_TALKER,			"client_is_talker" },
+		{Client::QueryData::CLIENT_IS_PRIORITY_SPEAKER, "client_is_priority_speaker" },
+		{Client::QueryData::CLIENT_DESCRIPTION,			"client_description" },
+		{Client::QueryData::CLIENT_IS_CHANNEL_COMMANDER,"client_is_channel_commander" },
+		{Client::QueryData::CLIENT_ICON_ID,				"client_icon_id" },
+		{Client::QueryData::CLIENT_COUNTRY,				"client_country" },
+		{Client::QueryData::CLIENT_IDLE_TIME,			"client_idle_time" },
+		{Client::QueryData::CLIENT_IS_RECORDING,		"client_is_recording" }
+	};
+
+	auto it = data_map.find(data);
+	if (it == data_map.end())
+		return false;
+
+
+	CNetwork::Get()->Execute(fmt::format("clientinfo clid={}", clid),
+		[=](CNetwork::ResultSet_t &result)
+	{
+		string
+			&info = result.at(0),
+			data_dest;
+
+		CUtils::Get()->ParseField(info, it->second, data_dest);
+		m_QueriedData.push(data_dest);
+
+		callback->OnPreExecute([this]()
+		{
+			m_QueriedData.pop(m_ActiveQueriedData);
+		});
+		callback->OnPostExecute([this]()
+		{
+			m_ActiveQueriedData.clear();
+		});
+		CCallbackHandler::Get()->Call(callback);
+	});
+	//return true;
+}
+
+bool CServer::GetQueriedData(string &dest)
+{
+	dest = m_ActiveQueriedData;
+	return true;
+}
+
+bool CServer::GetQueriedData(int &dest)
+{
+	return CUtils::Get()->ConvertStringToInt(m_ActiveQueriedData, dest);
+}
+
+
+
+
 bool CServer::CreateChannel(string name, Channel::Types type, int maxusers, 
 	Channel::Id_t pcid, Channel::Id_t ocid, int talkpower)
 {

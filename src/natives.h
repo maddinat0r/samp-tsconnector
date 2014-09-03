@@ -19,6 +19,13 @@ namespace Native
 	AMX_DECLARE_NATIVE(TSC_SendServerMessage);
 
 
+	//data query functions
+	AMX_DECLARE_NATIVE(TSC_QueryChannelData);
+	AMX_DECLARE_NATIVE(TSC_QueryClientData);
+	AMX_DECLARE_NATIVE(TSC_GetQueriedData);
+	AMX_DECLARE_NATIVE(TSC_GetQueriedDataAsInt);
+
+
 	//channel functions
 	AMX_DECLARE_NATIVE(TSC_CreateChannel);
 	AMX_DECLARE_NATIVE(TSC_DeleteChannel);
