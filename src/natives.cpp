@@ -26,13 +26,25 @@ AMX_DECLARE_NATIVE(Native::TSC_Connect)
 
 	if (CNetwork::Get()->Connect(host, server_port, query_port))
 	{
+		auto timeout_start = boost::chrono::steady_clock::now();
 		while (CNetwork::Get()->IsConnected() == false)
-			boost::this_thread::sleep(boost::posix_time::milliseconds(20));
+		{
+			if ((boost::chrono::steady_clock::now() - timeout_start) < boost::chrono::seconds(3))
+				boost::this_thread::sleep_for(boost::chrono::milliseconds(20));
+			else
+				return 0;
+		}
 
+		timeout_start = boost::chrono::steady_clock::now();
 		if (CServer::Get()->Login(login, pass))
 		{
 			while (CServer::Get()->IsLoggedIn() == false)
-				boost::this_thread::sleep(boost::posix_time::milliseconds(20));
+			{
+				if ((boost::chrono::steady_clock::now() - timeout_start) < boost::chrono::seconds(3))
+					boost::this_thread::sleep_for(boost::chrono::milliseconds(20));
+				else
+					return 0;
+			}
 			return 1;
 		}
 	}
@@ -42,7 +54,9 @@ AMX_DECLARE_NATIVE(Native::TSC_Connect)
 //native TSC_Disconnect();
 AMX_DECLARE_NATIVE(Native::TSC_Disconnect)
 {
-	return CNetwork::Get()->Disconnect();
+	CNetwork::CSingleton::Destroy();
+	CServer::CSingleton::Destroy();
+	return true;
 }
 
 //native TSC_ChangeNickname(nickname[]);

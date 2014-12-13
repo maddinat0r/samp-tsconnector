@@ -8,6 +8,7 @@
 #include <string>
 #include <list>
 #include <functional>
+#include <boost/chrono.hpp>
 #include <boost/thread/thread.hpp>
 #include <boost/asio.hpp>
 #include <boost/tuple/tuple.hpp>

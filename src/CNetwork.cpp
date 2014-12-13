@@ -30,6 +30,9 @@ void CNetwork::NetAlive(const boost::system::error_code &error_code, bool from_w
 
 bool CNetwork::Connect(string hostname, unsigned short port, unsigned short query_port)
 {
+	if (IsConnected())
+		return false;
+
 	boost::system::error_code error;
 	tcp::resolver resolver(m_IoService);
 	tcp::resolver::query query(tcp::v4(), hostname, string());
@@ -250,10 +253,6 @@ void CNetwork::OnRead(const boost::system::error_code &error_code)
 		}
 
 		AsyncRead();
-	}
-	else if (error_code == asio::error::eof)
-	{
-		AsyncConnect();
 	}
 	else
 	{
