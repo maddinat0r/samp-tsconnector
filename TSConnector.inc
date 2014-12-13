@@ -78,6 +78,14 @@ enum /*teamspeak channel codecs*/
 	CODEC_OPUS_MUSIC //5: opus music
 };
 
+enum TSC_ERROR_TYPE
+{
+	INVALID,
+	CONNECTION_ERROR,
+	TEAMSPEAK_ERROR,
+	CALLBACK_ERROR
+};
+
 
 //server functions
 native TSC_Connect(user[], pass[], hostname[], port = 9987, serverquery_port = 10011);
@@ -141,6 +149,7 @@ native TSC_SendClientMessage(clientid, msg[]);
 
 //server callbacks
 forward TSC_OnConnect();
+forward TSC_OnError(TSC_ERROR_TYPE:error_type, error_id, const error_msg[]);
 
 //channel callbacks
 forward TSC_OnChannelCreated(channelid);

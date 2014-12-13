@@ -23,6 +23,14 @@ using boost::unordered_set;
 #include "CSingleton.h"
 
 
+enum class EErrorType
+{
+	INVALID,
+	CONNECTION_ERROR,
+	TEAMSPEAK_ERROR,
+	CALLBACK_ERROR
+};
+
 class CCallback
 {
 	friend class CCallbackHandler;
@@ -98,11 +106,17 @@ public: //functions
 		m_Queue.push(callback);
 	}
 	template <typename... Args>
-	inline void Call(const char *name, Args&&... args)
+	inline void Call(const string &name, Args&&... args)
 	{
 		Call(new CCallback(name, std::forward<Args>(args)...));
 	}
 
+	inline void ForwardError(EErrorType error_type, 
+		const unsigned int error_id, const string &error_msg)
+	{
+		Call("TSC_OnError", 
+			static_cast<unsigned int>(error_type), error_id, error_msg);
+	}
 
 	inline void AddAmx(AMX *amx)
 	{

@@ -1,5 +1,7 @@
 #include "CCallback.h"
 
+#include "format.h"
+
 
 void CCallbackHandler::Process()
 {
@@ -80,8 +82,9 @@ CCallback *CCallbackHandler::Create(string name, string format,
 				param_list.push(amx_GetCppString(amx, params[param_offset + param_idx]));
 				break;
 			default:
-				logprintf(">> plugin.TSConnector: Error while creating callback structure: \
-						  (#1) Unrecognized format specifier '%c'", c);
+				CCallbackHandler::Get()->ForwardError(
+					EErrorType::CALLBACK_ERROR, 1,
+					fmt::format("unrecognized format specifier '{}' in callback \"{}({})\"", c, name, format));
 				return nullptr;
 			}
 			param_idx++;

@@ -2,6 +2,7 @@
 #include "CNetwork.h"
 #include "CServer.h"
 #include "CUtils.h"
+#include "CCallback.h"
 
 #include <istream>
 #include <boost/date_time/posix_time/posix_time.hpp>
@@ -36,8 +37,9 @@ bool CNetwork::Connect(string hostname, unsigned short port, unsigned short quer
 
 	if (error)
 	{
-		logprintf(">> plugin.TSConnector: Error while resolving hostname \"%s\": (#%d) %s",
-			hostname.c_str(), error.value(), error.message().c_str());
+		CCallbackHandler::Get()->ForwardError(
+			EErrorType::CONNECTION_ERROR, error.value(),
+			fmt::format("error while resolving hostname \"{}\": {}", hostname, error.message()));
 		return false;
 	}
 
@@ -107,8 +109,9 @@ void CNetwork::OnConnect(const boost::system::error_code &error_code)
 	}
 	else
 	{
-		logprintf(">> plugin.TSConnector: Error while connecting to server: (#%d) %s", 
-			error_code.value(), error_code.message().c_str());
+		CCallbackHandler::Get()->ForwardError(
+			EErrorType::CONNECTION_ERROR, error_code.value(),
+			fmt::format("error while connecting to server: {}", error_code.message()));
 		Disconnect();
 	}
 }
@@ -189,10 +192,14 @@ void CNetwork::OnRead(const boost::system::error_code &error_code)
 			else
 			{
 				string error_str(error_rx_result[2].str());
-				CUtils::Get()->UnEscapeString(error_str);
+				unsigned int error_id = 0;
 
-				logprintf(">> plugin.TSConnector: Error while executing \"%s\": (#%s) %s", 
-					m_CmdQueue.front().get<0>().c_str(), error_str.c_str(), error_rx_result[1].str().c_str());
+				CUtils::Get()->UnEscapeString(error_str);
+				CUtils::Get()->ConvertStringToInt(error_rx_result[1].str(), error_id);
+
+				CCallbackHandler::Get()->ForwardError(
+					EErrorType::TEAMSPEAK_ERROR, error_id,
+					fmt::format("error while executing \"{}\": {}", m_CmdQueue.front().get<0>(), error_str));
 				m_CmdQueue.pop();
 			}
 
@@ -250,8 +257,9 @@ void CNetwork::OnRead(const boost::system::error_code &error_code)
 	}
 	else
 	{
-		logprintf(">> plugin.TSConnector: Error while reading: (#%d) %s",
-			error_code.message().c_str(), error_code.value());
+		CCallbackHandler::Get()->ForwardError(
+			EErrorType::CONNECTION_ERROR, error_code.value(),
+			fmt::format("error while reading: {}", error_code.message()));
 	}
 }
 
@@ -263,8 +271,9 @@ void CNetwork::OnWrite(const boost::system::error_code &error_code)
 	m_CmdWriteBuffer.clear();
 	if (error_code.value() != 0)
 	{
-		logprintf(">> plugin.TSConnector: Error while writing: (#%d) %s", 
-			error_code.message().c_str(), error_code.value());
+		CCallbackHandler::Get()->ForwardError(
+			EErrorType::CONNECTION_ERROR, error_code.value(),
+			fmt::format("error while writing: {}", error_code.message()));
 	}
 }
 
