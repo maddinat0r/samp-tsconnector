@@ -41,15 +41,15 @@
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <LinkIncremental>true</LinkIncremental>
-    <IncludePath>C:\Libraries\boost_1_56_0;lib;$(IncludePath)</IncludePath>
-    <LibraryPath>C:\Libraries\boost_1_56_0\lib32-msvc-12.0;$(LibraryPath)</LibraryPath>
+    <IncludePath>C:\libs\boost_1_57_0;lib;$(IncludePath)</IncludePath>
+    <LibraryPath>C:\libs\boost_1_57_0\lib32-msvc-12.0;$(LibraryPath)</LibraryPath>
     <OutDir>bin\$(Configuration)\</OutDir>
     <IntDir>bin\$(Configuration)\obj\</IntDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <LinkIncremental>false</LinkIncremental>
-    <IncludePath>C:\Libraries\boost_1_56_0;lib;$(IncludePath)</IncludePath>
-    <LibraryPath>C:\Libraries\boost_1_56_0\lib32-msvc-12.0;$(LibraryPath)</LibraryPath>
+    <IncludePath>C:\libs\boost_1_57_0;lib;$(IncludePath)</IncludePath>
+    <LibraryPath>C:\libs\boost_1_57_0\lib32-msvc-12.0;$(LibraryPath)</LibraryPath>
     <OutDir>bin\$(Configuration)\</OutDir>
     <IntDir>bin\$(Configuration)\obj\</IntDir>
   </PropertyGroup>
