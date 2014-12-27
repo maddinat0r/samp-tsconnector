@@ -205,37 +205,40 @@ bool CServer::QueryChannelData(Channel::Id_t cid, Channel::QueryData data, Callb
 
 bool CServer::QueryClientData(Client::Id_t clid, Client::QueryData data, Callback_t callback)
 {
+	if (IsValidClient(clid) == false)
+		return false;
+
 	if (data == Client::QueryData::INVALID || callback == nullptr)
 		return false;
 
 
 	static const unordered_map<Client::QueryData, string> data_map{
-		{Client::QueryData::CLIENT_NICKNAME,			"client_nickname" },
-		{Client::QueryData::CLIENT_VERSION,				"client_version" },
-		{Client::QueryData::CLIENT_PLATFORM,			"client_platform" },
-		{Client::QueryData::CLIENT_INPUT_MUTED,			"client_input_muted" },
-		{Client::QueryData::CLIENT_OUTPUT_MUTED,		"client_output_muted" },
-		{Client::QueryData::CLIENT_INPUT_HARDWARE,		"client_input_hardware" },
-		{Client::QueryData::CLIENT_OUTPUT_HARDWARE,		"client_output_hardware" },
-		{Client::QueryData::CLIENT_CHANNEL_GROUP_ID,	"client_channel_group_id" },
-		{Client::QueryData::CLIENT_SERVER_GROUPS,		"client_servergroups" },
-		{Client::QueryData::CLIENT_FIRSTCONNECTED,		"client_created" },
-		{Client::QueryData::CLIENT_LASTCONNECTED,		"client_lastconnected" },
-		{Client::QueryData::CLIENT_TOTALCONNECTIONS,	"client_totalconnections" },
-		{Client::QueryData::CLIENT_AWAY,				"client_away" },
-		{Client::QueryData::CLIENT_AWAY_MESSAGE,		"client_away_message" },
-		{Client::QueryData::CLIENT_AVATAR,				"client_flag_avatar" },
-		{Client::QueryData::CLIENT_TALK_POWER,			"client_talk_power" },
-		{Client::QueryData::CLIENT_TALK_REQUEST,		"client_talk_request" },
-		{Client::QueryData::CLIENT_TALK_REQUEST_MSG,	"client_talk_request_msg" },
-		{Client::QueryData::CLIENT_IS_TALKER,			"client_is_talker" },
-		{Client::QueryData::CLIENT_IS_PRIORITY_SPEAKER, "client_is_priority_speaker" },
-		{Client::QueryData::CLIENT_DESCRIPTION,			"client_description" },
-		{Client::QueryData::CLIENT_IS_CHANNEL_COMMANDER,"client_is_channel_commander" },
-		{Client::QueryData::CLIENT_ICON_ID,				"client_icon_id" },
-		{Client::QueryData::CLIENT_COUNTRY,				"client_country" },
-		{Client::QueryData::CLIENT_IDLE_TIME,			"client_idle_time" },
-		{Client::QueryData::CLIENT_IS_RECORDING,		"client_is_recording" }
+		{ Client::QueryData::CLIENT_NICKNAME,				"client_nickname" },
+		{ Client::QueryData::CLIENT_VERSION,				"client_version" },
+		{ Client::QueryData::CLIENT_PLATFORM,				"client_platform" },
+		{ Client::QueryData::CLIENT_INPUT_MUTED,			"client_input_muted" },
+		{ Client::QueryData::CLIENT_OUTPUT_MUTED,			"client_output_muted" },
+		{ Client::QueryData::CLIENT_INPUT_HARDWARE,			"client_input_hardware" },
+		{ Client::QueryData::CLIENT_OUTPUT_HARDWARE,		"client_output_hardware" },
+		{ Client::QueryData::CLIENT_CHANNEL_GROUP_ID,		"client_channel_group_id" },
+		{ Client::QueryData::CLIENT_SERVER_GROUPS,			"client_servergroups" },
+		{ Client::QueryData::CLIENT_FIRSTCONNECTED,			"client_created" },
+		{ Client::QueryData::CLIENT_LASTCONNECTED,			"client_lastconnected" },
+		{ Client::QueryData::CLIENT_TOTALCONNECTIONS,		"client_totalconnections" },
+		{ Client::QueryData::CLIENT_AWAY,					"client_away" },
+		{ Client::QueryData::CLIENT_AWAY_MESSAGE,			"client_away_message" },
+		{ Client::QueryData::CLIENT_AVATAR,					"client_flag_avatar" },
+		{ Client::QueryData::CLIENT_TALK_POWER,				"client_talk_power" },
+		{ Client::QueryData::CLIENT_TALK_REQUEST,			"client_talk_request" },
+		{ Client::QueryData::CLIENT_TALK_REQUEST_MSG,		"client_talk_request_msg" },
+		{ Client::QueryData::CLIENT_IS_TALKER,				"client_is_talker" },
+		{ Client::QueryData::CLIENT_IS_PRIORITY_SPEAKER,	"client_is_priority_speaker" },
+		{ Client::QueryData::CLIENT_DESCRIPTION,			"client_description" },
+		{ Client::QueryData::CLIENT_IS_CHANNEL_COMMANDER,	"client_is_channel_commander" },
+		{ Client::QueryData::CLIENT_ICON_ID,				"client_icon_id" },
+		{ Client::QueryData::CLIENT_COUNTRY,				"client_country" },
+		{ Client::QueryData::CLIENT_IDLE_TIME,				"client_idle_time" },
+		{ Client::QueryData::CLIENT_IS_RECORDING,			"client_is_recording" }
 	};
 
 	auto it = data_map.find(data);
@@ -766,7 +769,11 @@ bool CServer::KickClient(Client::Id_t clid, Client::KickTypes type, string reaso
 
 	CUtils::Get()->EscapeString(reasonmsg);
 	if (reasonmsg.length() > 40)
+	{
 		reasonmsg.resize(40);
+		if (reasonmsg.back() == '\\')
+			reasonmsg.pop_back();
+	}
 
 	CNetwork::Get()->Execute(fmt::format("clientkick clid={} reasonid={} reasonmsg={}", clid, kicktype_id, reasonmsg));
 	return true;
