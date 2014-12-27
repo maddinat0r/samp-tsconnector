@@ -785,6 +785,7 @@ bool CServer::BanClient(string uid, int seconds, string reasonmsg)
 		return false;
 
 
+	CUtils::Get()->EscapeString(uid);
 	CUtils::Get()->EscapeString(reasonmsg);
 	CNetwork::Get()->Execute(fmt::format("banadd uid={} time={} banreason={}", uid, seconds, reasonmsg));
 	return true;
@@ -963,6 +964,7 @@ void CServer::OnClientList(vector<string> &res)
 		CUtils::Get()->ParseField(r, "client_type", type);
 		CUtils::Get()->ParseField(r, "connection_client_ip", ip);
 
+		CUtils::Get()->UnEscapeString(uid);
 
 		Client_t client(new Client);
 		client->DatabaseId = dbid;
@@ -1279,12 +1281,14 @@ void CServer::OnClientConnect(boost::smatch &result)
 	CUtils::Get()->ConvertStringToInt(result[5].str(), dbid);
 	CUtils::Get()->ConvertStringToInt(result[6].str(), type);
 
+	CUtils::Get()->UnEscapeString(uid);
+	CUtils::Get()->UnEscapeString(nickname);
+
 	Client_t client(new Client);
 	client->DatabaseId = dbid;
 	client->Uid = uid;
 	client->CurrentChannel = cid;
 
-	CUtils::Get()->UnEscapeString(nickname);
 
 
 	CNetwork::Get()->Execute(
