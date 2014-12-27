@@ -181,10 +181,12 @@ void CNetwork::OnRead(const boost::system::error_code &error_code)
 				if (m_CmdQueue.empty() == false)
 				{
 					ReadCallback_t &callback = m_CmdQueue.front().get<1>();
-					m_CmdQueueMutex.unlock();
 					if (callback)
+					{
+						m_CmdQueueMutex.unlock();
 						callback(captured_data); //calls the callback
-					m_CmdQueueMutex.lock();
+						m_CmdQueueMutex.lock();
+					}
 					m_CmdQueue.pop();
 
 					if (m_CmdQueue.empty() == false)
@@ -200,10 +202,17 @@ void CNetwork::OnRead(const boost::system::error_code &error_code)
 				CUtils::Get()->UnEscapeString(error_str);
 				CUtils::Get()->ConvertStringToInt(error_rx_result[1].str(), error_id);
 
+				m_CmdQueueMutex.lock();
+
 				CCallbackHandler::Get()->ForwardError(
 					EErrorType::TEAMSPEAK_ERROR, error_id,
 					fmt::format("error while executing \"{}\": {}", m_CmdQueue.front().get<0>(), error_str));
 				m_CmdQueue.pop();
+
+				if (m_CmdQueue.empty() == false)
+					AsyncWrite(m_CmdQueue.front().get<0>());
+
+				m_CmdQueueMutex.unlock();
 			}
 
 			captured_data.clear();
