@@ -9,6 +9,7 @@
 #include <stack>
 #include <deque>
 #include <functional>
+#include <memory>
 #include <boost/variant.hpp>
 #include <boost/unordered_set.hpp>
 #include <boost/lockfree/spsc_queue.hpp>
@@ -17,6 +18,7 @@ using std::string;
 using std::stack;
 using std::deque;
 using std::function;
+using std::shared_ptr;
 using boost::variant;
 using boost::unordered_set;
 
@@ -78,6 +80,7 @@ private: //functions
 			m_PostExecute();
 	}
 };
+typedef shared_ptr<CCallback> Callback_t;
 
 class CCallbackHandler : public CSingleton<CCallbackHandler>
 {
@@ -89,7 +92,7 @@ private: //constructor / deconstructor
 
 private: //variables
 	boost::lockfree::spsc_queue<
-			CCallback *,
+			Callback_t,
 			boost::lockfree::fixed_sized<true>,
 			boost::lockfree::capacity<32678>
 		> m_Queue;
@@ -98,17 +101,17 @@ private: //variables
 
 
 public: //functions
-	CCallback *Create(string name, string format, 
+	Callback_t Create(string name, string format,
 		AMX* amx, cell* params, const cell param_offset);
 
-	inline void Call(CCallback *callback)
+	inline void Call(Callback_t callback)
 	{
 		m_Queue.push(callback);
 	}
 	template <typename... Args>
 	inline void Call(const string &name, Args&&... args)
 	{
-		Call(new CCallback(name, std::forward<Args>(args)...));
+		Call(std::make_shared<CCallback>(name, std::forward<Args>(args)...));
 	}
 
 	inline void ForwardError(EErrorType error_type, 

@@ -5,7 +5,7 @@
 
 void CCallbackHandler::Process()
 {
-	CCallback *callback = nullptr;
+	Callback_t callback;
 	while (m_Queue.pop(callback))
 	{
 		for (auto amx : m_AmxList) 
@@ -45,11 +45,11 @@ void CCallbackHandler::Process()
 			}
 		}
 
-		delete callback;
+		callback.reset();
 	}
 }
 
-CCallback *CCallbackHandler::Create(string name, string format, 
+Callback_t CCallbackHandler::Create(string name, string format,
 	AMX* amx, cell* params, const cell param_offset)
 {
 	if (name.empty())
@@ -90,5 +90,5 @@ CCallback *CCallbackHandler::Create(string name, string format,
 			param_idx++;
 		}
 	}
-	return new CCallback(name, std::move(param_list));
+	return std::make_shared<CCallback>(name, std::move(param_list));
 }

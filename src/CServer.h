@@ -7,6 +7,7 @@
 #include <list>
 #include <vector>
 #include <queue>
+#include <memory>
 #include <boost/unordered_map.hpp>
 #include <boost/regex.hpp>
 #include <boost/atomic.hpp>
@@ -20,11 +21,13 @@ using std::string;
 using std::list;
 using std::vector;
 using std::queue;
+using std::shared_ptr;
 using boost::atomic;
 using boost::unordered_map;
 using boost::mutex;
 
 class CCallback;
+typedef shared_ptr<CCallback> Callback_t;
 
 
 struct Channel
@@ -68,6 +71,7 @@ struct Channel
 	list<unsigned int> Clients;
 	int MaxClients = -1;
 };
+typedef shared_ptr<Channel> Channel_t;
 
 struct Client
 {
@@ -120,17 +124,18 @@ struct Client
 
 	Channel::Id_t CurrentChannel = Channel::Invalid;
 };
+typedef shared_ptr<Client> Client_t;
 
 
 class CServer : public CSingleton <CServer>
 {
 	friend class CSingleton <CServer>;
 private: //variables
-	unordered_map<Channel::Id_t, Channel *> m_Channels;
+	unordered_map<Channel::Id_t, Channel_t> m_Channels;
 	Channel::Id_t m_DefaultChannel = Channel::Invalid;
 	mutex m_ChannelMtx;
 
-	unordered_map<Client::Id_t, Client *> m_Clients;
+	unordered_map<Client::Id_t, Client_t> m_Clients;
 	mutex m_ClientMtx;
 
 	atomic<bool> m_IsLoggedIn;
@@ -149,7 +154,7 @@ private: //constructor / deconstructor
 	CServer() :
 		m_IsLoggedIn(false)
 	{}
-	~CServer();
+	~CServer() = default;
 
 
 private: //functions (internal)
@@ -168,8 +173,8 @@ public: //server functions
 
 
 public: //data query functions
-	bool QueryChannelData(Channel::Id_t cid, Channel::QueryData data, CCallback *callback);
-	bool QueryClientData(Client::Id_t clid, Client::QueryData data, CCallback *callback);
+	bool QueryChannelData(Channel::Id_t cid, Channel::QueryData data, Callback_t callback);
+	bool QueryClientData(Client::Id_t clid, Client::QueryData data, Callback_t callback);
 	bool GetQueriedData(string &dest);
 	bool GetQueriedData(int &dest);
 

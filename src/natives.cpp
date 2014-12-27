@@ -78,7 +78,7 @@ AMX_DECLARE_NATIVE(Native::TSC_SendServerMessage)
 //native TSC_QueryChannelData(channelid, TSC_CHANNEL_QUERYDATA:data, const callback[], const format[] = "", ...);
 AMX_DECLARE_NATIVE(Native::TSC_QueryChannelData)
 {
-	auto *callback = CCallbackHandler::Get()->Create(
+	auto callback = CCallbackHandler::Get()->Create(
 		amx_GetCppString(amx, params[3]),
 		amx_GetCppString(amx, params[4]),
 		amx,
@@ -97,7 +97,7 @@ AMX_DECLARE_NATIVE(Native::TSC_QueryChannelData)
 //native TSC_QueryClientData(clientid, TSC_CLIENT_QUERYDATA:data, const callback[], const format[] = "", ...);
 AMX_DECLARE_NATIVE(Native::TSC_QueryClientData)
 {
-	auto *callback = CCallbackHandler::Get()->Create(
+	auto callback = CCallbackHandler::Get()->Create(
 		amx_GetCppString(amx, params[3]),
 		amx_GetCppString(amx, params[4]),
 		amx,

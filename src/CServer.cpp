@@ -110,15 +110,6 @@ void CServer::Initialize()
 		});
 }
 
-CServer::~CServer()
-{
-	for (auto &c : m_Channels)
-		delete c.second;
-
-	for (auto &c : m_Clients)
-		delete c.second;
-}
-
 
 
 bool CServer::Login(string login, string pass)
@@ -164,7 +155,7 @@ bool CServer::SendServerMessage(string msg)
 
 
 
-bool CServer::QueryChannelData(Channel::Id_t cid, Channel::QueryData data, CCallback *callback)
+bool CServer::QueryChannelData(Channel::Id_t cid, Channel::QueryData data, Callback_t callback)
 {
 	if (IsValidChannel(cid) == false)
 		return false;
@@ -212,7 +203,7 @@ bool CServer::QueryChannelData(Channel::Id_t cid, Channel::QueryData data, CCall
 	return true;
 }
 
-bool CServer::QueryClientData(Client::Id_t clid, Client::QueryData data, CCallback *callback)
+bool CServer::QueryClientData(Client::Id_t clid, Client::QueryData data, Callback_t callback)
 {
 	if (data == Client::QueryData::INVALID || callback == nullptr)
 		return false;
@@ -364,7 +355,6 @@ bool CServer::DeleteChannel(Channel::Id_t cid)
 		[this, cid](CNetwork::ResultSet_t &result)
 		{
 			boost::lock_guard<mutex> channel_mtx_guard(m_ChannelMtx);
-			delete m_Channels.at(cid);
 			m_Channels.erase(cid);
 		});
 	return true;
@@ -927,7 +917,7 @@ void CServer::OnChannelList(vector<string> &res)
 		CUtils::Get()->UnEscapeString(name);
 
 
-		Channel *chan = new Channel;
+		Channel_t chan(new Channel);
 		chan->ParentId = pid;
 		chan->OrderId = order;
 		chan->Name = name;
@@ -967,7 +957,7 @@ void CServer::OnClientList(vector<string> &res)
 		CUtils::Get()->ParseField(r, "connection_client_ip", ip);
 
 
-		Client *client = new Client;
+		Client_t client(new Client);
 		client->DatabaseId = dbid;
 		client->Uid = uid;
 		client->IpAddress = ip;
@@ -1016,7 +1006,7 @@ void CServer::OnChannelCreated(boost::smatch &result)
 
 	CUtils::Get()->UnEscapeString(name);
 
-	Channel *chan = new Channel;
+	Channel_t chan(new Channel);
 	chan->ParentId = parent_id;
 	chan->OrderId = order_id;
 	chan->Name = name;
@@ -1096,7 +1086,7 @@ void CServer::OnChannelMoved(boost::smatch &result)
 	
 
 	boost::lock_guard<mutex> channel_mtx_guard(m_ChannelMtx);
-	Channel *channel = m_Channels.at(cid);
+	Channel_t &channel = m_Channels.at(cid);
 	channel->ParentId = parentid;
 	channel->OrderId = orderid;
 
@@ -1138,7 +1128,7 @@ void CServer::OnChannelPasswordToggled(boost::smatch &result)
 
 
 	boost::lock_guard<mutex> channel_mtx_guard(m_ChannelMtx);
-	Channel *channel = m_Channels.at(cid);
+	Channel_t &channel = m_Channels.at(cid);
 	channel->HasPassword = (toggle_password != 0);
 	channel->WasPasswordToggled = true;
 
@@ -1157,7 +1147,7 @@ void CServer::OnChannelPasswordChanged(boost::smatch &result)
 
 
 	boost::lock_guard<mutex> channel_mtx_guard(m_ChannelMtx);
-	Channel *channel = m_Channels.at(cid);
+	Channel_t &channel = m_Channels.at(cid);
 	if (channel->WasPasswordToggled == false)
 	{
 		//forward TSC_OnChannelPasswordEdited(channelid, bool:ispassworded, bool:passwordchanged);
@@ -1188,7 +1178,7 @@ void CServer::OnChannelTypeChanged(boost::smatch &result)
 
 
 	boost::lock_guard<mutex> channel_mtx_guard(m_ChannelMtx);
-	Channel *channel = m_Channels.at(cid);
+	Channel_t &channel = m_Channels.at(cid);
 	if (flag_data != 0)
 	{
 		channel->Type = (flag.find("semi_") == 0)
@@ -1282,7 +1272,7 @@ void CServer::OnClientConnect(boost::smatch &result)
 	CUtils::Get()->ConvertStringToInt(result[5].str(), dbid);
 	CUtils::Get()->ConvertStringToInt(result[6].str(), type);
 
-	Client *client = new Client;
+	Client_t client(new Client);
 	client->DatabaseId = dbid;
 	client->Uid = uid;
 	client->CurrentChannel = cid;
@@ -1321,7 +1311,6 @@ void CServer::OnClientDisconnect(boost::smatch &result)
 
 
 	boost::lock_guard<mutex> client_mtx_guard(m_ClientMtx);
-	delete m_Clients.at(clid);
 	m_Clients.erase(clid);
 
 
