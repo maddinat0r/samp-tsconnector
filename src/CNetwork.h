@@ -53,7 +53,8 @@ private: //variables
 	asio::deadline_timer m_AliveTimer;
 
 	asio::streambuf m_ReadStreamBuf;
-	string m_CmdWriteBuffer;
+	queue<string> m_CmdWriteBufferQueue;
+	boost::mutex m_CmdWriteBufferQueueMutex;
 
 	boost::mutex m_CmdQueueMutex;
 	queue<CmdTuple_t> m_CmdQueue;
@@ -104,7 +105,7 @@ private: //handlers
 
 private: //functions
 	void AsyncRead();
-	void AsyncWrite(string &data);
+	void AsyncWrite(const string &data);
 	void AsyncConnect();
 
 };

@@ -93,13 +93,17 @@ void CNetwork::AsyncRead()
 		boost::bind(&CNetwork::OnRead, this, _1));
 }
 
-void CNetwork::AsyncWrite(string &data)
+void CNetwork::AsyncWrite(const string &data)
 {
-	m_CmdWriteBuffer = data;
-	if (data.at(data.length()-1) != '\n')
-		m_CmdWriteBuffer.push_back('\n');
+	boost::lock_guard<boost::mutex> lock_guard(m_CmdWriteBufferQueueMutex);
 
-	m_Socket.async_send(asio::buffer(m_CmdWriteBuffer), 
+	m_CmdWriteBufferQueue.push(data);
+	string &cmd_write_buffer = m_CmdWriteBufferQueue.back();
+
+	if (cmd_write_buffer.back() != '\n')
+		cmd_write_buffer.push_back('\n');
+
+	m_Socket.async_send(asio::buffer(cmd_write_buffer),
 		boost::bind(&CNetwork::OnWrite, this, _1));
 }
 
@@ -286,10 +290,11 @@ void CNetwork::OnRead(const boost::system::error_code &error_code)
 
 void CNetwork::OnWrite(const boost::system::error_code &error_code)
 {
+	boost::lock_guard<boost::mutex> lock_guard(m_CmdWriteBufferQueueMutex);
 #ifdef _DEBUG
-	logprintf("<<<< %s", m_CmdWriteBuffer.c_str());
+	logprintf("<<<< %s", m_CmdWriteBufferQueue.front().c_str());
 #endif
-	m_CmdWriteBuffer.clear();
+	m_CmdWriteBufferQueue.pop();
 	if (error_code.value() != 0)
 	{
 		CCallbackHandler::Get()->ForwardError(
