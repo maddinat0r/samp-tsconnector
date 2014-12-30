@@ -62,11 +62,17 @@ bool CNetwork::Connect(string hostname, unsigned short port, unsigned short quer
 
 bool CNetwork::Disconnect()
 {
-	if (m_Socket.is_open() == false || m_Connected == false)
+	if (IsConnected() == false)
 		return false; 
 
+	Execute("quit", [this](ResultSet_t &res)
+	{
+		m_Connected = false;
+	});
 
-	m_Connected = false;
+	while (m_Connected == true)
+		boost::this_thread::sleep_for(boost::chrono::milliseconds(20));
+
 	m_Socket.close();
 	m_AliveTimer.cancel();
 	m_IoService.stop();
@@ -99,9 +105,6 @@ void CNetwork::AsyncWrite(string &data)
 
 void CNetwork::AsyncConnect()
 {
-	if (m_Socket.is_open())
-		m_Socket.close();
-
 	m_Connected = false;
 	m_Socket.async_connect(m_SocketDest, boost::bind(&CNetwork::OnConnect, this, _1));
 }
@@ -272,9 +275,12 @@ void CNetwork::OnRead(const boost::system::error_code &error_code)
 	}
 	else
 	{
-		CCallbackHandler::Get()->ForwardError(
-			EErrorType::CONNECTION_ERROR, error_code.value(),
-			fmt::format("error while reading: {}", error_code.message()));
+		if (IsConnected())
+		{
+			CCallbackHandler::Get()->ForwardError(
+				EErrorType::CONNECTION_ERROR, error_code.value(),
+				fmt::format("error while reading: {}", error_code.message()));
+		}
 	}
 }
 
