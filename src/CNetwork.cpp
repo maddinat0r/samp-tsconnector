@@ -149,14 +149,16 @@ void CNetwork::OnRead(const boost::system::error_code &error_code)
 		std::getline(tmp_stream, read_data, '\r');
 
 #ifdef _DEBUG
-		if (read_data.length() < 512)
-			logprintf(">>>> %s", read_data.c_str());
-		else
+		string dbg_read_data(read_data);
+		bool first_line = true;
+		do
 		{
-			string shortened_data(read_data);
-			shortened_data.resize(256);
-			logprintf(">>>> %s", shortened_data.c_str());
-		}
+			logprintf("%s> %s", 
+				first_line == true ? ">>>" : "   ",
+				dbg_read_data.substr(0, 512).c_str());
+			dbg_read_data.erase(0, 512);
+			first_line = false;
+		} while (dbg_read_data.empty() == false);
 #endif
 
 		//regex: parse error
