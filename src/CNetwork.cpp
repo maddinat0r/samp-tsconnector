@@ -15,6 +15,9 @@ void CNetwork::NetAlive(const boost::system::error_code &error_code, bool from_w
 	if (from_write == true)
 		return;
 	
+	if (error_code.value() != 0)
+		return;
+
 
 	if (m_Socket.is_open())
 	{
@@ -65,6 +68,7 @@ bool CNetwork::Disconnect()
 
 	m_Connected = false;
 	m_Socket.close();
+	m_AliveTimer.cancel();
 	m_IoService.stop();
 	
 	if (m_IoThread != nullptr)
@@ -109,6 +113,9 @@ void CNetwork::OnConnect(const boost::system::error_code &error_code)
 		m_Connected = true;
 		Execute(fmt::format("use port={}", m_ServerPort));
 		AsyncRead();
+
+		//start heartbeat check
+		NetAlive(boost::system::error_code(), false);
 	}
 	else
 	{

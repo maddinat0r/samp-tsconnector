@@ -66,9 +66,7 @@ private: //constructor / deconstructor
 		m_Socket(m_IoService),
 		m_Connected(false),
 		m_AliveTimer(m_IoService)
-	{
-		NetAlive(boost::system::error_code(), false);
-	}
+	{ }
 
 	~CNetwork()
 	{
