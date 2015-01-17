@@ -27,7 +27,7 @@ void CCallbackHandler::Process()
 						amx_PushString(amx, &tmp_addr, NULL, 
 							boost::get<string>(param).c_str(), 0, 0);
 
-						if (amx_address < NULL)
+						if (amx_address < 0)
 							amx_address = tmp_addr;
 					}
 					callback->m_Params.pop();
@@ -36,7 +36,7 @@ void CCallbackHandler::Process()
 				callback->CallPreExecute();
 
 				amx_Exec(amx, NULL, cb_idx);
-				if(amx_address >= NULL)
+				if(amx_address >= 0)
 					amx_Release(amx, amx_address);
 
 				callback->CallPostExecute();
