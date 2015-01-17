@@ -1,4 +1,3 @@
-LIBRARY	"TSConnector"
 EXPORTS
 	Supports
 	Load

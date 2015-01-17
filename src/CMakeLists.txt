@@ -1,0 +1,66 @@
+include(AmxConfig)
+include(Plugin)
+include(FindSDK)
+
+set(SAMP_SDK_DIR "../lib")
+find_package(SDK REQUIRED)
+
+set(TSC_PLUGIN_CONFIG_INCLUDE_DIR "${CMAKE_CURRENT_BINARY_DIR}/config_headers")
+include_directories("${SDK_INCLUDE_DIR}" "${TSC_PLUGIN_CONFIG_INCLUDE_DIR}")
+
+set(CMAKE_DEBUG_POSTFIX "_d")
+
+configure_file(
+	"../TSConnector.inc.in"
+	"TSConnector.inc"
+	@ONLY
+)
+
+configure_file(
+	"version.hpp.in"
+	"${TSC_PLUGIN_CONFIG_INCLUDE_DIR}/version.hpp"
+	@ONLY
+)
+
+
+add_plugin(teamspeak-connector 
+	${SDK_INCLUDE_DIR}/amxplugin.cpp
+	${SDK_INCLUDE_DIR}/amxplugin2.cpp
+	${SDK_INCLUDE_DIR}/amx/getch.c
+	CCallback.cpp
+	CNetwork.cpp
+	CServer.cpp
+	CUtils.cpp
+	main.cpp
+	natives.cpp
+	format.cc
+	plugin.def
+)
+
+if(MSVC)
+	add_definitions(-D_CRT_SECURE_NO_WARNINGS -DNOMINMAX -D_WIN32_WINNT=0x0600)
+endif()
+
+if(NOT MSVC) #we have auto-linking in Visual Studio
+	target_link_libraries(teamspeak-connector
+		"${Boost_ATOMIC_LIBRARY}"
+		"${Boost_CHRONO_LIBRARY}"
+		"${Boost_DATE_TIME_LIBRARY}"
+		"${Boost_REGEX_LIBRARY}"
+		"${Boost_SYSTEM_LIBRARY}"
+		"${Boost_THREAD_LIBRARY}"
+	)
+endif()
+
+
+install(TARGETS teamspeak-connector DESTINATION "plugins/")
+install(FILES "${CMAKE_CURRENT_BINARY_DIR}/TSConnector.inc" DESTINATION "pawno/include/")
+
+set(CPACK_PACKAGE_VERSION "v${TSC_PLUGIN_VERSION}")
+if(WIN32)
+	set(CPACK_GENERATOR ZIP)
+else()
+	set(CPACK_GENERATOR TGZ)
+endif()
+
+include(CPack)

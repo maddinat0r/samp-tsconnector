@@ -1,8 +1,25 @@
-ipch/
-*.user
+[Bb]in/
+build/
+[Rr]elease/
+[Dd]ebug/
+
+#Linux
+*.o
+*.so
+*~
+
+#Visual Studio
 *.sdf
-*.suo
 *.opensdf
-*.vsp
+*.suo
 *.psess
-*.old
+*.vsp
+*.user
+
+#Merge files
+*.orig
+
+#archives
+*.rar
+*.zip
+*.tar.gz

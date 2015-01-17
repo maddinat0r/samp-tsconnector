@@ -3,6 +3,7 @@
 #include "CNetwork.h"
 #include "CServer.h"
 #include "CCallback.h"
+#include "version.hpp"
 
 
 extern void *pAMXFunctions;
@@ -24,7 +25,7 @@ PLUGIN_EXPORT bool PLUGIN_CALL Load(void **ppData)
 	pAMXFunctions = ppData[PLUGIN_DATA_AMX_EXPORTS];
 	logprintf = reinterpret_cast<logprintf_t>(ppData[PLUGIN_DATA_LOGPRINTF]);
 
-	logprintf(" >> plugin.TSConnector: v1.2 loaded.");
+	logprintf(" >> plugin.TSConnector: v" TSC_VERSION " loaded.");
 	return 1;
 }
 

@@ -1,0 +1,3 @@
+#pragma once
+
+#define TSC_VERSION "@TSC_PLUGIN_VERSION@"
