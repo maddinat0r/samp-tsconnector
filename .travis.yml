@@ -3,7 +3,8 @@ before_install:
   - sudo add-apt-repository -y ppa:ubuntu-toolchain-r/test
   - sudo apt-get -qq update
   - sudo apt-get install -yfm libc6-dev-i386 g++-4.7-multilib cmake
-  - sudo apt-get install -yf libicu48:i386 libicu-dev:i386
+  - sudo apt-get install -yf libicu48:i386
+  - sudo apt-get install -yf libicu-dev:i386
   - sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-4.7 99 --slave /usr/bin/g++ g++ /usr/bin/g++-4.7
   - wget -O boost_1_57_0.tar.gz http://sourceforge.net/projects/boost/files/boost/1.57.0/boost_1_57_0.tar.gz/download
   - tar xzf boost_1_57_0.tar.gz
