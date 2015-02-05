@@ -1,12 +1,11 @@
-include(AmxConfig)
-include(Plugin)
-include(FindSDK)
+include(AMXConfig)
+include(AddSAMPPlugin)
 
-set(SAMP_SDK_DIR "../lib")
-find_package(SDK REQUIRED)
+set(SAMP_SDK_ROOT "${PROJECT_SOURCE_DIR}/lib/sdk")
+find_package(SAMPSDK REQUIRED)
 
 set(TSC_PLUGIN_CONFIG_INCLUDE_DIR "${CMAKE_CURRENT_BINARY_DIR}/config_headers")
-include_directories("${SDK_INCLUDE_DIR}" "${TSC_PLUGIN_CONFIG_INCLUDE_DIR}")
+include_directories("${SAMPSDK_INCLUDE_DIR}" "${TSC_PLUGIN_CONFIG_INCLUDE_DIR}")
 
 set(CMAKE_DEBUG_POSTFIX "_d")
 
@@ -23,10 +22,10 @@ configure_file(
 )
 
 
-add_plugin(teamspeak-connector 
-	${SDK_INCLUDE_DIR}/amxplugin.cpp
-	${SDK_INCLUDE_DIR}/amxplugin2.cpp
-	${SDK_INCLUDE_DIR}/amx/getch.c
+add_samp_plugin(teamspeak-connector 
+	${SAMPSDK_DIR}/amxplugin.cpp
+	${SAMPSDK_DIR}/amxplugin2.cpp
+	${SAMPSDK_DIR}/amx/getch.c
 	CCallback.cpp
 	CNetwork.cpp
 	CServer.cpp

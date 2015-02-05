@@ -3,7 +3,7 @@ project(teamspeak-connector)
 
 set(TSC_PLUGIN_VERSION "1.2")
 
-list(APPEND CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}/cmake")
+list(APPEND CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}/lib/cmake")
 
 if(UNIX)
 	#force C++11 flag and 32bit compilation
