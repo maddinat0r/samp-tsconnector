@@ -27,11 +27,17 @@ add_samp_plugin(teamspeak-connector
 	${SAMPSDK_DIR}/amxplugin2.cpp
 	${SAMPSDK_DIR}/amx/getch.c
 	CCallback.cpp
+	CCallback.hpp
 	CNetwork.cpp
+	CNetwork.hpp
 	CServer.cpp
+	CServer.hpp
 	CUtils.cpp
+	CUtils.hpp
 	main.cpp
+	main.hpp
 	natives.cpp
+	natives.hpp
 	format.cc
 	plugin.def
 )
