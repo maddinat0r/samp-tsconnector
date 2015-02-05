@@ -3,7 +3,6 @@
 #define INC_MAIN_H
 
 
-#include <malloc.h>
 #include <amx/amx2.h>
 #include <plugincommon.h>
 

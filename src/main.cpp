@@ -1,8 +1,8 @@
-#include "main.h"
-#include "natives.h"
-#include "CNetwork.h"
-#include "CServer.h"
-#include "CCallback.h"
+#include "main.hpp"
+#include "natives.hpp"
+#include "CNetwork.hpp"
+#include "CServer.hpp"
+#include "CCallback.hpp"
 #include "version.hpp"
 
 

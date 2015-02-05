@@ -1,9 +1,9 @@
-#include "main.h"
-#include "natives.h"
+#include "main.hpp"
+#include "natives.hpp"
 
-#include "CNetwork.h"
-#include "CServer.h"
-#include "CCallback.h"
+#include "CNetwork.hpp"
+#include "CServer.hpp"
+#include "CCallback.hpp"
 
 
 //native TSC_Connect(user[], pass[], host[], port = 9987, serverquery_port = 10011);

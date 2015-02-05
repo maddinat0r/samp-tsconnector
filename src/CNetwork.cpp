@@ -1,8 +1,8 @@
-#include "main.h"
-#include "CNetwork.h"
-#include "CServer.h"
-#include "CUtils.h"
-#include "CCallback.h"
+#include "main.hpp"
+#include "CNetwork.hpp"
+#include "CServer.hpp"
+#include "CUtils.hpp"
+#include "CCallback.hpp"
 
 #include <istream>
 #include <boost/date_time/posix_time/posix_time.hpp>

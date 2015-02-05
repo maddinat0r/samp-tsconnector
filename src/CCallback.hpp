@@ -3,7 +3,7 @@
 #define INC_CCALLBACK_H
 
 
-#include "main.h"
+#include "main.hpp"
 
 #include <string>
 #include <stack>
@@ -22,7 +22,7 @@ using std::shared_ptr;
 using boost::variant;
 using boost::unordered_set;
 
-#include "CSingleton.h"
+#include "CSingleton.hpp"
 
 
 enum class EErrorType

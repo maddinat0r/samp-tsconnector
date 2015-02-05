@@ -4,7 +4,7 @@
 
 #include <string>
 
-#include "CSingleton.h"
+#include "CSingleton.hpp"
 
 using std::string;
 

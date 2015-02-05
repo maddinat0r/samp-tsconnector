@@ -1,9 +1,9 @@
-#include "CServer.h"
-#include "CNetwork.h"
-#include "CUtils.h"
-#include "CCallback.h"
+#include "CServer.hpp"
+#include "CNetwork.hpp"
+#include "CUtils.hpp"
+#include "CCallback.hpp"
 
-#include "main.h"
+#include "main.hpp"
 #include "format.h"
 
 

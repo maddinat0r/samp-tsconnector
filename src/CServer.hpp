@@ -15,7 +15,7 @@
 #include <boost/thread/lock_guard.hpp>
 #include <boost/lockfree/spsc_queue.hpp>
 
-#include "CSingleton.h"
+#include "CSingleton.hpp"
 
 using std::string;
 using std::list;

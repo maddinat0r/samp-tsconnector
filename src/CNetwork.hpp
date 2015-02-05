@@ -16,7 +16,7 @@
 
 #include "format.h"
 
-#include "CSingleton.h"
+#include "CSingleton.hpp"
 
 using std::vector;
 using std::queue;
