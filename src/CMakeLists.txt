@@ -47,7 +47,7 @@ if(MSVC)
 endif()
 
 if(NOT MSVC) #we have auto-linking in Visual Studio
-	target_link_libraries(mysql ${Boost_LIBRARIES} rt)
+	target_link_libraries(teamspeak-connector ${Boost_LIBRARIES} rt)
 endif()
 
 
