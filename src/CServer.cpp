@@ -685,14 +685,14 @@ Client::Id_t CServer::GetClientIdByUid(string uid)
 
 Client::Id_t CServer::GetClientIdByIpAddress(string ip)
 {
+	if (ip.empty())
+		return Client::Invalid;
+
 	boost::lock_guard<mutex> client_mtx_guard(m_ClientMtx);
-	if (ip.empty() == false)
+	for (auto &i : m_Clients)
 	{
-		for (auto &i : m_Clients)
-		{
-			if (i.second->IpAddress == ip)
-				return i.first;
-		}
+		if (i.second->IpAddress.compare(ip) == 0)
+			return i.first;
 	}
 
 	return Client::Invalid;
