@@ -15,7 +15,7 @@ bool CUtils::ParseField(const string &row, const string &field, string &dest)
 		if (equal_sign_pos < row.length() && row.at(equal_sign_pos) == '=')
 		{
 			const size_t data_pos = field_pos + field.length() + 1;
-			dest = row.substr(data_pos, row.find(' ', field_pos) - data_pos);
+			dest = row.substr(data_pos, row.find_first_of(" \n\r", field_pos) - data_pos);
 			return true;
 		}
 	}
