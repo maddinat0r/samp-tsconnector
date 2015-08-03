@@ -67,7 +67,7 @@ void CServer::Initialize()
 		boost::bind(&CServer::OnClientConnect, this, _1));
 
 	CNetwork::Get()->RegisterEvent(
-		boost::regex("notifyclientleftview cfid=[0-9]+ ctid=0 reasonid=([0-9]+) reasonmsg=([^ ]+) clid=([0-9]+).*"),
+		boost::regex("notifyclientleftview cfid=[0-9]+ ctid=0 reasonid=([0-9]+).* reasonmsg(?:=([^ ]+))?.* clid=([0-9]+).*"),
 		boost::bind(&CServer::OnClientDisconnect, this, _1));
 
 	CNetwork::Get()->RegisterEvent(
