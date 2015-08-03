@@ -9,6 +9,11 @@
 //native TSC_Connect(user[], pass[], host[], port = 9987, serverquery_port = 10011);
 AMX_DECLARE_NATIVE(Native::TSC_Connect)
 {
+	//(sadly) neccessary
+	CNetwork::CSingleton::Destroy();
+	CServer::CSingleton::Destroy();
+
+
 	string
 		login = amx_GetCppString(amx, params[1]),
 		pass = amx_GetCppString(amx, params[2]),

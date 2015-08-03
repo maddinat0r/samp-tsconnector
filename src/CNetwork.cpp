@@ -62,19 +62,19 @@ bool CNetwork::Connect(string hostname, unsigned short port, unsigned short quer
 
 bool CNetwork::Disconnect()
 {
-	if (IsConnected() == false)
-		return false; 
+	if (IsConnected())
+	{
+		Execute("quit", [this](ResultSet_t &res)
+		{
+			m_Connected = false;
+		});
 
-	Execute("quit", [this](ResultSet_t &res)
-	{
-		m_Connected = false;
-	});
-	
-	auto start_time = boost::chrono::steady_clock::now();
-	while (m_Connected == true &&
-		(boost::chrono::steady_clock::now() - start_time) < boost::chrono::seconds(5))
-	{
-		boost::this_thread::sleep_for(boost::chrono::milliseconds(20));
+		auto start_time = boost::chrono::steady_clock::now();
+		while (m_Connected == true &&
+			(boost::chrono::steady_clock::now() - start_time) < boost::chrono::seconds(5))
+		{
+			boost::this_thread::sleep_for(boost::chrono::milliseconds(20));
+		}
 	}
 
 	m_Connected = false;
@@ -134,7 +134,6 @@ void CNetwork::OnConnect(const boost::system::error_code &error_code)
 		CCallbackHandler::Get()->ForwardError(
 			EErrorType::CONNECTION_ERROR, error_code.value(),
 			fmt::format("error while connecting to server: {}", error_code.message()));
-		Disconnect();
 	}
 }
 
@@ -284,14 +283,16 @@ void CNetwork::OnRead(const boost::system::error_code &error_code)
 
 		AsyncRead();
 	}
-	else
+	else //error
 	{
-		if (IsConnected())
-		{
-			CCallbackHandler::Get()->ForwardError(
-				EErrorType::CONNECTION_ERROR, error_code.value(),
-				fmt::format("error while reading: {}", error_code.message()));
-		}
+		CCallbackHandler::Get()->ForwardError(
+			EErrorType::CONNECTION_ERROR, error_code.value(),
+			fmt::format("error while reading: {}", error_code.message()));
+
+		//"disable" the plugin, since calling Disconnect() or
+		//destroying CNetwork here is not very smart
+		CServer::CSingleton::Destroy();
+		m_Connected = false; //we're not _really_ connected, are we?
 	}
 }
 
