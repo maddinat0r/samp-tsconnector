@@ -232,6 +232,8 @@ public: //client functions
 	bool SetClientChannelGroup(Client::Id_t clid, int groupid, Channel::Id_t cid);
 	bool AddClientToServerGroup(Client::Id_t clid, int groupid);
 	bool RemoveClientFromServerGroup(Client::Id_t clid, int groupid);
+	bool SetClientTalkerStatus(Client::Id_t clid, bool status);
+	bool SetClientDescription(Client::Id_t clid, string desc);
 
 	bool PokeClient(Client::Id_t clid, string msg);
 	bool SendClientMessage(Client::Id_t clid, string msg);

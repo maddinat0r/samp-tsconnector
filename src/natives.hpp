@@ -65,6 +65,8 @@ namespace Native
 	AMX_DECLARE_NATIVE(TSC_SetClientChannelGroup);
 	AMX_DECLARE_NATIVE(TSC_AddClientToServerGroup);
 	AMX_DECLARE_NATIVE(TSC_RemoveClientFromServerGroup);
+	AMX_DECLARE_NATIVE(TSC_SetClientTalkerStatus);
+	AMX_DECLARE_NATIVE(TSC_SetClientDescription);
 
 	AMX_DECLARE_NATIVE(TSC_PokeClient);
 	AMX_DECLARE_NATIVE(TSC_SendClientMessage);

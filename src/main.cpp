@@ -88,6 +88,8 @@ extern "C" const AMX_NATIVE_INFO native_list[] =
 	AMX_DEFINE_NATIVE(TSC_SetClientChannelGroup)
 	AMX_DEFINE_NATIVE(TSC_AddClientToServerGroup)
 	AMX_DEFINE_NATIVE(TSC_RemoveClientFromServerGroup)
+	AMX_DEFINE_NATIVE(TSC_SetClientTalkerStatus)
+	AMX_DEFINE_NATIVE(TSC_SetClientDescription)
 
 	AMX_DEFINE_NATIVE(TSC_PokeClient)
 	AMX_DEFINE_NATIVE(TSC_SendClientMessage)

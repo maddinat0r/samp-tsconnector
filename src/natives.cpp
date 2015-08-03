@@ -385,6 +385,21 @@ AMX_DECLARE_NATIVE(Native::TSC_RemoveClientFromServerGroup)
 		params[2]);
 }
 
+//native TSC_SetClientTalkerStatus(clientid, bool:status);
+AMX_DECLARE_NATIVE(Native::TSC_SetClientTalkerStatus)
+{
+	return CServer::Get()->SetClientTalkerStatus(
+		static_cast<Client::Id_t>(params[1]), params[2] != 0);
+}
+
+//native TSC_SetClientDescription(clientid, const description[]);
+AMX_DECLARE_NATIVE(Native::TSC_SetClientDescription)
+{
+	return CServer::Get()->SetClientDescription(
+		static_cast<Client::Id_t>(params[1]),
+		amx_GetCppString(amx, params[2]));
+}
+
 
 //native TSC_PokeClient(clientid, msg[]);
 AMX_DECLARE_NATIVE(Native::TSC_PokeClient)

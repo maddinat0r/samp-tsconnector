@@ -140,6 +140,8 @@ native TSC_MoveClient(clientid, channelid);
 native TSC_SetClientChannelGroup(clientid, groupid, channelid);
 native TSC_AddClientToServerGroup(clientid, groupid);
 native TSC_RemoveClientFromServerGroup(clientid, groupid);
+native TSC_SetClientTalkerStatus(clientid, bool:status);
+native TSC_SetClientDescription(clientid, const description[]);
 
 native TSC_PokeClient(clientid, msg[]);
 native TSC_SendClientMessage(clientid, msg[]);

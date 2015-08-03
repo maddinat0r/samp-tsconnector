@@ -843,6 +843,29 @@ bool CServer::RemoveClientFromServerGroup(Client::Id_t clid, int groupid)
 	return true;
 }
 
+bool CServer::SetClientTalkerStatus(Client::Id_t clid, bool status)
+{
+	if (IsValidClient(clid) == false)
+		return false;
+
+
+	CNetwork::Get()->Execute(fmt::format(
+		"clientedit clid={} client_is_talker={}", clid, status ? 1 : 0));
+	return true;
+}
+
+bool CServer::SetClientDescription(Client::Id_t clid, string desc)
+{
+	if (IsValidClient(clid) == false)
+		return false;
+
+
+	CUtils::Get()->EscapeString(desc);
+	CNetwork::Get()->Execute(fmt::format(
+		"clientedit clid={} client_description={}", clid, desc));
+	return true;
+}
+
 bool CServer::PokeClient(Client::Id_t clid, string msg)
 {
 	if (IsValidClient(clid) == false)
