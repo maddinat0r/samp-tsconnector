@@ -69,10 +69,15 @@ bool CNetwork::Disconnect()
 	{
 		m_Connected = false;
 	});
-
-	while (m_Connected == true)
+	
+	auto start_time = boost::chrono::steady_clock::now();
+	while (m_Connected == true &&
+		(boost::chrono::steady_clock::now() - start_time) < boost::chrono::seconds(5))
+	{
 		boost::this_thread::sleep_for(boost::chrono::milliseconds(20));
+	}
 
+	m_Connected = false;
 	m_Socket.close();
 	m_AliveTimer.cancel();
 	m_IoService.stop();
