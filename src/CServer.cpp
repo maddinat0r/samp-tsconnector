@@ -188,6 +188,7 @@ bool CServer::QueryChannelData(Channel::Id_t cid, Channel::QueryData data, Callb
 			data_dest;
 
 		CUtils::Get()->ParseField(info, it->second, data_dest);
+		CUtils::Get()->UnEscapeString(data_dest);
 		m_QueriedData.push(data_dest);
 
 		callback->OnPreExecute([this]()
@@ -254,6 +255,7 @@ bool CServer::QueryClientData(Client::Id_t clid, Client::QueryData data, Callbac
 			data_dest;
 
 		CUtils::Get()->ParseField(info, it->second, data_dest);
+		CUtils::Get()->UnEscapeString(data_dest);
 		m_QueriedData.push(data_dest);
 
 		callback->OnPreExecute([this]()
