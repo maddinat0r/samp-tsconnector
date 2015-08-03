@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 2.8)
 project(teamspeak-connector)
 
-set(TSC_PLUGIN_VERSION "1.2.1")
+set(TSC_PLUGIN_VERSION "1.3")
 
 list(APPEND CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}/lib/cmake")
 
