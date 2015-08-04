@@ -851,6 +851,13 @@ bool CServer::SetClientTalkerStatus(Client::Id_t clid, bool status)
 		return false;
 
 
+	boost::lock_guard<mutex> client_mtx_guard(m_ClientMtx);
+	boost::lock_guard<mutex> channel_mtx_guard(m_ChannelMtx);
+
+	Channel::Id_t cid = m_Clients.at(clid)->CurrentChannel;
+	if (m_Channels.at(cid)->RequiredTalkPower == 0)
+		return false;
+
 	CNetwork::Get()->Execute(fmt::format(
 		"clientedit clid={} client_is_talker={}", clid, status ? 1 : 0));
 	return true;
