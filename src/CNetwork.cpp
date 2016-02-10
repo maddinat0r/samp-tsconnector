@@ -227,6 +227,7 @@ void CNetwork::OnRead(const boost::system::error_code &error_code)
 				CCallbackHandler::Get()->ForwardError(
 					EErrorType::TEAMSPEAK_ERROR, error_id,
 					fmt::format("error while executing \"{}\": {}", m_CmdQueue.front().get<0>(), error_str));
+
 				m_CmdQueue.pop();
 
 				if (m_CmdQueue.empty() == false)

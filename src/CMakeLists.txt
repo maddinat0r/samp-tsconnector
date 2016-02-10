@@ -7,8 +7,6 @@ find_package(SAMPSDK REQUIRED)
 set(TSC_PLUGIN_CONFIG_INCLUDE_DIR "${CMAKE_CURRENT_BINARY_DIR}/config_headers")
 include_directories("${SAMPSDK_INCLUDE_DIR}" "${TSC_PLUGIN_CONFIG_INCLUDE_DIR}")
 
-set(CMAKE_DEBUG_POSTFIX "_d")
-
 configure_file(
 	"../TSConnector.inc.in"
 	"TSConnector.inc"

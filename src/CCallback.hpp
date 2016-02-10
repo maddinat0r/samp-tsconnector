@@ -115,10 +115,11 @@ public: //functions
 	}
 
 	inline void ForwardError(EErrorType error_type, 
-		const unsigned int error_id, const string &error_msg)
+		unsigned int error_id, string &&error_msg)
 	{
 		Call("TSC_OnError", 
-			static_cast<unsigned int>(error_type), error_id, error_msg);
+			static_cast<std::underlying_type<EErrorType>::type>(error_type),
+			error_id, error_msg);
 	}
 
 	inline void AddAmx(AMX *amx)

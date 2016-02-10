@@ -375,7 +375,7 @@ bool CServer::SetChannelName(Channel::Id_t cid, string name)
 
 	if (name.empty())
 		return false;
-
+	
 
 	string unescaped_name(name);
 
